@@ -3,9 +3,7 @@ package bundle
 import (
 	"bytes"
 	"context"
-	"crypto/sha256"
 	"embed"
-	"encoding/hex"
 	"fmt"
 	"os"
 	"os/exec"
@@ -13,46 +11,19 @@ import (
 	"time"
 )
 
-//go:embed files/* game-sounds/*
+//go:embed game-sounds/*
 var files embed.FS
 
 func Prepare(root string) (func([]byte, string, float64) error, error) {
-	binary, err := files.ReadFile("files/ffmpeg.exe")
+	exe, err := exec.LookPath("ffmpeg")
 	if err != nil {
-		return nil, fmt.Errorf("bundled FFmpeg is missing: %w", err)
-	}
-	hash := sha256.Sum256(binary)
-	dir := filepath.Join(root, "cache", "ffmpeg-"+hex.EncodeToString(hash[:8]))
-	if err = os.MkdirAll(dir, 0700); err != nil {
-		return nil, err
-	}
-	exe := filepath.Join(dir, "ffmpeg.exe")
-	if existing, _ := os.ReadFile(exe); !bytes.Equal(existing, binary) {
-		if err = os.WriteFile(exe, binary, 0700); err != nil {
-			return nil, err
-		}
-	}
-	entries, err := files.ReadDir("files")
-	if err != nil {
-		return nil, err
-	}
-	for _, e := range entries {
-		if e.Name() == "ffmpeg.exe" {
-			continue
-		}
-		b, err := files.ReadFile("files/" + e.Name())
-		if err != nil {
-			return nil, err
-		}
-		if err = os.WriteFile(filepath.Join(dir, e.Name()), b, 0600); err != nil {
-			return nil, err
-		}
+		exe = ""
 	}
 	game := filepath.Join(root, "cache", "game-sounds")
 	if err = os.MkdirAll(game, 0700); err != nil {
 		return nil, err
 	}
-	entries, err = files.ReadDir("game-sounds")
+	entries, err := files.ReadDir("game-sounds")
 	if err != nil {
 		return nil, err
 	}
@@ -64,6 +35,9 @@ func Prepare(root string) (func([]byte, string, float64) error, error) {
 		if err = os.WriteFile(filepath.Join(game, e.Name()), b, 0600); err != nil {
 			return nil, err
 		}
+	}
+	if exe == "" {
+		return nil, nil
 	}
 	return func(input []byte, target string, speed float64) error {
 		ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
