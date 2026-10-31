@@ -24,7 +24,7 @@ Both versions keep your filters, settings and sounds in **`%APPDATA%\Filtertool`
 
 Requires 64-bit Windows 10 or 11 and Microsoft Edge WebView2. The installer installs WebView2 if needed; standalone users can get it from [Microsoft](https://developer.microsoft.com/microsoft-edge/webview2/).
 
-Generating TTS sounds also requires **FFmpeg** to be installed separately and available as `ffmpeg.exe` on your `PATH` ([FFmpeg download page](https://ffmpeg.org/download.html)). Filtertool does not bundle, download, or install FFmpeg. If it is not detected, Filtertool will still work, but generating TTS sounds will be unavailable. After installing FFmpeg or changing `PATH`, restart Filtertool.
+Generating TTS sounds also requires **FFmpeg** to be installed separately. Find Windows build options on the [official FFmpeg download page](https://ffmpeg.org/download.html#build-windows), then make sure `ffmpeg.exe` is available on your `PATH`. Filtertool does not bundle, download, or install FFmpeg. If it is not detected, Filtertool will still work, but generating TTS sounds will be unavailable. After installing FFmpeg or changing `PATH`, restart Filtertool.
 
 ## Quick guide
 
