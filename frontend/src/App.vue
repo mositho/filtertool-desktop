@@ -11,7 +11,7 @@ import PreviewPane from "./components/PreviewPane.vue"
 import GlobalSettings from "./components/GlobalSettings.vue"
 
 const filters = ref<FilterInfo[]>([])
-const templateMode = ref(false)
+const devMode = ref(false)
 const selected = ref<string | null>(null)
 const config = ref<FilterConfig>(clone(EMPTY_FILTER_CONFIG))
 const savedConfig = ref<FilterConfig>(clone(EMPTY_FILTER_CONFIG))
@@ -135,8 +135,8 @@ function discardChanges() {
 }
 
 async function refreshFilters(selectName?: string) {
-  const { filters: list, templateMode: templates } = await api.listFilters()
-  templateMode.value = templates
+  const { filters: list, devMode: dev } = await api.listFilters()
+  devMode.value = dev
   filters.value = list
   if (selectName && list.some((f) => f.name === selectName)) {
     selected.value = selectName
@@ -201,7 +201,7 @@ async function onSave() {
   if (!selected.value) return
   try {
     await saveOnly()
-    flash("Saved", "save")
+    flash(devMode.value ? "Saved to repository" : "Saved", "save")
   } catch (e) {
     flash((e as Error).message, "error")
   }
@@ -217,11 +217,12 @@ const globalExporting = computed(() => globalRef.value?.exporting ?? false)
 
 async function onGlobalSave() {
   const result = await globalRef.value?.save()
-  if (result) flash(result.message, result.kind)
+  if (result) flash(devMode.value && result.kind === "notice" ? "Saved to repository" : result.message, result.kind)
   await refreshDefaults()
 }
 
 async function onGlobalExport() {
+  if (devMode.value) return
   const result = await globalRef.value?.saveAndExport()
   if (result) flash(result.message, result.kind)
   await refreshDefaults()
@@ -239,7 +240,7 @@ async function refreshDefaults() {
 }
 
 async function onSaveAndExport() {
-  if (!selected.value) return
+  if (devMode.value || !selected.value) return
   exporting.value = true
   try {
     const [error] = filterRangeErrors(config.value)
@@ -256,6 +257,7 @@ async function onSaveAndExport() {
 }
 
 async function onExportAll() {
+  if (devMode.value) return
   exportingAll.value = true
   try {
     if (selected.value && dirty.value) {
@@ -457,15 +459,6 @@ async function saveShareFile() {
     shareError.value = (error as Error).message
   }
 }
-async function exportTemplateBundle() {
-  try {
-    if (dirty.value) await saveOnly()
-    const path = await api.saveTemplateBundle()
-    if (path) flash("Template bundle saved. Review changes before including them in a build.", "save")
-  } catch (error) {
-    flash((error as Error).message, "error")
-  }
-}
 async function importFromPicker(folder: boolean) {
   importBusy.value = true
   try {
@@ -646,7 +639,7 @@ onUnmounted(() => {
       <div class="absolute inset-0 bg-black/60" @click="sidebarOpen = false"></div>
       <div class="absolute inset-y-0 left-0 flex w-64">
         <Sidebar
-          :template-mode="templateMode"
+          :dev-mode="devMode"
           :filters="filters"
           :selected="selected"
           :view="view"
@@ -672,7 +665,7 @@ onUnmounted(() => {
 
     <div class="hidden shrink-0 md:flex">
       <Sidebar
-        :template-mode="templateMode"
+        :dev-mode="devMode"
         :filters="filters"
         :selected="selected"
         :view="view"
@@ -697,17 +690,10 @@ onUnmounted(() => {
 
     <main class="flex-1 flex flex-col min-w-0">
       <div
-        v-if="templateMode"
-        class="flex items-center justify-between gap-3 border-b border-amber-800 bg-amber-950/40 px-4 py-2 text-xs text-amber-200"
+        v-if="devMode"
+        class="flex flex-wrap items-center justify-between gap-3 border-b border-amber-800 bg-amber-950/40 px-4 py-2 text-xs text-amber-200"
       >
-        <span>Template Editor — isolated from your personal filters. Save edits, then export to update the bundled templates.</span>
-        <button
-          type="button"
-          @click="exportTemplateBundle"
-          class="shrink-0 rounded border border-amber-700 px-3 py-1 hover:bg-amber-900/40"
-        >
-          Export template bundle…
-        </button>
+        <span>Dev Editor — Save writes templates and global defaults/styles directly to the repository. Personal data stays separate.</span>
       </div>
       <header class="flex h-14 items-center justify-between gap-2 border-b border-neutral-800 px-3 sm:px-6">
         <div class="flex min-w-0 items-center gap-2">
@@ -805,9 +791,9 @@ onUnmounted(() => {
             </button>
             <button
               @click="onSaveAndExport"
-              :disabled="exporting"
-              class="rounded bg-green-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-600 disabled:opacity-50"
-              title="Save and export to Path of Exile (Ctrl+Shift+S)"
+              :disabled="devMode || exporting"
+              class="rounded bg-green-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500 disabled:opacity-50"
+              :title="devMode ? 'Export is disabled in Dev Editor' : 'Save and export to Path of Exile (Ctrl+Shift+S)'"
             >
               {{ exporting ? "Exporting…" : "Export" }}
             </button>
@@ -879,9 +865,9 @@ onUnmounted(() => {
             </button>
             <button
               @click="onGlobalExport"
-              :disabled="globalSaving || globalExporting"
-              class="rounded bg-green-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-600 disabled:opacity-50"
-              title="Save settings and export all filters (Ctrl+Shift+S)"
+              :disabled="devMode || globalSaving || globalExporting"
+              class="rounded bg-green-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500 disabled:opacity-50"
+              :title="devMode ? 'Export is disabled in Dev Editor' : 'Save settings and export all filters (Ctrl+Shift+S)'"
             >
               {{ globalExporting ? "Exporting…" : "Export" }}
             </button>
@@ -927,7 +913,7 @@ onUnmounted(() => {
                 <button @click="browseHomePath" class="rounded border border-neutral-700 px-3 text-sm hover:bg-neutral-800">Browse…</button>
               </div>
             </div>
-            <div v-if="!templateMode" class="flex flex-col items-stretch gap-3">
+            <div v-if="!devMode" class="flex flex-col items-stretch gap-3">
               <button
                 type="button"
                 @click="createFromLanding"

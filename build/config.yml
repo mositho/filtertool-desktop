@@ -11,7 +11,7 @@ dev_mode:
   debounce: 500
   ignore:
     dir: [.git, node_modules, frontend, bin, build, branding]
-    file: ["*_test.go"]
+    file: ["*_test.go", templates.json, defaults.json, styles.json]
     watched_extension: ["*.go", "*.json"]
     git_ignore: true
   executes:

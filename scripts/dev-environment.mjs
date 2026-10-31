@@ -13,6 +13,12 @@ export function wailsEnvironment(environment, platform, osRelease) {
         "FILTERTOOL_PROFILE/w",
       ].join(":")
     }
+    if (environment.FILTERTOOL_SOURCE_DIR) {
+      result.WSLENV = [
+        ...result.WSLENV.split(":").filter((entry) => entry.split("/")[0] !== "FILTERTOOL_SOURCE_DIR"),
+        "FILTERTOOL_SOURCE_DIR/pw",
+      ].join(":")
+    }
   }
   return result
 }

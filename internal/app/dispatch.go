@@ -2,7 +2,6 @@ package app
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -22,20 +21,18 @@ func (s *Store) Dispatch(action string, input Object) (any, error) {
 		input = Object{}
 	}
 	name := c.Text(input["name"])
-	if s.TemplateMode {
+	if s.DevMode {
 		switch action {
-		case "createFilter", "duplicateFilter", "renameFilter", "deleteFilter", "importJSON", "importFiles", "importFolder", "saveDefaults", "saveStyles":
-			return nil, errors.New("the template workspace only edits the bundled templates")
-		case "saveConfig":
-			if _, ok := data.Load[Object]("templates.json")[name]; !ok {
-				return nil, errors.New("not a bundled template")
-			}
+		case "exportFilter", "exportAllFilters":
+			return nil, errors.New("game export is disabled in dev mode")
+		case "createFilter", "duplicateFilter", "renameFilter", "deleteFilter", "importJSON", "importFiles", "importFolder":
+			return nil, errors.New("the dev workspace only edits bundled templates and global defaults/styles")
 		}
 	}
 	switch action {
 	case "listFilters":
 		filters, err := s.filters()
-		return Object{"filters": filters, "templateMode": s.TemplateMode}, err
+		return Object{"filters": filters, "devMode": s.DevMode}, err
 	case "getConfig":
 		return s.readFilter(name)
 	case "saveConfig":
@@ -151,8 +148,16 @@ func (s *Store) Dispatch(action string, input Object) (any, error) {
 			return nil, err
 		}
 		if action == "getDefaults" {
+			if s.DevMode {
+				base := s.devBase("defaults")
+				return Object{"defaults": d, "baseDefaults": base, "userDefaults": c.Difference(d, base)}, nil
+			}
 			u, err := s.optional("defaults.json")
 			return Object{"defaults": d, "baseDefaults": data.Load[Object]("defaults.json"), "userDefaults": u}, err
+		}
+		if s.DevMode {
+			base := s.devBase("styles")
+			return Object{"styles": st, "baseStyles": base, "userStyles": c.Difference(st, base)}, nil
 		}
 		u, err := s.optional("styles.json")
 		return Object{"styles": st, "baseStyles": data.Load[Object]("styles.json"), "userStyles": u}, err
@@ -164,6 +169,10 @@ func (s *Store) Dispatch(action string, input Object) (any, error) {
 		value := c.Obj(input[key])
 		if err := validateOverrides(key, value); err != nil {
 			return nil, err
+		}
+		if s.DevMode {
+			value = c.Merge(s.devBase(key), value)
+			return Object{"ok": true}, s.writeSource(key, value)
 		}
 		return Object{"ok": true}, s.write(key+".json", value)
 	case "reference":
@@ -220,29 +229,6 @@ func (s *Store) Dispatch(action string, input Object) (any, error) {
 		return Object{"exported": exported, "total": len(filters), "errors": failures}, nil
 	case "share":
 		return s.share(input)
-	case "saveTemplateBundle":
-		if !s.TemplateMode {
-			return nil, errors.New("template bundle export is only available in the template workspace")
-		}
-		if s.SaveShareFile == nil {
-			return nil, errors.New("native save dialog is unavailable")
-		}
-		bundle := Object{}
-		for template := range data.Load[Object]("templates.json") {
-			cfg, err := s.readFilter(template)
-			if err != nil {
-				return nil, err
-			}
-			if err = c.Validate(cfg); err != nil {
-				return nil, err
-			}
-			bundle[template] = cfg
-		}
-		text, err := json.MarshalIndent(bundle, "", "  ")
-		if err != nil {
-			return nil, err
-		}
-		return s.SaveShareFile("templates.json", string(text)+"\n")
 	case "saveShareFile":
 		if s.SaveShareFile == nil {
 			return nil, errors.New("native save dialog is unavailable")

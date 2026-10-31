@@ -10,7 +10,7 @@ const props = defineProps<{
   exporting: boolean
   adding: boolean
   renaming: string | null
-  templateMode?: boolean
+  devMode?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -105,7 +105,7 @@ function confirmRename() {
   <aside class="flex w-64 shrink-0 flex-col border-r border-neutral-800 bg-neutral-950">
     <div class="flex h-14 items-center justify-between px-4 border-b border-neutral-800">
       <button type="button" @click="emit('home')" class="font-semibold hover:text-neutral-300" title="Show welcome screen">Filters</button>
-      <div v-if="!templateMode" class="flex items-center gap-1">
+      <div v-if="!devMode" class="flex items-center gap-1">
         <button
           v-if="!adding"
           type="button"
@@ -147,7 +147,6 @@ function confirmRename() {
     </div>
 
     <button
-      v-if="!templateMode"
       @click="emit('global')"
       class="flex items-center justify-center border-b border-neutral-800 bg-neutral-300 px-4 py-1.5 text-sm font-medium text-black hover:bg-neutral-200"
     >
@@ -174,8 +173,8 @@ function confirmRename() {
           :class="renameError ? 'border-red-500' : 'border-neutral-700'"
           :title="renameError || undefined"
         />
-        <span v-else class="truncate" @dblclick.stop="!templateMode && emit('start-rename', filter.name)">{{ filter.name }}</span>
-        <span v-if="!templateMode && renaming !== filter.name" class="hidden group-hover:flex gap-1">
+        <span v-else class="truncate" @dblclick.stop="!devMode && emit('start-rename', filter.name)">{{ filter.name }}</span>
+        <span v-if="!devMode && renaming !== filter.name" class="hidden group-hover:flex gap-1">
           <button title="Duplicate" @click.stop="emit('duplicate', filter.name)" class="px-1 text-neutral-400 hover:text-white">⧉</button>
           <button title="Rename" @click.stop="emit('start-rename', filter.name)" class="px-1 text-neutral-400 hover:text-white">✎</button>
           <button title="Delete" @click.stop="emit('delete', filter.name)" class="px-1 text-neutral-400 hover:text-red-400">✕</button>
@@ -208,8 +207,9 @@ function confirmRename() {
 
     <button
       @click="emit('exportAll')"
-      :disabled="exporting"
-      class="flex items-center justify-center gap-2 border-t border-neutral-800 bg-green-700 px-4 py-3 text-sm font-medium text-white hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-50"
+      :disabled="devMode || exporting"
+      :title="devMode ? 'Export is disabled in Dev Editor' : undefined"
+      class="flex items-center justify-center gap-2 border-t border-neutral-800 bg-green-700 px-4 py-3 text-sm font-medium text-white hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500 disabled:opacity-50"
     >
       <span>{{ exporting ? "Exporting…" : "Export All" }}</span>
       <svg

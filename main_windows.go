@@ -39,10 +39,10 @@ func (a *App) Dispatch(action string, input map[string]any) (any, error) {
 	return a.store.Dispatch(action, input)
 }
 func main() {
-	templateMode := os.Getenv("FILTERTOOL_PROFILE") == "templates"
+	devMode := os.Getenv("FILTERTOOL_PROFILE") == "dev"
 	for _, arg := range os.Args[1:] {
-		if arg == "--templates" {
-			templateMode = true
+		if arg == "--dev" {
+			devMode = true
 		}
 	}
 	root, err := app.UserDataDir()
@@ -50,8 +50,15 @@ func main() {
 		log.Fatal(err)
 	}
 	var store *app.Store
-	if templateMode {
-		store, err = app.OpenTemplates(root)
+	if devMode {
+		sourceDir := os.Getenv("FILTERTOOL_SOURCE_DIR")
+		if sourceDir == "" {
+			sourceDir, err = filepath.Abs(filepath.Join("internal", "data"))
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+		store, err = app.OpenDev(root, sourceDir)
 	} else {
 		store, err = app.Open(root)
 	}
@@ -69,9 +76,9 @@ func main() {
 	var window *application.WebviewWindow
 	title := "Filtertool"
 	instanceID := "io.github.mositho.filtertool-desktop"
-	if templateMode {
-		title += " — Template Editor"
-		instanceID += ".templates"
+	if devMode {
+		title += " — Dev Editor"
+		instanceID += ".dev"
 	}
 	native := application.New(application.Options{Name: title, Description: "Path of Exile leveling filter builder", Icon: icon, Services: []application.Service{application.NewService(service)}, Assets: application.AssetOptions{Handler: application.AssetFileServerFS(assets)}, Windows: application.WindowsOptions{WebviewUserDataPath: filepath.Join(root, "cache", "webview2")}, SingleInstance: &application.SingleInstanceOptions{UniqueID: instanceID, OnSecondInstanceLaunch: func(application.SecondInstanceData) {
 		if window != nil {
@@ -98,11 +105,7 @@ func main() {
 	}
 	store.SaveShareFile = func(name, text string) (string, error) {
 		dialog := native.Dialog.SaveFile()
-		title := "Save shared filter"
-		if templateMode && name == "templates.json" {
-			title = "Export template bundle"
-		}
-		dialog.SetOptions(&application.SaveFileDialogOptions{Title: title, Filename: name, CanCreateDirectories: true, Window: window, Filters: []application.FileFilter{{DisplayName: "Filtertool JSON", Pattern: "*.json"}}})
+		dialog.SetOptions(&application.SaveFileDialogOptions{Title: "Save shared filter", Filename: name, CanCreateDirectories: true, Window: window, Filters: []application.FileFilter{{DisplayName: "Filtertool JSON", Pattern: "*.json"}}})
 		path, err := desktop.DialogSelection(dialog.PromptForSingleSelection())
 		if err != nil || path == "" {
 			return path, err

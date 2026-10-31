@@ -42,11 +42,10 @@ async function call<T>(action: string, input: Record<string, unknown> = {}): Pro
   return (await Call.ByName("main.App.Dispatch", action, JSON.parse(JSON.stringify(input)))) as T
 }
 export const api = {
-  listFilters: () => call<{ filters: FilterInfo[]; templateMode: boolean }>("listFilters"),
+  listFilters: () => call<{ filters: FilterInfo[]; devMode: boolean }>("listFilters"),
   getConfig: (name: string) => call<FilterConfig>("getConfig", { name }),
   saveConfig: (name: string, config: FilterConfig) => call<FilterConfig>("saveConfig", { name, config }),
   createFilter: (name: string, template?: string) => call<{ name: string }>("createFilter", { name, template }),
-  saveTemplateBundle: () => call<string>("saveTemplateBundle"),
   duplicateFilter: (name: string, newName: string) => call<{ name: string }>("duplicateFilter", { name, newName }),
   renameFilter: (name: string, newName: string) => call<{ name: string }>("renameFilter", { name, newName }),
   deleteFilter: (name: string, deleteGameFile: boolean) => call<{ ok: boolean }>("deleteFilter", { name, deleteGameFile }),

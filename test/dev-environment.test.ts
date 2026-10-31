@@ -3,10 +3,20 @@ import { describe, expect, it } from "vitest"
 import { wailsEnvironment } from "../scripts/dev-environment.mjs"
 
 describe("WSL development launcher", () => {
-  it("forwards the template profile to the Windows app without duplicate entries", () => {
-    const result = wailsEnvironment({ FILTERTOOL_PROFILE: "templates", WSLENV: "FILTERTOOL_PROFILE/up:WT_SESSION" }, "linux", "microsoft")
-    expect(result.FILTERTOOL_PROFILE).toBe("templates")
+  it("forwards the isolated dev profile to the Windows app without duplicate entries", () => {
+    const result = wailsEnvironment({ FILTERTOOL_PROFILE: "dev", WSLENV: "FILTERTOOL_PROFILE/up:WT_SESSION" }, "linux", "microsoft")
+    expect(result.FILTERTOOL_PROFILE).toBe("dev")
     expect(result.WSLENV).toBe("WT_SESSION:FRONTEND_DEVSERVER_URL/w:FILTERTOOL_PROFILE/w")
+  })
+
+  it("path-translates the repository directory when launching the Windows app from WSL", () => {
+    const result = wailsEnvironment(
+      { FILTERTOOL_SOURCE_DIR: "/home/user/filtertool/internal/data", WSLENV: "FILTERTOOL_SOURCE_DIR/u:WT_SESSION" },
+      "linux",
+      "microsoft",
+    )
+    expect(result.WSLENV).toBe("WT_SESSION:FRONTEND_DEVSERVER_URL/w:FILTERTOOL_SOURCE_DIR/pw")
+    expect(result.FILTERTOOL_SOURCE_DIR).toBe("/home/user/filtertool/internal/data")
   })
   it("forwards the Wails URL without changing unrelated WSLENV entries", () => {
     const environment = { WSL_DISTRO_NAME: "Ubuntu", WSLENV: "WT_SESSION:MY_PATH/p", OTHER: "keep" }

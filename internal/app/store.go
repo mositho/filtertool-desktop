@@ -19,7 +19,10 @@ import (
 type Object = map[string]any
 type Store struct {
 	Root            string
-	TemplateMode    bool
+	DevMode         bool
+	SourceDir       string
+	devDefaults     Object
+	devStyles       Object
 	mu              sync.Mutex
 	ChooseFolder    func(string) (string, error)
 	ChooseFiles     func() ([]string, error)
@@ -40,45 +43,63 @@ func UserDataDir() (string, error) {
 	return filepath.Join(root, "Filtertool"), nil
 }
 func Open(root string) (*Store, error) {
-	return open(root, false)
+	return open(root, "")
 }
 
-// OpenTemplates opens an isolated authoring workspace, never the personal root.
-func OpenTemplates(root string) (*Store, error) {
+// OpenDev edits repository data directly, with settings and caches isolated
+// from the personal profile. Source files must already exist.
+func OpenDev(root, sourceDir string) (*Store, error) {
 	if root == "" {
 		return nil, errors.New("data directory is required")
 	}
-	return open(filepath.Join(root, "profiles", "templates"), true)
+	if !filepath.IsAbs(sourceDir) {
+		return nil, errors.New("dev mode requires an absolute repository data directory; launch with npm run dev")
+	}
+	base := map[string]Object{}
+	for _, kind := range []string{"templates", "defaults", "styles"} {
+		value, err := readObject(filepath.Join(sourceDir, kind+".json"))
+		if err != nil {
+			return nil, fmt.Errorf("cannot open repository %s: %w", kind, err)
+		}
+		if kind == "templates" {
+			for name, cfg := range value {
+				if err = checkName(name); err != nil {
+					return nil, err
+				}
+				if err = c.Validate(c.Obj(cfg)); err != nil {
+					return nil, err
+				}
+			}
+		} else if err = validateOverrides(kind, value); err != nil {
+			return nil, err
+		}
+		base[kind] = value
+	}
+	s, err := open(filepath.Join(root, "profiles", "dev"), sourceDir)
+	if err != nil {
+		return nil, err
+	}
+	s.devDefaults, s.devStyles = base["defaults"], base["styles"]
+	return s, nil
 }
 
-func open(root string, templates bool) (*Store, error) {
+func open(root, sourceDir string) (*Store, error) {
 	if root == "" {
 		return nil, errors.New("data directory is required")
 	}
-	s := &Store{Root: root, TemplateMode: templates}
+	s := &Store{Root: root, DevMode: sourceDir != "", SourceDir: sourceDir}
 	for _, dir := range []string{"filters", "sounds", "cache"} {
 		if err := os.MkdirAll(filepath.Join(root, dir), 0700); err != nil {
 			return nil, err
 		}
 	}
 	if _, err := os.Stat(filepath.Join(root, ".initialized")); errors.Is(err, os.ErrNotExist) {
-		filters, err := s.filters()
-		if err != nil {
-			return nil, err
-		}
-		if templates && len(filters) == 0 {
-			for name, value := range data.Load[Object]("templates.json") {
-				if err = s.writeFilter(name, c.Obj(value)); err != nil {
-					return nil, err
-				}
-			}
-		}
 		if _, err = os.Stat(filepath.Join(root, "settings.json")); errors.Is(err, os.ErrNotExist) {
 			filterPath := ""
-			if !templates {
+			if !s.DevMode {
 				filterPath = DetectFilterPath()
 			}
-			if err = s.write("settings.json", Object{"filterPath": filterPath, "soundsFolder": "", "welcomeComplete": templates, "tts": Object{"locale": "en-US", "speed": 1.6}}); err != nil {
+			if err = s.write("settings.json", Object{"filterPath": filterPath, "soundsFolder": "", "welcomeComplete": s.DevMode, "tts": Object{"locale": "en-US", "speed": 1.6}}); err != nil {
 				return nil, err
 			}
 		}
@@ -117,11 +138,37 @@ func writeAtomic(path string, b []byte) error {
 	return os.Rename(name, path)
 }
 func (s *Store) write(name string, v any) error {
+	return writeJSON(filepath.Join(s.Root, name), v)
+}
+
+func writeJSON(path string, v any) error {
 	b, err := json.MarshalIndent(v, "", "  ")
 	if err != nil {
 		return err
 	}
-	return writeAtomic(filepath.Join(s.Root, name), append(b, '\n'))
+	return writeAtomic(path, append(b, '\n'))
+}
+
+func (s *Store) source(kind string) (Object, error) {
+	return readObject(filepath.Join(s.SourceDir, kind+".json"))
+}
+
+func (s *Store) devBase(kind string) Object {
+	if kind == "styles" {
+		return c.Clone(s.devStyles)
+	}
+	return c.Clone(s.devDefaults)
+}
+
+func (s *Store) writeSource(kind string, value Object) error {
+	if !s.DevMode || !contains([]string{"templates", "defaults", "styles"}, kind) {
+		return errors.New("repository writes are only available in dev mode")
+	}
+	// Never silently create a replacement for a missing or invalid source file.
+	if _, err := s.source(kind); err != nil {
+		return err
+	}
+	return writeJSON(filepath.Join(s.SourceDir, kind+".json"), value)
 }
 func readObject(path string) (Object, error) {
 	st, err := os.Lstat(path)
@@ -174,6 +221,16 @@ func (s *Store) filterPath(name string) (string, error) {
 	return filepath.Join(s.Root, "filters", name+".json"), nil
 }
 func (s *Store) readFilter(name string) (Object, error) {
+	if s.DevMode {
+		templates, err := s.source("templates")
+		if err != nil {
+			return nil, err
+		}
+		if value, ok := templates[name]; ok {
+			return c.Obj(value), nil
+		}
+		return nil, fmt.Errorf("template %q not found: %w", name, os.ErrNotExist)
+	}
 	p, err := s.filterPath(name)
 	if err != nil {
 		return nil, err
@@ -183,6 +240,17 @@ func (s *Store) readFilter(name string) (Object, error) {
 func (s *Store) writeFilter(name string, cfg Object) error {
 	if err := c.Validate(cfg); err != nil {
 		return err
+	}
+	if s.DevMode {
+		templates, err := s.source("templates")
+		if err != nil {
+			return err
+		}
+		if _, ok := templates[name]; !ok {
+			return errors.New("not a bundled template")
+		}
+		templates[name] = cfg
+		return s.writeSource("templates", templates)
 	}
 	p, err := s.filterPath(name)
 	if err != nil {
@@ -195,6 +263,20 @@ func (s *Store) writeFilter(name string, cfg Object) error {
 	return writeAtomic(p, append(b, '\n'))
 }
 func (s *Store) filters() ([]Object, error) {
+	if s.DevMode {
+		templates, err := s.source("templates")
+		if err != nil {
+			return nil, err
+		}
+		out := []Object{}
+		for name := range templates {
+			out = append(out, Object{"name": name, "hasConfigJson": true})
+		}
+		sort.Slice(out, func(i, j int) bool {
+			return strings.ToLower(c.Text(out[i]["name"])) < strings.ToLower(c.Text(out[j]["name"]))
+		})
+		return out, nil
+	}
 	entries, err := os.ReadDir(filepath.Join(s.Root, "filters"))
 	if err != nil {
 		return nil, err
@@ -246,6 +328,14 @@ func (s *Store) available(name, except string) error {
 	return nil
 }
 func (s *Store) globals() (Object, Object, error) {
+	if s.DevMode {
+		d, err := s.source("defaults")
+		if err != nil {
+			return nil, nil, err
+		}
+		st, err := s.source("styles")
+		return d, st, err
+	}
 	d, err := s.optional("defaults.json")
 	if err != nil {
 		return nil, nil, err
