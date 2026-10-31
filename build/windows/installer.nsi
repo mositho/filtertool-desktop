@@ -40,7 +40,7 @@ Section "Filtertool"
   ${EndIf}
   SetOutPath "$INSTDIR"
   File "..\..\bin\Filtertool.exe"
-  File "..\..\THIRD_PARTY.md"
+  File "..\..\docs\THIRD_PARTY.md"
   File "..\..\LICENSE"
   WriteUninstaller "$INSTDIR\Uninstall.exe"
   CreateShortcut "$SMPROGRAMS\Filtertool.lnk" "$INSTDIR\Filtertool.exe"

@@ -6,7 +6,7 @@
 
 A Windows item-filter builder for Path of Exile 1, focused on leveling.
 
-[Get started](#get-started) · [Quick guide](#quick-guide) · [Releases](https://github.com/mositho/filtertool-desktop/releases) · [Filter terminology](GLOSSARY.md)
+[Get started](#get-started) · [Quick guide](#quick-guide) · [Releases](https://github.com/mositho/filtertool-desktop/releases) · [Filter terminology](docs/GLOSSARY.md)
 
 </div>
 
@@ -27,7 +27,7 @@ Requires 64-bit Windows 10 or 11 and Microsoft Edge WebView2. The installer inst
 ## Quick guide
 
 1. **Check your game folder.** Filtertool detects your PoE filter path. Use **Browse…** to choose another folder.
-2. **Start with an example** — **Caster Example** or **Attack Example** — or create a filter in the sidebar.
+2. **Create a filter** in the sidebar. Choose **Caster Template**, **Attack Template**, or a blank starting template, then enter your own filter name and click **Create**.
 3. **Save** keeps your configuration locally. It does not update the in-game filter.
 4. **Export** saves your configuration and writes the `.filter` file and sound pack to your game folder. **Export All** updates every saved filter. Generating TTS sounds needs an internet connection.
 5. **Select it in PoE.** Choose the exported filter in the game's item-filter settings. After changes, export again and reload it in-game.
@@ -36,7 +36,7 @@ Use **Output Preview** to inspect the generated filter text.
 
 | Want to…                       | Use                                                                    |
 | :----------------------------- | :--------------------------------------------------------------------- |
-| Bring filters from the web app | **Import → JSON files…** or **Old web app folder…**                    |
+| Bring filters from the web app | **Import → JSON files…** or **Web App folder…**                        |
 | Share a filter                 | **Share**, then copy or save the compact JSON                          |
 | Include your defaults/styles   | Enable the option in **Share**; imports keep them local to that filter |
 | Change defaults or styles      | **Global Settings**                                                    |
@@ -48,4 +48,4 @@ Import reads existing web JSON without changing the originals. Folder import als
 > [!CAUTION]
 > Keep the exported sound folder alongside the `.filter` file. Moving or deleting it will break the filter's sounds. Check your filters after exporting.
 
-[Contributing](CONTRIBUTING.md) · [Third-party notices](THIRD_PARTY.md)
+[Contributing](docs/CONTRIBUTING.md) · [Third-party notices](docs/THIRD_PARTY.md)
