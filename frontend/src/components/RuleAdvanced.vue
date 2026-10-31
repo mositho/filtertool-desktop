@@ -6,7 +6,7 @@ defineProps<{ modules: FieldSubsection[] }>()
 </script>
 
 <template>
-  <AdvancedOptions v-if="modules.length" class="mt-3">
+  <AdvancedOptions v-if="modules.length" compact class="mt-1">
     <div class="space-y-2">
       <div v-for="module in modules" :key="module.key" class="rounded border border-neutral-800 bg-neutral-950/60 p-2">
         <div class="space-y-2">

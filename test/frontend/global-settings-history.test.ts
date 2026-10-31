@@ -33,6 +33,57 @@ afterEach(() => {
 })
 
 describe("global settings style history", () => {
+  it("aligns default section headers and keeps nested state across top-level expand/collapse all", async () => {
+    container = document.createElement("div")
+    document.body.append(container)
+    app = createApp(GlobalSettings)
+    app.mount(container)
+    await nextTick()
+    await nextTick()
+    const defaults = [...container.querySelectorAll("section")].find((section) => section.querySelector("h2")?.textContent === "Defaults")!
+    const button = (name: string) =>
+      [...defaults.querySelectorAll<HTMLButtonElement>("button")].find((entry) => entry.textContent?.trim().startsWith(name))!
+    expect(button("Early").classList.contains("px-4")).toBe(false)
+    button("Early").click()
+    await nextTick()
+    button("Socket Rules").click()
+    await nextTick()
+    button("2 Sockets · Armour").click()
+    await nextTick()
+    const summary = button("2 Sockets · Armour").parentElement!.parentElement!.querySelector("summary")!
+    expect(summary.classList.contains("px-4")).toBe(false)
+    expect(button("2 Sockets · Armour").classList.contains("py-1")).toBe(true)
+    button("Collapse all").click()
+    await nextTick()
+    button("Expand all").click()
+    await nextTick()
+    expect(button("Early").getAttribute("aria-expanded")).toBe("true")
+    expect(button("Socket Rules").getAttribute("aria-expanded")).toBe("true")
+    expect(button("2 Sockets · Armour").getAttribute("aria-expanded")).toBe("true")
+    expect(button("3 Sockets · Armour").getAttribute("aria-expanded")).toBe("false")
+    expect(button("Link Rules").getAttribute("aria-expanded")).toBe("false")
+  })
+
+  it("aligns non-rare jewellery cutoffs and sizes style rows by their container", async () => {
+    container = document.createElement("div")
+    document.body.append(container)
+    app = createApp(GlobalSettings)
+    app.mount(container)
+    await nextTick()
+    await nextTick()
+    const heading = [...container.querySelectorAll("h5")].find((entry) => entry.textContent?.trim() === "Max Area Level")!
+    expect(heading.parentElement!.style.marginLeft).toBe("0rem")
+    expect(heading.parentElement!.querySelector('[data-field-path="jewellery.amuletMaxAreaLevel"]')).not.toBeNull()
+    expect(container.textContent).not.toContain("Non-Rare max area level")
+    const styles = [...container.querySelectorAll("section")].find((entry) => entry.querySelector("h2")?.textContent === "Styles")!
+    expect(styles.classList.contains("@container")).toBe(true)
+    const flasks = [...styles.querySelectorAll("button")].find((entry) => entry.textContent?.includes("Flasks & Tinctures"))!
+    flasks.click()
+    await nextTick()
+    expect(styles.querySelector("[class*='@min-[48rem]:grid']")).not.toBeNull()
+    expect(styles.querySelector("[class*='@min-[48rem]:hidden']")).not.toBeNull()
+  })
+
   it.each([
     { titles: ["Equipment", "Equipment Rules", "Rare", "1×1"], path: "rareItems.rules.1x1" },
     { titles: ["Early", "Socket Rules", "2 Sockets · Armour"], path: "early.rules.armour2" },

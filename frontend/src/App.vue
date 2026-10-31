@@ -1070,9 +1070,7 @@ onUnmounted(() => {
           class="mb-2 w-full rounded border border-neutral-700 bg-neutral-950 p-2 font-mono text-xs"
         ></textarea>
         <p class="mb-4 text-xs text-neutral-400">
-          {{ shareCharacters.toLocaleString() }} characters<span v-if="shareCharacters > 2000">
-            — over Discord's standard message limit; share as a file.</span
-          >
+          {{ shareCharacters.toLocaleString() }} characters — share as {{ shareCharacters > 2000 ? "file" : "text" }}
         </p>
         <p v-if="shareError" class="mb-4 text-sm text-red-400">{{ shareError }}</p>
         <div class="flex justify-end gap-2">
@@ -1105,7 +1103,7 @@ onUnmounted(() => {
             :disabled="importBusy"
             class="rounded border border-neutral-700 px-3 py-2 text-sm disabled:opacity-50"
           >
-            Old web app folder…
+            Web App folder…
           </button>
         </div>
         <div class="mb-4">

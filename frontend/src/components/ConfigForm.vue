@@ -237,14 +237,8 @@ function collapseAll() {
 }
 
 function expandAll() {
-  const next: Record<string, boolean> = {}
-  const expand = (group: string, sections: FieldSubsection[]) => {
-    for (const section of sections) {
-      next[`${group}:${section.key}`] = false
-      expand(group, section.subsections ?? [])
-    }
-  }
-  for (const { group } of allGroups.value) expand(group.key, group.subsections ?? [])
+  const next = { ...collapsed.value }
+  for (const { group } of allGroups.value) next[group.key] = false
   collapsed.value = next
 }
 </script>
@@ -321,7 +315,15 @@ function expandAll() {
             <div
               v-for="sub in subsectionEntries(entry.group, entry.root)"
               :key="sub.key"
-              :class="sub.depth > 0 ? 'mt-2' : sub.hasSiblingAbove ? 'mt-4 border-t border-neutral-800/60 pt-3' : 'mt-4'"
+              :class="
+                sub.subsection.layout === 'cutoff-size'
+                  ? 'mt-1'
+                  : sub.depth > 0
+                    ? 'mt-2'
+                    : sub.hasSiblingAbove
+                      ? 'mt-4 border-t border-neutral-800/60 pt-3'
+                      : 'mt-4'
+              "
               :style="{ marginLeft: `${sub.depth}rem` }"
               :data-preview-section="previewSectionFor(sub.group, sub.subsection)"
             >
@@ -329,6 +331,7 @@ function expandAll() {
                 v-if="sub.subsection.collapsed"
                 :title="sub.subsection.title"
                 :heading="sub.depth === 0"
+                :compact="sub.subsection.layout === 'cutoff-size'"
                 :expanded="!subsectionCollapsed(entry.group.key, sub.subsection)"
                 :field="sub.enabledField"
                 :enabled="sub.enabledField && effectiveValue(sub.root, sub.enabledField)"

@@ -12,6 +12,7 @@ import (
 
 	"github.com/mositho/filtertool-desktop/internal/app"
 	"github.com/mositho/filtertool-desktop/internal/bundle"
+	"github.com/mositho/filtertool-desktop/internal/desktop"
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/wailsapp/wails/v3/pkg/events"
 )
@@ -79,7 +80,7 @@ func main() {
 		}
 	}}})
 	service.native = native
-	window = native.Window.NewWithOptions(application.WebviewWindowOptions{Title: title, Width: 1440, Height: 960, MinWidth: 900, MinHeight: 640, BackgroundColour: application.NewRGB(10, 10, 10), URL: "/"})
+	window = native.Window.NewWithOptions(application.WebviewWindowOptions{Title: title, Width: 1440, Height: 960, MinWidth: 1024, MinHeight: 720, BackgroundColour: application.NewRGB(10, 10, 10), URL: "/"})
 	window.RegisterHook(events.Common.WindowClosing, func(e *application.WindowEvent) {
 		if service.dirty.Load() {
 			e.Cancel()
@@ -87,13 +88,13 @@ func main() {
 		}
 	})
 	store.ChooseFolder = func(path string) (string, error) {
-		return native.Dialog.OpenFile().SetTitle("Choose folder").CanChooseFiles(false).CanChooseDirectories(true).CanCreateDirectories(true).SetDirectory(path).AttachToWindow(window).PromptForSingleSelection()
+		return desktop.DialogSelection(native.Dialog.OpenFile().SetTitle("Choose folder").CanChooseFiles(false).CanChooseDirectories(true).CanCreateDirectories(true).SetDirectory(path).AttachToWindow(window).PromptForSingleSelection())
 	}
 	store.ChooseFiles = func() ([]string, error) {
-		return native.Dialog.OpenFile().SetTitle("Import Filtertool JSON").CanChooseFiles(true).CanChooseDirectories(false).AddFilter("Filtertool JSON", "*.json").AttachToWindow(window).PromptForMultipleSelection()
+		return desktop.DialogSelection(native.Dialog.OpenFile().SetTitle("Import Filtertool JSON").CanChooseFiles(true).CanChooseDirectories(false).AddFilter("Filtertool JSON", "*.json").AttachToWindow(window).PromptForMultipleSelection())
 	}
 	store.ChooseSoundFile = func() (string, error) {
-		return native.Dialog.OpenFile().SetTitle("Choose custom sound").AddFilter("MP3 audio", "*.mp3").AttachToWindow(window).PromptForSingleSelection()
+		return desktop.DialogSelection(native.Dialog.OpenFile().SetTitle("Choose custom sound").AddFilter("MP3 audio", "*.mp3").AttachToWindow(window).PromptForSingleSelection())
 	}
 	store.SaveShareFile = func(name, text string) (string, error) {
 		dialog := native.Dialog.SaveFile()
@@ -102,7 +103,7 @@ func main() {
 			title = "Export template bundle"
 		}
 		dialog.SetOptions(&application.SaveFileDialogOptions{Title: title, Filename: name, CanCreateDirectories: true, Window: window, Filters: []application.FileFilter{{DisplayName: "Filtertool JSON", Pattern: "*.json"}}})
-		path, err := dialog.PromptForSingleSelection()
+		path, err := desktop.DialogSelection(dialog.PromptForSingleSelection())
 		if err != nil || path == "" {
 			return path, err
 		}

@@ -57,6 +57,54 @@ const fields = fieldsOf(BUILD_SPECIFIC_SCHEMA)
 const field = (path: string) => fields.find((entry) => entry.path === path)!
 
 describe("built-in equipment rule defaults", () => {
+  it("keeps nested disclosure state when collapsing and expanding all top-level sections", async () => {
+    mount(ConfigForm, { modelValue: { buildProfile: {}, buildSpecificOptions: {} }, filterName: "test", reference })
+    const button = (name: string) =>
+      [...root.querySelectorAll<HTMLButtonElement>("button")].find((entry) => entry.textContent?.trim().startsWith(name))!
+    button("Socket Rules").click()
+    await nextTick()
+    button("2 Sockets · Armour").click()
+    await nextTick()
+    expect(button("2 Sockets · Armour").classList.contains("py-1")).toBe(true)
+    const summary = button("2 Sockets · Armour").parentElement!.parentElement!.querySelector("summary")!
+    expect(summary.classList.contains("px-4")).toBe(false)
+    expect(summary.classList.contains("py-1")).toBe(true)
+    button("Collapse all").click()
+    await nextTick()
+    button("Expand all").click()
+    await nextTick()
+    expect(button("Socket Rules").getAttribute("aria-expanded")).toBe("true")
+    expect(button("2 Sockets · Armour").getAttribute("aria-expanded")).toBe("true")
+    expect(button("3 Sockets · Armour").getAttribute("aria-expanded")).toBe("false")
+    expect(button("Link Rules").getAttribute("aria-expanded")).toBe("false")
+  })
+
+  it("puts all cutoffs first in Equipment, with non-rare jewellery below rarity cutoffs", () => {
+    mount(ConfigForm, { modelValue: { buildProfile: {}, buildSpecificOptions: {} }, filterName: "test", reference })
+    const heading = [...root.querySelectorAll("h3")].find((entry) => entry.textContent?.trim() === "Max Area Level")!
+    expect(heading.parentElement!.style.marginLeft).toBe("0rem")
+    const equipment = BUILD_SPECIFIC_SCHEMA.find((group) => group.key === "equipment")!
+    expect(equipment.subsections!.map((section) => section.key)).toEqual([
+      "rarityItems",
+      "jewellery",
+      "flasks",
+      "tinctures",
+      "genericEquipment",
+    ])
+    expect(equipment.subsections![0].fields.map((field) => field.path)).toEqual([
+      "normalItems.maxAreaLevel",
+      "magicItems.smallMaxAreaLevel",
+      "magicItems.bigMaxAreaLevel",
+      "rareItems.maxAreaLevel",
+      "jewellery.amuletMaxAreaLevel",
+      "jewellery.basicRingMaxAreaLevel",
+      "jewellery.elementalRingMaxAreaLevel",
+      "jewellery.beltMaxAreaLevel",
+    ])
+    expect(root.textContent).not.toContain("Non-Rare max area level")
+    expect(root.textContent).not.toContain("Extend generic links beyond their early cutoff.")
+  })
+
   it("inherits shortcut sizes from presets and keeps inherited colors when editing size", () => {
     const sizeField = field("rareItems.rules.1x1.style.size")
     const shared = { rareItems: { rules: { "1x1": { style: { preset: "threeLink", text: "#123456" } } } } }

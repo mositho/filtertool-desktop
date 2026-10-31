@@ -35,40 +35,42 @@ watch(
 </script>
 
 <template>
-  <div v-if="!open" class="flex min-h-0 flex-1 flex-col items-center justify-between py-3">
-    <span class="select-none text-xs text-neutral-500" style="writing-mode: vertical-rl">Output Preview</span>
+  <div class="flex min-h-0 flex-1">
     <button
       type="button"
-      @click="emit('update:open', true)"
-      :aria-expanded="false"
-      class="flex h-7 w-7 items-center justify-center rounded border border-neutral-700 text-neutral-400 hover:bg-neutral-800 hover:text-white"
-      title="Extend output preview"
+      @click="emit('update:open', !open)"
+      :aria-expanded="open"
+      class="flex w-10 shrink-0 flex-col items-center justify-between py-3 text-neutral-400 hover:bg-neutral-800 hover:text-white focus-visible:outline focus-visible:outline-green-600"
+      :class="open ? 'border-r border-neutral-800' : ''"
+      :title="open ? 'Collapse output preview' : 'Expand output preview'"
+      :aria-label="open ? 'Collapse output preview' : 'Expand output preview'"
     >
-      ◀
+      <span class="select-none text-xs" style="writing-mode: vertical-rl">Output Preview</span>
+      <span aria-hidden="true" class="flex h-7 w-7 items-center justify-center rounded border border-neutral-700">
+        {{ open ? "▸" : "◀" }}
+      </span>
     </button>
-  </div>
-  <div v-else class="flex min-h-0 flex-1 flex-col">
-    <div class="flex items-center justify-between border-b border-neutral-800 px-4 py-3">
-      <span class="text-sm font-medium">Output Preview</span>
+    <div v-if="open" class="flex min-h-0 min-w-0 flex-1 flex-col">
       <button
         type="button"
         @click="emit('update:open', false)"
         :aria-expanded="true"
-        class="text-sm text-neutral-400 hover:text-white"
+        class="flex items-center justify-between border-b border-neutral-800 px-4 py-3 text-left hover:bg-neutral-800"
         title="Collapse output preview"
       >
-        ▸
+        <span class="text-sm font-medium">Output Preview</span>
+        <span aria-hidden="true" class="text-sm text-neutral-400">▸</span>
       </button>
-    </div>
-    <div ref="scroller" class="min-h-0 flex-1 overflow-auto p-4 font-mono text-xs leading-relaxed text-neutral-300">
-      <div
-        v-for="(line, index) in lines"
-        :key="index"
-        class="whitespace-pre"
-        :data-heading="headingOf(line)"
-        :class="headingOf(line) === section ? 'rounded bg-neutral-800' : ''"
-        v-text="line === '' ? '\u00A0' : line"
-      ></div>
+      <div ref="scroller" class="min-h-0 flex-1 overflow-auto p-4 font-mono text-xs leading-relaxed text-neutral-300">
+        <div
+          v-for="(line, index) in lines"
+          :key="index"
+          class="whitespace-pre"
+          :data-heading="headingOf(line)"
+          :class="headingOf(line) === section ? 'rounded bg-neutral-800' : ''"
+          v-text="line === '' ? '\u00A0' : line"
+        ></div>
+      </div>
     </div>
   </div>
 </template>

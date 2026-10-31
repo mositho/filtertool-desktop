@@ -470,6 +470,7 @@ const equipmentJewelleryCutoffs: SchemaField[] = [
     min: 0,
     integer: true,
     defaultValue: 24,
+    previewSection: "Jewellery",
     tooltip: "Area level up to which normal and magic amulets are highlighted.",
   },
   {
@@ -479,6 +480,7 @@ const equipmentJewelleryCutoffs: SchemaField[] = [
     min: 0,
     integer: true,
     defaultValue: 16,
+    previewSection: "Jewellery",
     tooltip: "Area level up to which basic rings (Iron, Coral) are highlighted (Magic and Normal).",
   },
   {
@@ -488,6 +490,7 @@ const equipmentJewelleryCutoffs: SchemaField[] = [
     min: 0,
     integer: true,
     defaultValue: 33,
+    previewSection: "Jewellery",
     tooltip: "Area level up to which elemental rings (Ruby, Sapphire, Topaz, Two-Stone) are highlighted (Magic and Normal).",
   },
   {
@@ -497,6 +500,7 @@ const equipmentJewelleryCutoffs: SchemaField[] = [
     min: 0,
     integer: true,
     defaultValue: 24,
+    previewSection: "Jewellery",
     tooltip: "Area level up to which belts are highlighted (Magic and Normal).",
   },
 ]
@@ -739,7 +743,6 @@ export const BUILD_SPECIFIC_SCHEMA: FieldGroup[] = [
       {
         key: "generic",
         title: "Generic links",
-        description: "Extend generic links beyond their early cutoff.",
         fields: linksGeneric,
       },
       { key: "linkRules", title: "Link Rules", collapsed: true, fields: [], subsections: linkRules },
@@ -751,18 +754,15 @@ export const BUILD_SPECIFIC_SCHEMA: FieldGroup[] = [
     description: "Rarity thresholds, jewellery and tinctures.",
     fields: [],
     subsections: [
+      { key: "rarityItems", title: "Max Area Level", fields: [...equipmentRarityItems, ...equipmentJewelleryCutoffs] },
       {
         key: "jewellery",
         title: "Jewellery",
         previewSection: "Jewellery",
         fields: equipmentJewelleryAmulets,
-        subsections: [
-          { key: "jewelleryCutoffs", title: "Non-Rare max area level", previewSection: "Jewellery", fields: equipmentJewelleryCutoffs },
-        ],
       },
-      { key: "tinctures", title: "Tinctures", previewSection: "Tinctures", fields: equipmentTinctures },
       { key: "flasks", title: "Flasks", previewSection: "Flasks", fields: equipmentFlasks },
-      { key: "rarityItems", title: "Max Area Level", fields: equipmentRarityItems },
+      { key: "tinctures", title: "Tinctures", previewSection: "Tinctures", fields: equipmentTinctures },
       { key: "genericEquipment", title: "Equipment Rules", collapsed: true, fields: [], subsections: genericEquipment },
     ],
   },

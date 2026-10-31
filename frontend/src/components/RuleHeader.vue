@@ -8,15 +8,17 @@ defineProps<{
   enabled?: unknown
   defaulted?: boolean
   heading?: boolean
+  compact?: boolean
 }>()
 const emit = defineEmits<{ toggle: []; change: [value: boolean]; reset: [] }>()
 </script>
 
 <template>
-  <div class="mb-1 flex items-center rounded text-sm font-semibold text-neutral-400">
+  <div class="flex items-center rounded text-sm font-semibold text-neutral-400" :class="compact ? '' : 'mb-1'">
     <label
       v-if="field"
-      class="flex shrink-0 cursor-pointer items-center pr-2 py-3"
+      class="flex shrink-0 cursor-pointer items-center pr-2"
+      :class="compact ? 'py-1' : 'py-3'"
       :data-field-path="field.path"
       :title="defaulted ? 'Rule enabled · using default' : 'Rule enabled'"
     >
@@ -30,7 +32,8 @@ const emit = defineEmits<{ toggle: []; change: [value: boolean]; reset: [] }>()
     </label>
     <button
       type="button"
-      class="flex min-w-0 flex-1 items-center justify-between gap-3 py-3 text-left"
+      class="flex min-w-0 flex-1 items-center justify-between gap-3 text-left"
+      :class="compact ? 'py-1' : 'py-3'"
       :aria-expanded="expanded"
       @click="emit('toggle')"
     >

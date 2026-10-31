@@ -421,14 +421,7 @@ function collapseAllDefaults() {
 }
 
 function expandAllDefaults() {
-  defaultsCollapsed.value = {}
-  const expand = (group: string, sections: FieldSubsection[]) => {
-    for (const section of sections) {
-      defaultSections.value[`${group}:${section.key}`] = false
-      expand(group, section.subsections ?? [])
-    }
-  }
-  for (const group of DEFAULTS_SCHEMA) expand(group.key, group.subsections ?? [])
+  defaultsCollapsed.value = Object.fromEntries(DEFAULTS_SCHEMA.map((group) => [group.key, false]))
 }
 
 const settingsCollapsed = ref(false)
@@ -629,7 +622,7 @@ function removeSaved(name: string) {
               type="button"
               @click="toggleDefaultsGroup(group.key)"
               :aria-expanded="!isDefaultsCollapsed(group.key)"
-              class="mb-1 flex w-full items-center justify-between gap-2 rounded px-4 py-3 text-left hover:bg-neutral-900/40"
+              class="mb-1 flex w-full items-center justify-between gap-2 rounded py-3 text-left hover:bg-neutral-900/40"
             >
               <span class="text-sm font-semibold uppercase tracking-wide text-neutral-400">{{ group.title }}</span>
               <span class="text-sm text-neutral-500">{{ isDefaultsCollapsed(group.key) ? "▸" : "▾" }}</span>
@@ -653,13 +646,22 @@ function removeSaved(name: string) {
               <div
                 v-for="sub in defaultsSubsectionEntries(group)"
                 :key="sub.key"
-                :class="sub.depth > 0 ? 'mt-2' : sub.hasSiblingAbove ? 'mt-4 border-t border-neutral-800/60 pt-3' : 'mt-3'"
+                :class="
+                  sub.subsection.layout === 'cutoff-size'
+                    ? 'mt-1'
+                    : sub.depth > 0
+                      ? 'mt-2'
+                      : sub.hasSiblingAbove
+                        ? 'mt-4 border-t border-neutral-800/60 pt-3'
+                        : 'mt-3'
+                "
                 :style="{ marginLeft: `${sub.depth}rem` }"
               >
                 <RuleHeader
                   v-if="sub.subsection.collapsed"
                   :title="sub.subsection.title"
                   :heading="sub.depth === 0"
+                  :compact="sub.subsection.layout === 'cutoff-size'"
                   :expanded="!defaultSubsectionCollapsed(group.key, sub.subsection)"
                   :field="sub.enabledField"
                   :enabled="sub.enabledField && defaultsValue(sub.enabledField)"
@@ -728,7 +730,7 @@ function removeSaved(name: string) {
         </div>
       </section>
 
-      <section class="rounded border border-neutral-800 bg-neutral-900/40">
+      <section class="@container min-w-0 rounded border border-neutral-800 bg-neutral-900/40">
         <div class="flex items-center justify-between gap-2 px-4 py-3">
           <h2 class="text-lg font-semibold uppercase tracking-wide text-neutral-200">Styles</h2>
           <div class="flex items-center gap-2">
@@ -764,7 +766,7 @@ function removeSaved(name: string) {
 
             <div v-if="!collapsed[section.title]" class="border-t border-neutral-800 px-3 py-2">
               <div
-                class="mb-1 hidden items-center gap-3 text-[10px] uppercase text-neutral-600 md:grid"
+                class="mb-1 hidden items-center gap-3 text-[10px] uppercase text-neutral-600 @min-[48rem]:grid"
                 :style="{ gridTemplateColumns: STYLE_GRID_TEMPLATE }"
               >
                 <span></span><span>Text</span><span>Bg</span><span>Border</span><span title="20–45">Size</span
@@ -772,7 +774,7 @@ function removeSaved(name: string) {
               </div>
 
               <div v-for="key in section.keys" :key="key" class="py-2">
-                <div class="hidden items-center gap-3 md:grid" :style="{ gridTemplateColumns: STYLE_GRID_TEMPLATE }">
+                <div class="hidden items-center gap-3 @min-[48rem]:grid" :style="{ gridTemplateColumns: STYLE_GRID_TEMPLATE }">
                   <span class="min-w-0 truncate text-xs text-neutral-300" :title="key">{{ key }}</span>
                   <input
                     type="color"
@@ -876,7 +878,7 @@ function removeSaved(name: string) {
                   </div>
                 </div>
 
-                <div class="rounded border border-neutral-800 p-2 md:hidden">
+                <div class="rounded border border-neutral-800 p-2 @min-[48rem]:hidden">
                   <div class="mb-2 flex items-center justify-between gap-2">
                     <span class="truncate text-sm font-medium text-neutral-200">{{ key }}</span>
                     <div class="flex shrink-0 items-center gap-0.5">
