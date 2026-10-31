@@ -59,6 +59,7 @@ export const api = {
     return call<ExportResult>("exportAllFilters").finally(() => off?.())
   },
   getSettings: () => call<AppSettings>("getSettings"),
+  audioStatus: () => call<{ ffmpegAvailable: boolean }>("audioStatus"),
   saveSettings: (settings: AppSettings) => call<AppSettings>("saveSettings", { settings }),
   getDefaults: () =>
     call<{ defaults: Record<string, unknown>; baseDefaults: Record<string, unknown>; userDefaults: Record<string, unknown> }>(

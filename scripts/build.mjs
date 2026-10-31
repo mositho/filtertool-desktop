@@ -12,7 +12,6 @@ const run = (command, args, env = {}) => {
   if (result.status !== 0) throw new Error(`${command} failed with exit code ${result.status ?? 1}`)
 }
 run("node", ["scripts/generate-branding.mjs"])
-run("node", ["scripts/prepare-audio.mjs"])
 run("npm", ["run", "frontend:build"])
 await mkdir("bin", { recursive: true })
 const { version } = JSON.parse(await readFile("package.json", "utf8"))
