@@ -904,8 +904,8 @@ onUnmounted(() => {
           role="alert"
           class="mb-4 rounded border border-amber-800 bg-amber-950/50 px-4 py-3 text-sm text-amber-200"
         >
-          <strong>FFmpeg was not found.</strong> Generating TTS sounds requires FFmpeg installed and available on PATH. Install it and
-          restart Filtertool; Filtertool does not download or install FFmpeg.
+          <strong>TTS sound generation requires FFmpeg to be installed.</strong> Refer to the README for installation help. Filtertool
+          does not download or install FFmpeg.
         </div>
         <GlobalSettings v-show="view === 'global'" ref="globalRef" />
         <div v-if="view !== 'global' && selected && reference" class="space-y-4">
