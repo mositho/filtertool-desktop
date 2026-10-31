@@ -1,0 +1,5 @@
+{
+  "normal": { "iconShape": "Star", "iconColor": "Grey", "iconSize": 2 },
+  "magic": { "iconShape": "Star", "iconColor": "Blue", "iconSize": 2 },
+  "rare": { "iconShape": "Star", "iconColor": "Yellow", "iconSize": 2, "soundId": 3 }
+}

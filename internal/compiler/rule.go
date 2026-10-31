@@ -131,7 +131,7 @@ func (c *Compiler) tts(r *rule, value string) *rule {
 	return r.set("CustomAlertSound", strconv.Quote(c.soundPath(name+".mp3"))+" 300")
 }
 func (c *Compiler) sound(r *rule, s Object) *rule {
-	if s["enabled"] == false {
+	if s["enabled"] == false || s["soundEnabled"] == false {
 		return r
 	}
 	if t := Text(s["tts"]); t != "" {

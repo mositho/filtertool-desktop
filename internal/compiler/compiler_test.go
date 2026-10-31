@@ -37,9 +37,16 @@ func TestWebCompilerParity(t *testing.T) {
 				t.Fatal(err)
 			}
 			compiler := New(Obj(cfg["_defaults"]), Obj(cfg["_styles"]), "")
-			// The captured web compiler predates starter-support defaults. Keep
-			// that historical baseline here; current defaults have separate tests.
-			compiler.Defaults["gemCallouts"] = Object{}
+			// Freeze the web compiler's historical behavior without changing its
+			// captured output. Current opt-in/default behavior has separate tests.
+			compiler.starterSupports = nil
+			compiler.rarityDefaults = Object{}
+			for _, phase := range List(Obj(cfg["buildProfile"])["weaponPhases"]) {
+				p := Obj(phase)
+				if p["weaponCutoffOverlap"] == nil {
+					p["weaponCutoffOverlap"] = float64(10)
+				}
+			}
 			compiler.weapons = referenceWeapons
 			got, err := compiler.Compile(cfg)
 			if err != nil {

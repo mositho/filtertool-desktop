@@ -43,6 +43,42 @@ func (c *Compiler) findWeapons(classes []string, min any) []string {
 	return out
 }
 func (c *Compiler) highlight(cfg Object) []*rule {
+	return c.highlightRules(activeHighlight(cfg, false))
+}
+
+// Fields in legacy JSON remain explicit opt-ins. When module metadata exists,
+// only added modules apply; phase bounds are separate from optional modules.
+func activeHighlight(cfg Object, phase bool) Object {
+	out := Clone(cfg)
+	if cfg["modules"] == nil {
+		return out
+	}
+	modules := Strings(cfg["modules"])
+	for module, fields := range map[string][]string{
+		"minAps": {"minAps"}, "linkedSockets": {"linkedSockets"}, "minSockets": {"minSockets"},
+		"areaLevel": {"minAreaLevel", "maxAreaLevel"}, "itemLevel": {"minItemLevel", "maxItemLevel"},
+		"weaponCutoff": {"weaponCutoffOverlap"}, "size": {"width", "height"}, "style": {"style"},
+		"icon": {"iconColor", "iconShape", "iconSize"}, "sound": {"tts", "soundId", "soundFileName"},
+	} {
+		added := contains(modules, module)
+		if module == "areaLevel" || module == "itemLevel" {
+			added = added || contains(modules, fields[0]) || contains(modules, fields[1])
+		}
+		if phase && module == "areaLevel" {
+			continue
+		}
+		if !added {
+			for _, field := range fields {
+				delete(out, field)
+			}
+		} else if module == "weaponCutoff" && out["weaponCutoffOverlap"] == nil {
+			out["weaponCutoffOverlap"] = float64(10)
+		}
+	}
+	return out
+}
+
+func (c *Compiler) highlightRules(cfg Object) []*rule {
 	bases, classes := Strings(cfg["baseTypes"]), Strings(cfg["itemClasses"])
 	if len(bases) == 0 && len(classes) == 0 && cfg["minAps"] == nil {
 		return nil
@@ -65,9 +101,10 @@ func (c *Compiler) highlight(cfg Object) []*rule {
 			r := newRule().style(style)
 			presentation := cfg
 			if cfg["perRarityCustomization"] == true {
-				presentation = Obj(cfg[strings.ToLower(rarity)])
+				key := strings.ToLower(rarity)
+				presentation = Merge(Obj(c.rarityDefaults[key]), Obj(cfg[key]))
 			}
-			if presentation["iconColor"] != nil || presentation["iconShape"] != nil {
+			if presentation["iconShape"] != "" && (presentation["iconColor"] != nil || presentation["iconShape"] != nil) {
 				r.icon(Text(Val(presentation, "iconColor", "Cyan")), Text(Val(presentation, "iconShape", "UpsideDownHouse")), Val(presentation, "iconSize", float64(2)))
 			}
 			r.quoted("BaseType", false, bases...).quoted("Class", true, classes...).set("Rarity", "== "+rarity)
@@ -200,10 +237,7 @@ func (c *Compiler) phases(phases []any) string {
 	}
 	rules := []*rule{}
 	for _, p := range ordered {
-		if p["weaponCutoffOverlap"] == nil {
-			p["weaponCutoffOverlap"] = float64(10)
-		}
-		rules = append(rules, c.highlight(p)...)
+		rules = append(rules, c.highlightRules(activeHighlight(p, true))...)
 	}
 	if len(rules) == 0 {
 		return ""

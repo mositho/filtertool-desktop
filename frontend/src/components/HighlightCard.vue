@@ -13,6 +13,7 @@ import StyleEditor from "./StyleEditor.vue"
 import ItemTargetPicker from "./ItemTargetPicker.vue"
 import AdvancedOptions from "./AdvancedOptions.vue"
 import { areaLevelRangeError, itemLevelRangeError } from "@schema/range-validation"
+import rarityDefaults from "../../../internal/data/highlight-defaults.json"
 
 const props = defineProps<{
   highlight: Record<string, unknown>
@@ -173,7 +174,7 @@ function setRarities(value: string[]) {
 
 function setPerRarity(value: boolean) {
   setField("perRarityCustomization", value || undefined)
-  active.value = computeActive()
+  active.value = new Set([...active.value, ...computeActive()].filter((id) => !value || (id !== "icon" && id !== "sound")))
   persistModules()
 }
 
@@ -270,15 +271,20 @@ function setSizeValue(path: string, value: number | undefined) {
 }
 
 type RarityKey = "normal" | "magic" | "rare"
-const EMPTY_RARITY: Record<string, unknown> = {}
 
 function rarityKeyOf(rarity: string): RarityKey {
   return rarity.toLowerCase() as RarityKey
 }
 
 function rarityConfig(rarity: string): Record<string, unknown> {
-  const config = props.highlight[rarityKeyOf(rarity)]
-  return config && typeof config === "object" && !Array.isArray(config) ? (config as Record<string, unknown>) : EMPTY_RARITY
+  const key = rarityKeyOf(rarity)
+  const config = props.highlight[key]
+  const overrides = config && typeof config === "object" && !Array.isArray(config) ? (config as Record<string, unknown>) : {}
+  const effective: Record<string, unknown> = { ...rarityDefaults[key], ...overrides }
+  if (effective.soundEnabled === false) {
+    for (const path of SOUND_FIELD_PATHS) delete effective[path]
+  }
+  return effective
 }
 
 function rarityIconColor(rarity: string): string {
@@ -304,7 +310,7 @@ function setRarityIconSize(rarity: string, size: number) {
 function setRarityIconShape(rarity: string, shape: string) {
   const key = rarityKeyOf(rarity)
   if (shape === "") {
-    deletePath(props.highlight, `${key}.iconShape`)
+    setPath(props.highlight, `${key}.iconShape`, "")
     deletePath(props.highlight, `${key}.iconColor`)
     deletePath(props.highlight, `${key}.iconSize`)
     onChange()
@@ -319,6 +325,8 @@ function applyRaritySound(rarity: string, next: Record<string, unknown>) {
   for (const path of SOUND_FIELD_PATHS) {
     if (next[path] !== undefined) setPath(props.highlight, `${key}.${path}`, next[path])
   }
+  if (SOUND_FIELD_PATHS.some((path) => next[path] !== undefined)) deletePath(props.highlight, `${key}.soundEnabled`)
+  else setPath(props.highlight, `${key}.soundEnabled`, false)
   onChange()
 }
 </script>
@@ -353,7 +361,12 @@ function applyRaritySound(rarity: string, next: Record<string, unknown>) {
         </div>
         <div v-if="perRarity" class="space-y-2">
           <p class="text-xs text-neutral-500">Configure icon and sound per selected rarity. Replaces any whole-highlight icon or sound.</p>
-          <div v-for="rarity in rarityValue" :key="rarity" class="rounded border border-neutral-800 bg-neutral-950/60 p-2">
+          <div
+            v-for="rarity in rarityValue"
+            :key="rarity"
+            :data-rarity="rarity"
+            class="rounded border border-neutral-800 bg-neutral-950/60 p-2"
+          >
             <span class="text-sm font-medium text-neutral-300">{{ rarity }}</span>
             <div class="mt-2">
               <IconPicker
@@ -398,7 +411,7 @@ function applyRaritySound(rarity: string, next: Record<string, unknown>) {
             <template v-if="id === 'weaponCutoff'">
               <FieldLabel :label="FIELD_BY_PATH.weaponCutoffOverlap!.label" :tooltip="FIELD_BY_PATH.weaponCutoffOverlap?.tooltip" />
               <NumberField
-                :model-value="fieldValue('weaponCutoffOverlap') as number"
+                :model-value="(fieldValue('weaponCutoffOverlap') as number | undefined) ?? 10"
                 integer
                 @update:model-value="setField('weaponCutoffOverlap', $event)"
               />

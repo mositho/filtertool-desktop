@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestStarterSupportsDefaultToStyleOnlyAndAllowSoundOverride(t *testing.T) {
+func TestStarterSupportsAlwaysGetStyleAndAllowSoundOverride(t *testing.T) {
 	c := New(nil, nil, "")
 	starters := []string{"Ruthless Support", "Chance to Bleed Support", "Momentum Support", "Chance to Poison Support", "Arcane Surge Support", "Hallow Support", "Prismatic Burst Support"}
 	output := c.gems(Object{})
@@ -29,7 +29,10 @@ func TestStarterSupportsDefaultToStyleOnlyAndAllowSoundOverride(t *testing.T) {
 			}
 		}
 	}
-	if strings.Contains(c.gems(Object{"styleOnly": []any{}}), `BaseType == "Momentum Support"`) {
-		t.Fatal("an explicit empty style-only selection should stay empty")
+	if !strings.Contains(c.gems(Object{"styleOnly": []any{}}), `BaseType == "Momentum Support"`) {
+		t.Fatal("starter styling must not depend on the editable style-only selection")
+	}
+	if strings.Count(c.gems(Object{"styleOnly": []any{"Momentum Support"}}), `BaseType == "Momentum Support"`) != 1 {
+		t.Fatal("a previously saved starter selection must not create duplicate rules")
 	}
 }

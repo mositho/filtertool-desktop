@@ -9,6 +9,7 @@ import WeaponProgression from "./WeaponProgression.vue"
 import RuleAdvanced from "./RuleAdvanced.vue"
 import { fieldDefault, defaultSource, ruleEnabledField, setStyleSize } from "../fieldDefaults"
 import RuleHeader from "./RuleHeader.vue"
+import starterSupports from "../../../internal/data/starter-supports.json"
 
 const props = defineProps<{ modelValue: FilterConfig; reference: ReferenceData; filterName: string; defaults?: Record<string, unknown> }>()
 const emit = defineEmits<{ "update:modelValue": [value: FilterConfig]; "previewSection": [section: string] }>()
@@ -31,8 +32,9 @@ function optionsFor(field: SchemaField): string[] {
     case "tinctures.baseTypes":
       return props.reference.baseTypesByClass["Tinctures"] ?? []
     case "gemCallouts.gems":
-    case "gemCallouts.styleOnly":
       return [...props.reference.skillGems, ...props.reference.supportGems]
+    case "gemCallouts.styleOnly":
+      return [...props.reference.skillGems, ...props.reference.supportGems].filter((gem) => !starterSupports.includes(gem))
     default:
       return []
   }
@@ -53,6 +55,10 @@ function effectiveValue(root: Record<string, unknown>, field: SchemaField): unkn
 
 /** Number fields show the default as a placeholder; other controls show it as a value. */
 function displayValue(root: Record<string, unknown>, field: SchemaField): unknown {
+  if (field.path === "gemCallouts.styleOnly") {
+    const gems = effectiveValue(root, field)
+    return Array.isArray(gems) ? gems.filter((gem) => !starterSupports.includes(gem)) : gems
+  }
   return field.control === "number" ? getPath(root, field.path) : effectiveValue(root, field)
 }
 

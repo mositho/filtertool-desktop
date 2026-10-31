@@ -57,6 +57,27 @@ const fields = fieldsOf(BUILD_SPECIFIC_SCHEMA)
 const field = (path: string) => fields.find((entry) => entry.path === path)!
 
 describe("built-in equipment rule defaults", () => {
+  it("keeps built-in starter supports out of style-only choices but allows sound selections", async () => {
+    const modelValue = {
+      buildProfile: {},
+      buildSpecificOptions: { gemCallouts: { styleOnly: ["Momentum Support", "Added Cold Damage Support"], gems: ["Momentum Support"] } },
+    }
+    mount(ConfigForm, {
+      modelValue,
+      filterName: "test",
+      reference: { ...reference, supportGems: ["Momentum Support", "Added Cold Damage Support"] },
+    })
+    const styleOnly = root.querySelector('[data-field-path="gemCallouts.styleOnly"]')!
+    const sound = root.querySelector('[data-field-path="gemCallouts.gems"]')!
+    expect(styleOnly.textContent).not.toContain("Momentum Support")
+    expect(styleOnly.textContent).toContain("Added Cold Damage Support")
+    expect(sound.textContent).toContain("Momentum Support")
+    styleOnly.querySelector<HTMLElement>('[role="group"]')!.click()
+    await nextTick()
+    expect(styleOnly.querySelector("ul")!.textContent).not.toContain("Momentum Support")
+    expect(modelValue.buildSpecificOptions.gemCallouts.styleOnly).toEqual(["Momentum Support", "Added Cold Damage Support"])
+  })
+
   it("keeps nested disclosure state when collapsing and expanding all top-level sections", async () => {
     mount(ConfigForm, { modelValue: { buildProfile: {}, buildSpecificOptions: {} }, filterName: "test", reference })
     const button = (name: string) =>

@@ -1,5 +1,4 @@
 import { EQUIPMENT_FOOTPRINTS, EQUIPMENT_RARITY_TEXT } from "../filters/shared/equipment-rules"
-import builtInDefaults from "../../internal/data/defaults.json"
 
 type BuildProfile = Record<string, unknown>
 type BuildSpecificOptions = Record<string, unknown>
@@ -174,7 +173,7 @@ export const HIGHLIGHT_FIELDS: SchemaField[] = [
 
 /** Per-rarity styling keys and their leaf fields on a highlight. */
 export const RARITY_HIGHLIGHT_KEYS = ["normal", "magic", "rare"] as const
-export const RARITY_HIGHLIGHT_PATHS = ["iconColor", "iconShape", "iconSize", "soundId", "soundFileName", "tts"] as const
+export const RARITY_HIGHLIGHT_PATHS = ["iconColor", "iconShape", "iconSize", "soundId", "soundFileName", "tts", "soundEnabled"] as const
 
 /** Whole-highlight leaf fields (top-level icon/sound plus metadata). */
 export const HIGHLIGHT_TOP_LEVEL_PATHS = [
@@ -785,9 +784,8 @@ export const BUILD_SPECIFIC_SCHEMA: FieldGroup[] = [
         label: "Gem style only",
         control: "multiselect",
         options: [],
-        defaultValue: builtInDefaults.gemCallouts.styleOnly,
         tooltip:
-          "Highlight selected gems without sound. Includes the Twilight Strand starter supports by default. Gem style + sound takes priority.",
+          "Highlight selected gems without sound. Twilight Strand starter supports always receive this style automatically. Gem style + sound takes priority.",
       },
     ],
   },
@@ -862,16 +860,12 @@ export function emptyHighlight(): HighlightedBaseTypeConfig {
 
 /**
  * Seed for the build-profile weapon highlights (early/preferred weapons).
- * These default to per-rarity customization with the classic rarity icons
- * and an alert sound on rares.
+ * Per-rarity presentation inherits the shared defaults. Optional modules,
+ * including weapon cutoff, are not added until the user selects them.
  */
 export function emptyWeaponHighlight(): HighlightedBaseTypeConfig {
   return {
     perRarityCustomization: true,
-    weaponCutoffOverlap: 10,
-    normal: { iconColor: "Cyan", iconShape: "UpsideDownHouse" },
-    magic: { iconColor: "Blue", iconShape: "UpsideDownHouse" },
-    rare: { iconColor: "Yellow", iconShape: "UpsideDownHouse", soundId: 3 },
   }
 }
 

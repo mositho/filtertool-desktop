@@ -20,6 +20,8 @@ type Compiler struct {
 	templates        Object
 	weapons          []Weapon
 	manifest         map[string]string
+	starterSupports  []string
+	rarityDefaults   Object
 }
 
 func New(defaults, styles Object, folder string) *Compiler {
@@ -27,6 +29,8 @@ func New(defaults, styles Object, folder string) *Compiler {
 		folder = "poeft-sounds-v2"
 	}
 	c := &Compiler{Defaults: Merge(data.Load[Object]("defaults.json"), defaults), Styles: Merge(data.Load[Object]("styles.json"), styles), SoundFolder: folder, templates: data.Load[Object]("rules.json"), weapons: data.Load[[]Weapon]("weapons.json"), manifest: map[string]string{}}
+	c.starterSupports = data.Load[[]string]("starter-supports.json")
+	c.rarityDefaults = data.Load[Object]("highlight-defaults.json")
 	for _, s := range data.Load[[]Object]("manifest.json") {
 		c.manifest[Text(s["id"])] = Text(s["text"])
 	}
@@ -107,7 +111,7 @@ func (c *Compiler) gems(cfg Object) string {
 		r := newRule().quoted("BaseType", true, gem).icon("Cyan", "Star", 2).style(Obj(c.Styles["gemCallout"]))
 		rules = append(rules, c.tts(r, strings.TrimSuffix(gem, " Support")))
 	}
-	for _, gem := range Strings(cfg["styleOnly"]) {
+	for _, gem := range unique(append(Strings(cfg["styleOnly"]), c.starterSupports...)) {
 		if contains(sounding, gem) {
 			continue
 		}

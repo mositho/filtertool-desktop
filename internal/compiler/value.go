@@ -109,7 +109,7 @@ func Validate(config Object) error {
 					}
 				}
 			}
-			for _, key := range []string{"preferredArmour", "preferredColors", "weaponPhases", "baseTypes", "itemClasses", "rarities", "amulets", "utilityFlasks", "highlights", "gems", "styleOnly"} {
+			for _, key := range []string{"preferredArmour", "preferredColors", "weaponPhases", "baseTypes", "itemClasses", "rarities", "amulets", "utilityFlasks", "highlights", "gems", "styleOnly", "modules"} {
 				if value, ok := x[key]; ok && value != nil {
 					if _, ok := value.([]any); !ok {
 						return fmt.Errorf("%s.%s must be a list", path, key)
