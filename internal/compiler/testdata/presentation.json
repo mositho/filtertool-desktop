@@ -1,0 +1,95 @@
+{
+  "buildProfile": {
+    "preferredArmour": [
+      "evasion"
+    ],
+    "preferredColors": [
+      "G"
+    ]
+  },
+  "buildSpecificOptions": {
+    "links": {
+      "rules": {
+        "4selected": {
+          "style": {
+            "preset": "currencyB",
+            "text": null,
+            "border": "#abc",
+            "size": 19,
+            "backgroundOpacity": 0.25
+          },
+          "sound": {
+            "tts": "four_link"
+          },
+          "icon": {
+            "iconShape": "Star"
+          }
+        },
+        "3good": {
+          "sound": {
+            "soundFileName": "custom.mp3"
+          },
+          "maxAreaLevel": 25,
+          "soundCutoffLevel": 40
+        },
+        "2generic": {
+          "enabled": false
+        }
+      }
+    },
+    "normalItems": {
+      "rules": {
+        "equipment": {
+          "style": {
+            "size": 25
+          },
+          "sound": {
+            "soundId": 16
+          },
+          "icon": {
+            "iconColor": "Pink"
+          }
+        }
+      }
+    },
+    "highlightedEquipment": {
+      "highlights": [
+        {
+          "baseTypes": [
+            "Iron Ring"
+          ],
+          "style": {
+            "text": null,
+            "border": null,
+            "background": null,
+            "size": 15
+          },
+          "tts": "Hello exile"
+        },
+        {
+          "itemClasses": [
+            "Gloves"
+          ],
+          "rarities": [
+            "Magic"
+          ],
+          "style": {
+            "preset": "gem"
+          },
+          "iconShape": "Cross",
+          "soundFileName": "custom.mp3"
+        },
+        {
+          "baseTypes": [
+            "Driftwood Wand"
+          ],
+          "rarities": [
+            "Rare"
+          ],
+          "tts": "chaos_orb",
+          "weaponCutoffOverlap": 0
+        }
+      ]
+    }
+  }
+}

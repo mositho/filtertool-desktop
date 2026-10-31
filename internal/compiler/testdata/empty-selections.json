@@ -1,0 +1,18 @@
+{
+  "buildProfile": {
+    "preferredColors": [],
+    "preferredArmour": [],
+    "weaponPhases": []
+  },
+  "buildSpecificOptions": {
+    "jewellery": {
+      "amulets": []
+    },
+    "flasks": {
+      "utilityFlasks": []
+    },
+    "highlightedEquipment": {
+      "highlights": []
+    }
+  }
+}

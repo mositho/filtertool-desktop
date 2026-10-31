@@ -1,0 +1,62 @@
+{
+  "buildProfile": {
+    "weaponPhases": [
+      {
+        "baseTypes": [
+          "Driftwood Wand"
+        ],
+        "weaponCutoffOverlap": 15
+      }
+    ]
+  },
+  "buildSpecificOptions": {
+    "highlightedEquipment": {
+      "highlights": [
+        {
+          "itemClasses": [
+            "Boots",
+            "Wands"
+          ],
+          "baseTypes": [
+            "Iron Ring"
+          ],
+          "minAps": 1.5,
+          "rarities": [
+            "Rare"
+          ],
+          "minAreaLevel": 2,
+          "maxAreaLevel": 45,
+          "minItemLevel": 5,
+          "maxItemLevel": 50,
+          "minSockets": 3,
+          "linkedSockets": 2,
+          "width": {
+            "operator": "==",
+            "value": 2
+          },
+          "style": {
+            "preset": "currencyA",
+            "border": null,
+            "size": 32
+          },
+          "perRarityCustomization": true,
+          "rare": {
+            "iconColor": "Red",
+            "iconShape": "Star",
+            "soundId": 4
+          }
+        },
+        {
+          "itemClasses": [
+            "Shields"
+          ],
+          "weaponCutoffOverlap": 10,
+          "rarities": [
+            "Normal",
+            "Magic"
+          ]
+        }
+      ]
+    }
+  }
+}

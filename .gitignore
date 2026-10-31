@@ -1,0 +1,9 @@
+node_modules/
+frontend/dist/
+frontend/bindings/
+bin/
+*.syso
+*.log
+internal/bundle/files/ffmpeg*
+build/windows/MicrosoftEdgeWebview2Setup.exe
+build/windows/info.json

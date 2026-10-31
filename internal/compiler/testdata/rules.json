@@ -1,0 +1,60 @@
+{
+  "buildProfile": {
+    "preferredArmour": [
+      "armour-es"
+    ],
+    "preferredColors": []
+  },
+  "buildSpecificOptions": {
+    "early": {
+      "earlyMaxAreaLevel": 18,
+      "twoSocketMaxAreaLevel": 3,
+      "rules": {
+        "armour3": {
+          "style": {
+            "text": "#abc",
+            "backgroundOpacity": 0.5
+          },
+          "icon": {
+            "iconColor": "Blue"
+          },
+          "sound": {
+            "tts": "Hello exile"
+          }
+        }
+      }
+    },
+    "links": {
+      "rules": {
+        "4good": {
+          "enabled": false
+        },
+        "3generic": {
+          "maxAreaLevel": 7,
+          "sound": {
+            "enabled": false
+          }
+        }
+      }
+    },
+    "magicItems": {
+      "rules": {
+        "1x3": {
+          "style": {
+            "preset": "currencyB"
+          },
+          "sound": {
+            "soundId": 7
+          }
+        }
+      }
+    },
+    "normalItems": {
+      "rules": {
+        "belts": {
+          "enabled": false
+        }
+      }
+    }
+  }
+}

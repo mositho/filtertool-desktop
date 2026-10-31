@@ -1,0 +1,61 @@
+{
+  "buildProfile": {
+    "weaponPhases": [
+      {
+        "itemClasses": [
+          "Wands"
+        ],
+        "maxAreaLevel": 50
+      },
+      {
+        "itemClasses": [
+          "Sceptres"
+        ],
+        "minAreaLevel": 10,
+        "maxAreaLevel": 25
+      },
+      {
+        "itemClasses": [
+          "Bows"
+        ],
+        "minAreaLevel": 5
+      },
+      {
+        "baseTypes": [
+          "Rusted Hatchet"
+        ],
+        "minAreaLevel": 1,
+        "maxAreaLevel": 8
+      },
+      {
+        "itemClasses": [
+          "Boots"
+        ],
+        "maxAreaLevel": 20
+      }
+    ],
+    "preferredColors": [
+      "R"
+    ]
+  },
+  "buildSpecificOptions": {
+    "highlightedEquipment": {
+      "highlights": [
+        {
+          "itemClasses": [
+            "Gloves",
+            "Sceptres"
+          ],
+          "baseTypes": [
+            "Iron Ring",
+            "Driftwood Wand"
+          ],
+          "weaponCutoffOverlap": 10,
+          "minAreaLevel": 5,
+          "maxAreaLevel": 15,
+          "minAps": 1.4
+        }
+      ]
+    }
+  }
+}

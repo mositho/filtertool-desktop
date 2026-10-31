@@ -1,0 +1,40 @@
+{
+  "name": "filtertool-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "dev": "node scripts/wails.mjs dev -config build/config.yml -port 5173",
+    "build": "node scripts/build.mjs",
+    "frontend:dev": "vite --config frontend/vite.config.ts",
+    "frontend:typecheck": "vue-tsc --noEmit -p frontend/tsconfig.json",
+    "frontend:build": "vite build --config frontend/vite.config.ts",
+    "check": "npm run frontend:typecheck && go test ./... && npm test && npm run format:check",
+    "test": "vitest run",
+    "format": "prettier --write . && npm run format:go",
+    "format:go": "go run ./cmd/gofmtcheck -w",
+    "format:check": "prettier --check . && go run ./cmd/gofmtcheck",
+    "update-basetypes": "go run ./cmd/update-basetypes",
+    "generate-data": "go run ./cmd/generate-data"
+  },
+  "dependencies": {
+    "@wailsio/runtime": "3.0.0",
+    "primevue": "^4.5.5",
+    "vue": "^3.5.44"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^24.0.0",
+    "@vitejs/plugin-vue": "^6.0.8",
+    "jsdom": "^27.4.0",
+    "prettier": "^3.6.2",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.9.3",
+    "vite": "^8.2.4",
+    "vitest": "^4.1.12",
+    "vue-tsc": "^3.3.11"
+  }
+}

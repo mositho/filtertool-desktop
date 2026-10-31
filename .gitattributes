@@ -1,0 +1,3 @@
+* text=auto eol=lf
+# Golden outputs retain the original compiler's bytes, including trailing spaces.
+internal/compiler/testdata/*.filter whitespace=-blank-at-eol

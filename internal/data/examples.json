@@ -1,0 +1,20 @@
+{
+  "Caster Example": {
+    "buildProfile": {
+      "preferredColors": ["B"],
+      "preferredArmour": ["es"],
+      "shieldProgression": "early",
+      "weaponPhases": [{ "itemClasses": ["Wands", "Sceptres"] }]
+    },
+    "buildSpecificOptions": { "jewellery": { "amulets": ["Lapis", "Turquoise", "Agate"] } }
+  },
+  "Attack Example": {
+    "buildProfile": {
+      "preferredColors": ["R", "G"],
+      "preferredArmour": ["armour", "armour-evasion"],
+      "shieldProgression": "none",
+      "weaponPhases": [{ "itemClasses": ["Two Hand Axes", "Two Hand Swords"], "minAps": 1.3 }]
+    },
+    "buildSpecificOptions": { "jewellery": { "amulets": ["Amber", "Jade", "Citrine"] } }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "buildProfile": {
+    "preferredColors": [
+      "B"
+    ],
+    "preferredArmour": [
+      "es"
+    ],
+    "weaponPhases": [
+      {
+        "itemClasses": [
+          "Wands",
+          "Sceptres"
+        ],
+        "maxAreaLevel": 35
+      },
+      {
+        "itemClasses": [
+          "Wands"
+        ],
+        "minAreaLevel": 20,
+        "maxAreaLevel": 60,
+        "minAps": 1.3
+      }
+    ],
+    "shieldProgression": "full"
+  },
+  "buildSpecificOptions": {
+    "gemCallouts": {
+      "gems": [
+        "Fireball",
+        "Added Lightning Damage Support"
+      ],
+      "styleOnly": [
+        "Frostblink"
+      ]
+    },
+    "tinctures": {
+      "baseTypes": [
+        "Prismatic Tincture"
+      ]
+    }
+  }
+}

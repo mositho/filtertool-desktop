@@ -1,0 +1,48 @@
+{
+  "buildProfile": {
+    "preferredColors": [
+      "R",
+      "G"
+    ],
+    "preferredArmour": [
+      "armour",
+      "armour-evasion"
+    ],
+    "weaponPhases": [
+      {
+        "itemClasses": [
+          "Two Hand Axes"
+        ],
+        "minAps": 1.3
+      }
+    ],
+    "shieldProgression": "none",
+    "misc": {
+      "whetstoneRecipe": false,
+      "showRusticSash": false
+    }
+  },
+  "buildSpecificOptions": {
+    "jewellery": {
+      "amulets": [
+        "Amber"
+      ],
+      "basicRingMaxAreaLevel": 8
+    },
+    "links": {
+      "genericFourLinksEnabled": true,
+      "genericThreeLinksEnabled": true
+    },
+    "rareItems": {
+      "maxAreaLevel": 45,
+      "rules": {
+        "2x4": {
+          "enabled": false
+        }
+      }
+    },
+    "flasks": {
+      "utilityFlasks": []
+    }
+  }
+}

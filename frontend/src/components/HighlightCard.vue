@@ -1,0 +1,550 @@
+<script setup lang="ts">
+import { computed, ref, watch, onMounted, onBeforeUnmount } from "vue"
+import { HIGHLIGHT_FIELDS, HIGHLIGHT_RARITIES, SIZE_OPERATORS, SOUND_FIELD_PATHS } from "@schema/form-schema"
+import type { ReferenceData } from "../api"
+import { getPath, setPath, deletePath } from "../path"
+import FieldLabel from "./FieldLabel.vue"
+import NumberField from "./NumberField.vue"
+import Toggle from "./Toggle.vue"
+import MultiSelect from "./MultiSelect.vue"
+import SoundSelector from "./SoundSelector.vue"
+import IconPicker from "./IconPicker.vue"
+import StyleEditor from "./StyleEditor.vue"
+import ItemTargetPicker from "./ItemTargetPicker.vue"
+import AdvancedOptions from "./AdvancedOptions.vue"
+import { areaLevelRangeError, itemLevelRangeError } from "@schema/range-validation"
+
+const props = defineProps<{
+  highlight: Record<string, unknown>
+  reference: ReferenceData
+  phaseMode?: boolean
+}>()
+const emit = defineEmits<{ change: [] }>()
+
+type ModuleId = "minAps" | "linkedSockets" | "minSockets" | "areaLevel" | "itemLevel" | "weaponCutoff" | "size" | "style" | "icon" | "sound"
+
+const FIELD_BY_PATH = Object.fromEntries(HIGHLIGHT_FIELDS.map((field) => [field.path, field]))
+
+const MODULE_IDS: ModuleId[] = [
+  "minAps",
+  "linkedSockets",
+  "minSockets",
+  "areaLevel",
+  "itemLevel",
+  "weaponCutoff",
+  "size",
+  "style",
+  "icon",
+  "sound",
+]
+
+const MODULE_LABELS: Record<ModuleId, string> = {
+  minAps: "Minimum Attack Speed",
+  linkedSockets: "Minimum Linked Sockets",
+  minSockets: "Minimum Sockets",
+  areaLevel: "Area Level",
+  itemLevel: "Item Level",
+  weaponCutoff: "Weapon Cutoff",
+  size: "Size",
+  style: "Style",
+  icon: "Icon",
+  sound: "Sound",
+}
+
+const sizeDimensions = [
+  { path: "width", label: "Width", tooltip: "Match items by their inventory width (1 or 2).", min: 1, max: 2, placeholder: "e.g. 2" },
+  { path: "height", label: "Height", tooltip: "Match items by their inventory height (1–4).", min: 1, max: 4, placeholder: "e.g. 3" },
+] as const
+
+function fieldSet(path: string): boolean {
+  return getPath(props.highlight, path) !== undefined
+}
+
+const perRarity = computed(() => !!props.highlight.perRarityCustomization)
+const areaLevelError = computed(() => areaLevelRangeError(props.highlight))
+const itemLevelError = computed(() => itemLevelRangeError(props.highlight))
+
+function computeActive(): Set<ModuleId> {
+  return new Set(
+    MODULE_IDS.filter((id) => {
+      if (id === "weaponCutoff") return fieldSet("weaponCutoffOverlap")
+      if (id === "areaLevel") return fieldSet("minAreaLevel") || fieldSet("maxAreaLevel")
+      if (id === "itemLevel") return fieldSet("minItemLevel") || fieldSet("maxItemLevel")
+      if (id === "size") return fieldSet("width") || fieldSet("height")
+      if (id === "style") return fieldSet("style")
+      if (id === "icon") return !perRarity.value && (fieldSet("iconColor") || fieldSet("iconShape"))
+      if (id === "sound") return !perRarity.value && (fieldSet("tts") || fieldSet("soundFileName") || fieldSet("soundId"))
+      return fieldSet(id)
+    }),
+  )
+}
+
+const LEGACY_MODULE_IDS: Record<string, ModuleId> = {
+  minAreaLevel: "areaLevel",
+  maxAreaLevel: "areaLevel",
+  minItemLevel: "itemLevel",
+  maxItemLevel: "itemLevel",
+}
+
+function readModules(): Set<ModuleId> {
+  const stored = props.highlight.modules
+  if (Array.isArray(stored)) {
+    return new Set(
+      stored.map((id) => LEGACY_MODULE_IDS[String(id)] ?? id).filter((id): id is ModuleId => MODULE_IDS.includes(id as ModuleId)),
+    )
+  }
+  return computeActive()
+}
+
+function persistModules() {
+  if (active.value.size > 0) setPath(props.highlight, "modules", [...active.value])
+  else deletePath(props.highlight, "modules")
+  onChange()
+}
+
+const active = ref<Set<ModuleId>>(readModules())
+
+watch(
+  () => props.highlight,
+  () => {
+    active.value = readModules()
+  },
+)
+
+const hasWeaponClass = computed(() => {
+  const classes = (fieldValue("itemClasses") as string[] | undefined) ?? []
+  return classes.some((itemClass) => props.reference.weaponClasses.includes(itemClass))
+})
+
+const weaponCutoffAvailable = computed(() => {
+  const bases = (fieldValue("baseTypes") as string[] | undefined) ?? []
+  return (
+    hasWeaponClass.value ||
+    props.reference.weaponClasses.some((itemClass) => bases.some((base) => props.reference.baseTypesByClass[itemClass]?.includes(base)))
+  )
+})
+
+const availableModules = computed(() =>
+  MODULE_IDS.filter((id) => {
+    if (active.value.has(id)) return false
+    if (props.phaseMode && id === "areaLevel") return false
+    if (id === "weaponCutoff" && !weaponCutoffAvailable.value) return false
+    if ((id === "icon" || id === "sound") && perRarity.value) return false
+    return true
+  }),
+)
+
+const modulesOpen = ref(false)
+const moduleMenu = ref<HTMLElement | null>(null)
+
+function onDocumentClick(event: MouseEvent) {
+  if (modulesOpen.value && moduleMenu.value && !moduleMenu.value.contains(event.target as Node)) {
+    modulesOpen.value = false
+  }
+}
+
+onMounted(() => document.addEventListener("mousedown", onDocumentClick))
+onBeforeUnmount(() => document.removeEventListener("mousedown", onDocumentClick))
+
+function chooseModule(id: ModuleId) {
+  addModule(id)
+  modulesOpen.value = false
+}
+
+function onChange() {
+  emit("change")
+}
+
+function setField(path: string, value: unknown) {
+  if (value === undefined) deletePath(props.highlight, path)
+  else setPath(props.highlight, path, value)
+  onChange()
+}
+
+function fieldValue(path: string): unknown {
+  return getPath(props.highlight, path)
+}
+
+const rarityValue = computed(() => (props.highlight.rarities as string[] | undefined) ?? [...HIGHLIGHT_RARITIES])
+
+function setRarities(value: string[]) {
+  setField("rarities", value)
+}
+
+function setPerRarity(value: boolean) {
+  setField("perRarityCustomization", value || undefined)
+  active.value = computeActive()
+  persistModules()
+}
+
+function addModule(id: ModuleId) {
+  active.value = new Set([...active.value, id])
+  if (id === "weaponCutoff") setField("weaponCutoffOverlap", 10)
+  persistModules()
+}
+
+function removeModule(id: ModuleId) {
+  active.value = new Set([...active.value].filter((entry) => entry !== id))
+  if (id === "weaponCutoff") {
+    deletePath(props.highlight, "weaponCutoffOverlap")
+  } else if (id === "areaLevel") {
+    deletePath(props.highlight, "minAreaLevel")
+    deletePath(props.highlight, "maxAreaLevel")
+  } else if (id === "itemLevel") {
+    deletePath(props.highlight, "minItemLevel")
+    deletePath(props.highlight, "maxItemLevel")
+  } else if (id === "size") {
+    deletePath(props.highlight, "width")
+    deletePath(props.highlight, "height")
+  } else if (id === "style") {
+    deletePath(props.highlight, "style")
+  } else if (id === "icon") {
+    deletePath(props.highlight, "iconColor")
+    deletePath(props.highlight, "iconShape")
+    deletePath(props.highlight, "iconSize")
+  } else if (id === "sound") {
+    for (const path of SOUND_FIELD_PATHS) deletePath(props.highlight, path)
+  } else {
+    deletePath(props.highlight, id)
+  }
+  persistModules()
+}
+
+function applyTopSound(next: Record<string, unknown>) {
+  for (const path of SOUND_FIELD_PATHS) deletePath(props.highlight, path)
+  for (const path of SOUND_FIELD_PATHS) {
+    if (next[path] !== undefined) setPath(props.highlight, path, next[path])
+  }
+  onChange()
+}
+
+function setIconColor(color: string) {
+  setField("iconColor", color)
+}
+
+function setIconSize(size: number) {
+  setField("iconSize", size)
+}
+
+function setIconShape(shape: string) {
+  if (shape === "") {
+    deletePath(props.highlight, "iconShape")
+    deletePath(props.highlight, "iconColor")
+    deletePath(props.highlight, "iconSize")
+    onChange()
+  } else {
+    setField("iconShape", shape)
+  }
+}
+
+type SizeConstraintValue = { operator: string; value: number | undefined }
+
+function sizeConstraint(path: string): SizeConstraintValue {
+  const raw = fieldValue(path)
+  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+    const obj = raw as Record<string, unknown>
+    return {
+      operator: typeof obj.operator === "string" ? obj.operator : "==",
+      value: typeof obj.value === "number" ? obj.value : undefined,
+    }
+  }
+  return { operator: "==", value: undefined }
+}
+
+function setSizeOperator(path: string, operator: string) {
+  const existing = sizeConstraint(path)
+  if (existing.value !== undefined) {
+    setPath(props.highlight, path, { operator, value: existing.value })
+    onChange()
+  }
+}
+
+function setSizeValue(path: string, value: number | undefined) {
+  if (value === undefined) {
+    deletePath(props.highlight, path)
+  } else {
+    const existing = sizeConstraint(path)
+    setPath(props.highlight, path, { operator: existing.operator, value })
+  }
+  onChange()
+}
+
+type RarityKey = "normal" | "magic" | "rare"
+const EMPTY_RARITY: Record<string, unknown> = {}
+
+function rarityKeyOf(rarity: string): RarityKey {
+  return rarity.toLowerCase() as RarityKey
+}
+
+function rarityConfig(rarity: string): Record<string, unknown> {
+  const config = props.highlight[rarityKeyOf(rarity)]
+  return config && typeof config === "object" && !Array.isArray(config) ? (config as Record<string, unknown>) : EMPTY_RARITY
+}
+
+function rarityIconColor(rarity: string): string {
+  return (rarityConfig(rarity).iconColor as string | undefined) ?? ""
+}
+
+function rarityIconShape(rarity: string): string {
+  return (rarityConfig(rarity).iconShape as string | undefined) ?? ""
+}
+
+function rarityIconSize(rarity: string): number {
+  return (rarityConfig(rarity).iconSize as number | undefined) ?? 2
+}
+
+function setRarityIconColor(rarity: string, color: string) {
+  setField(`${rarityKeyOf(rarity)}.iconColor`, color)
+}
+
+function setRarityIconSize(rarity: string, size: number) {
+  setField(`${rarityKeyOf(rarity)}.iconSize`, size)
+}
+
+function setRarityIconShape(rarity: string, shape: string) {
+  const key = rarityKeyOf(rarity)
+  if (shape === "") {
+    deletePath(props.highlight, `${key}.iconShape`)
+    deletePath(props.highlight, `${key}.iconColor`)
+    deletePath(props.highlight, `${key}.iconSize`)
+    onChange()
+  } else {
+    setField(`${key}.iconShape`, shape)
+  }
+}
+
+function applyRaritySound(rarity: string, next: Record<string, unknown>) {
+  const key = rarityKeyOf(rarity)
+  for (const path of SOUND_FIELD_PATHS) deletePath(props.highlight, `${key}.${path}`)
+  for (const path of SOUND_FIELD_PATHS) {
+    if (next[path] !== undefined) setPath(props.highlight, `${key}.${path}`, next[path])
+  }
+  onChange()
+}
+</script>
+
+<template>
+  <div class="space-y-4">
+    <div class="space-y-1">
+      <FieldLabel label="Match" tooltip="Select item classes, individual base types, or both." />
+      <ItemTargetPicker
+        :classes="(fieldValue('itemClasses') as string[]) ?? []"
+        :bases="(fieldValue('baseTypes') as string[]) ?? []"
+        :reference="reference"
+        :weapon-only="phaseMode"
+        @update:classes="setField('itemClasses', $event)"
+        @update:bases="setField('baseTypes', $event)"
+      />
+    </div>
+
+    <p v-if="!phaseMode && areaLevelError && !active.has('areaLevel')" role="alert" class="text-xs text-red-400">
+      {{ areaLevelError }}
+    </p>
+    <p v-if="!phaseMode && itemLevelError && !active.has('itemLevel')" role="alert" class="text-xs text-red-400">
+      {{ itemLevelError }}
+    </p>
+    <AdvancedOptions>
+      <div class="space-y-1">
+        <FieldLabel label="Rarities" :tooltip="FIELD_BY_PATH.rarities?.tooltip" />
+        <MultiSelect :model-value="rarityValue" :options="HIGHLIGHT_RARITIES" @update:model-value="setRarities($event)" />
+        <div class="flex items-center gap-2 pt-1">
+          <Toggle :model-value="perRarity" @update:model-value="setPerRarity($event)" />
+          <span class="text-xs text-neutral-400">Customize per rarity</span>
+        </div>
+        <div v-if="perRarity" class="space-y-2">
+          <p class="text-xs text-neutral-500">Configure icon and sound per selected rarity. Replaces any whole-highlight icon or sound.</p>
+          <div v-for="rarity in rarityValue" :key="rarity" class="rounded border border-neutral-800 bg-neutral-950/60 p-2">
+            <span class="text-sm font-medium text-neutral-300">{{ rarity }}</span>
+            <div class="mt-2">
+              <IconPicker
+                :shape="rarityIconShape(rarity)"
+                :color="rarityIconColor(rarity)"
+                :size="rarityIconSize(rarity)"
+                @update:shape="setRarityIconShape(rarity, $event)"
+                @update:color="setRarityIconColor(rarity, $event)"
+                @update:size="setRarityIconSize(rarity, $event)"
+              />
+            </div>
+            <div class="mt-2">
+              <SoundSelector
+                :model-value="rarityConfig(rarity)"
+                :sounds="reference.sounds"
+                @update:model-value="applyRaritySound(rarity, $event)"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <div
+          v-for="id in [...active].filter((entry) => !phaseMode || entry !== 'areaLevel')"
+          :key="id"
+          class="rounded border border-neutral-800 bg-neutral-950/60 p-2"
+        >
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              @click="removeModule(id)"
+              class="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-neutral-800 text-sm leading-none text-neutral-300 hover:bg-red-700 hover:text-white"
+              :title="`Remove ${MODULE_LABELS[id]}`"
+            >
+              −
+            </button>
+            <span class="text-sm font-medium text-neutral-300">{{ MODULE_LABELS[id] }}</span>
+          </div>
+
+          <div class="mt-1 space-y-1">
+            <template v-if="id === 'weaponCutoff'">
+              <FieldLabel :label="FIELD_BY_PATH.weaponCutoffOverlap!.label" :tooltip="FIELD_BY_PATH.weaponCutoffOverlap?.tooltip" />
+              <NumberField
+                :model-value="fieldValue('weaponCutoffOverlap') as number"
+                integer
+                @update:model-value="setField('weaponCutoffOverlap', $event)"
+              />
+            </template>
+            <template v-else-if="id === 'areaLevel'">
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <FieldLabel :label="FIELD_BY_PATH.minAreaLevel!.label" :tooltip="FIELD_BY_PATH.minAreaLevel?.tooltip" />
+                  <NumberField
+                    :model-value="fieldValue('minAreaLevel') as number"
+                    :min="FIELD_BY_PATH.minAreaLevel?.min"
+                    :invalid="!!areaLevelError"
+                    integer
+                    :placeholder="FIELD_BY_PATH.minAreaLevel?.placeholder"
+                    @update:model-value="setField('minAreaLevel', $event)"
+                  />
+                </div>
+                <div>
+                  <FieldLabel :label="FIELD_BY_PATH.maxAreaLevel!.label" :tooltip="FIELD_BY_PATH.maxAreaLevel?.tooltip" />
+                  <NumberField
+                    :model-value="fieldValue('maxAreaLevel') as number"
+                    :min="FIELD_BY_PATH.maxAreaLevel?.min"
+                    :invalid="!!areaLevelError"
+                    integer
+                    :placeholder="FIELD_BY_PATH.maxAreaLevel?.placeholder"
+                    @update:model-value="setField('maxAreaLevel', $event)"
+                  />
+                </div>
+              </div>
+              <p v-if="areaLevelError" role="alert" class="text-xs text-red-400">{{ areaLevelError }}</p>
+            </template>
+            <template v-else-if="id === 'itemLevel'">
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <FieldLabel :label="FIELD_BY_PATH.minItemLevel!.label" :tooltip="FIELD_BY_PATH.minItemLevel?.tooltip" />
+                  <NumberField
+                    :model-value="fieldValue('minItemLevel') as number"
+                    :min="FIELD_BY_PATH.minItemLevel?.min"
+                    :invalid="!!itemLevelError"
+                    integer
+                    :placeholder="FIELD_BY_PATH.minItemLevel?.placeholder"
+                    @update:model-value="setField('minItemLevel', $event)"
+                  />
+                </div>
+                <div>
+                  <FieldLabel :label="FIELD_BY_PATH.maxItemLevel!.label" :tooltip="FIELD_BY_PATH.maxItemLevel?.tooltip" />
+                  <NumberField
+                    :model-value="fieldValue('maxItemLevel') as number"
+                    :min="FIELD_BY_PATH.maxItemLevel?.min"
+                    :invalid="!!itemLevelError"
+                    integer
+                    :placeholder="FIELD_BY_PATH.maxItemLevel?.placeholder"
+                    @update:model-value="setField('maxItemLevel', $event)"
+                  />
+                </div>
+              </div>
+              <p v-if="itemLevelError" role="alert" class="text-xs text-red-400">{{ itemLevelError }}</p>
+            </template>
+            <template v-else-if="id === 'size'">
+              <div class="space-y-2">
+                <div v-for="dim in sizeDimensions" :key="dim.path" class="grid grid-cols-2 items-end gap-2">
+                  <div>
+                    <FieldLabel :label="dim.label" :tooltip="dim.tooltip" />
+                    <select
+                      :value="sizeConstraint(dim.path).operator"
+                      @change="setSizeOperator(dim.path, ($event.target as HTMLSelectElement).value)"
+                      class="w-full rounded border border-neutral-700 bg-neutral-900 px-2 py-1.5 text-sm"
+                    >
+                      <option v-for="op in SIZE_OPERATORS" :key="op.value" :value="op.value">{{ op.value }} {{ op.label }}</option>
+                    </select>
+                  </div>
+                  <div>
+                    <NumberField
+                      :model-value="sizeConstraint(dim.path).value"
+                      :min="dim.min"
+                      :max="dim.max"
+                      integer
+                      :placeholder="dim.placeholder"
+                      @update:model-value="setSizeValue(dim.path, $event)"
+                    />
+                  </div>
+                </div>
+              </div>
+            </template>
+            <template v-else-if="id === 'style'">
+              <FieldLabel
+                label="Style"
+                tooltip="A named style from Global Settings applied to this whole highlight. Editing any field turns it into a custom style. Without a style, the per-rarity highlight styles are used."
+              />
+              <StyleEditor
+                :model-value="(fieldValue('style') as Record<string, unknown>) ?? {}"
+                :style-names="reference.styleNames"
+                :styles="reference.styles"
+                @update:model-value="setField('style', $event)"
+              />
+            </template>
+            <template v-else-if="id === 'icon'">
+              <IconPicker
+                :shape="(fieldValue('iconShape') as string) ?? ''"
+                :color="(fieldValue('iconColor') as string) ?? ''"
+                :size="(fieldValue('iconSize') as number) ?? 2"
+                @update:shape="setIconShape"
+                @update:color="setIconColor"
+                @update:size="setIconSize"
+              />
+            </template>
+            <template v-else-if="id === 'sound'">
+              <SoundSelector :model-value="highlight" :sounds="reference.sounds" @update:model-value="applyTopSound($event)" />
+            </template>
+            <template v-else>
+              <NumberField
+                :model-value="fieldValue(id) as number"
+                :integer="FIELD_BY_PATH[id]?.integer"
+                :step="FIELD_BY_PATH[id]?.step"
+                :placeholder="FIELD_BY_PATH[id]?.placeholder"
+                @update:model-value="setField(id, $event)"
+              />
+            </template>
+          </div>
+        </div>
+
+        <div v-if="availableModules.length > 0" ref="moduleMenu" class="relative inline-block pt-1">
+          <button
+            type="button"
+            @click="modulesOpen = !modulesOpen"
+            :aria-expanded="modulesOpen"
+            class="rounded bg-blue-700 px-3 py-1.5 text-sm text-white hover:bg-blue-600"
+          >
+            + Add module
+          </button>
+          <div
+            v-if="modulesOpen"
+            class="absolute left-0 top-full z-30 mt-1 w-64 rounded border border-neutral-700 bg-neutral-900 py-1 shadow-lg"
+          >
+            <button
+              v-for="id in availableModules"
+              :key="id"
+              type="button"
+              @click="chooseModule(id)"
+              class="block w-full px-3 py-1.5 text-left text-sm text-neutral-300 hover:bg-neutral-800"
+            >
+              {{ MODULE_LABELS[id] }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </AdvancedOptions>
+  </div>
+</template>

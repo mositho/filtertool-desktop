@@ -1,0 +1,12 @@
+version: "3"
+
+tasks:
+  build:
+    cmds:
+      - node scripts/build.mjs {{if eq .DEV "true"}}--dev{{end}}
+  run:
+    cmds:
+      - ./bin/Filtertool.exe
+  frontend:
+    cmds:
+      - npm run frontend:dev

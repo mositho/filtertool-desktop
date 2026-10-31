@@ -1,0 +1,53 @@
+name: Update Base Types
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: update-basetypes
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      actions: write
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version-file: go.mod
+      - run: npm ci
+      - run: npm run update-basetypes
+      - run: npm run check
+      - run: npm run frontend:build
+      - run: npm audit --audit-level=high
+      - uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7
+        id: pr
+        with:
+          branch: chore/update-basetypes
+          commit-message: "chore: update PoE base data"
+          title: "chore: update PoE base data"
+          body: "Updates PoE 1 base data from FilterBlade and regenerates desktop references. Checks passed; review rule behavior before merging."
+          add-paths: |
+            internal/data/BaseTypes.csv
+            internal/data/reference.json
+            internal/data/weapons.json
+      # GITHUB_TOKEN-created pull requests do not trigger pull_request workflows.
+      - name: Run full CI on the update branch
+        if: steps.pr.outputs.pull-request-number != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run ci.yml --ref chore/update-basetypes

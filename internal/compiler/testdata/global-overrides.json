@@ -1,0 +1,60 @@
+{
+  "buildProfile": {},
+  "buildSpecificOptions": {
+    "links": {
+      "rules": {
+        "4generic": {
+          "style": {
+            "size": 32
+          }
+        }
+      }
+    }
+  },
+  "_defaults": {
+    "preferredColors": [
+      "G"
+    ],
+    "preferredArmour": [
+      "evasion"
+    ],
+    "shieldProgression": "full",
+    "early": {
+      "earlyMaxAreaLevel": 18
+    },
+    "rareItems": {
+      "maxAreaLevel": 60,
+      "rules": {
+        "1x1": {
+          "enabled": false
+        }
+      }
+    },
+    "links": {
+      "genericFourLinksEnabled": true,
+      "rules": {
+        "4generic": {
+          "style": {
+            "text": "#f00"
+          },
+          "sound": {
+            "soundId": 2
+          }
+        }
+      }
+    }
+  },
+  "_styles": {
+    "gem": {
+      "text": "#abc",
+      "size": 22
+    },
+    "currencyA": {
+      "background": null
+    },
+    "threeLink": {
+      "border": null,
+      "backgroundOpacity": 0.5
+    }
+  }
+}

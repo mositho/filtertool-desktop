@@ -1,0 +1,28 @@
+version: "3"
+info:
+  companyName: "mositho"
+  productName: "Filtertool"
+  productIdentifier: "io.github.mositho.filtertool-desktop"
+  description: "Path of Exile leveling filter builder"
+  version: "0.1.0"
+dev_mode:
+  root_path: .
+  log_level: warn
+  debounce: 500
+  ignore:
+    dir: [.git, node_modules, frontend, bin, build, branding]
+    file: ["*_test.go"]
+    watched_extension: ["*.go", "*.json"]
+    git_ignore: true
+  executes:
+    - cmd: node scripts/build.mjs --dev
+      type: blocking
+    - cmd: npm run frontend:dev
+      type: background
+      readiness:
+        tcp: "127.0.0.1:5173"
+        timeout: "60s"
+        interval: "200ms"
+    - cmd: ./bin/Filtertool.exe
+      type: primary
+      exit_policy: shutdown

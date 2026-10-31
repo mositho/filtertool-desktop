@@ -1,0 +1,5286 @@
+[
+  {
+    "aps": 1.5,
+    "baseType": "Rusted Hatchet",
+    "crit": 0.05,
+    "damageFrom": 6,
+    "damageTo": 11,
+    "dps": 12.75,
+    "dropLevel": 2,
+    "implicits": [],
+    "itemClass": "One Hand Axes"
+  },
+  {
+    "aps": 1.45,
+    "baseType": "Jade Hatchet",
+    "crit": 0.05,
+    "damageFrom": 10,
+    "damageTo": 15,
+    "dps": 18.12,
+    "dropLevel": 6,
+    "implicits": [],
+    "itemClass": "One Hand Axes"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Boarding Axe",
+    "crit": 0.05,
+    "damageFrom": 11,
+    "damageTo": 21,
+    "dps": 24,
+    "dropLevel": 11,
+    "implicits": [],
+    "itemClass": "One Hand Axes"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Cleaver",
+    "crit": 0.05,
+    "damageFrom": 12,
+    "damageTo": 35,
+    "dps": 30.55,
+    "dropLevel": 16,
+    "implicits": [],
+    "itemClass": "One Hand Axes"
+  },
+  {
+    "aps": 1.35,
+    "baseType": "Broad Axe",
+    "crit": 0.05,
+    "damageFrom": 19,
+    "damageTo": 34,
+    "dps": 35.78,
+    "dropLevel": 21,
+    "implicits": [],
+    "itemClass": "One Hand Axes"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Arming Axe",
+    "crit": 0.05,
+    "damageFrom": 14,
+    "damageTo": 42,
+    "dps": 39.2,
+    "dropLevel": 25,
+    "implicits": [],
+    "itemClass": "One Hand Axes"
+  },
+  {
+    "aps": 1.2,
+    "baseType": "Decorative Axe",
+    "crit": 0.05,
+    "damageFrom": 27,
+    "damageTo": 50,
+    "dps": 46.2,
+    "dropLevel": 29,
+    "implicits": [],
+    "itemClass": "One Hand Axes"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Spectral Axe",
+    "crit": 0.05,
+    "damageFrom": 29,
+    "damageTo": 48,
+    "dps": 50.05,
+    "dropLevel": 33,
+    "implicits": [],
+    "itemClass": "One Hand Axes"
+  },
+  {
+    "aps": 1.35,
+    "baseType": "Etched Hatchet",
+    "crit": 0.05,
+    "damageFrom": 26,
+    "damageTo": 46,
+    "dps": 48.6,
+    "dropLevel": 35,
+    "implicits": [
+      "8% increased Global Physical Damage"
+    ],
+    "itemClass": "One Hand Axes"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Jasper Axe",
+    "crit": 0.05,
+    "damageFrom": 32,
+    "damageTo": 50,
+    "dps": 53.3,
+    "dropLevel": 36,
+    "implicits": [],
+    "itemClass": "One Hand Axes"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Tomahawk",
+    "crit": 0.05,
+    "damageFrom": 25,
+    "damageTo": 46,
+    "dps": 53.25,
+    "dropLevel": 39,
+    "implicits": [],
+    "itemClass": "One Hand Axes"
+  },
+  {
+    "aps": 1.2,
+    "baseType": "Wrist Chopper",
+    "crit": 0.05,
+    "damageFrom": 26,
+    "damageTo": 79,
+    "dps": 63,
+    "dropLevel": 42,
+    "implicits": [],
+    "itemClass": "One Hand Axes"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "War Axe",
+    "crit": 0.05,
+    "damageFrom": 35,
+    "damageTo": 65,
+    "dps": 65,
+    "dropLevel": 45,
+    "implicits": [],
+    "itemClass": "One Hand Axes"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Chest Splitter",
+    "crit": 0.05,
+    "damageFrom": 24,
+    "damageTo": 71,
+    "dps": 66.5,
+    "dropLevel": 48,
+    "implicits": [],
+    "itemClass": "One Hand Axes"
+  },
+  {
+    "aps": 1.2,
+    "baseType": "Ceremonial Axe",
+    "crit": 0.05,
+    "damageFrom": 45,
+    "damageTo": 83,
+    "dps": 76.8,
+    "dropLevel": 51,
+    "implicits": [],
+    "itemClass": "One Hand Axes"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Wraith Axe",
+    "crit": 0.05,
+    "damageFrom": 45,
+    "damageTo": 75,
+    "dps": 78,
+    "dropLevel": 54,
+    "implicits": [],
+    "itemClass": "One Hand Axes"
+  },
+  {
+    "aps": 1.35,
+    "baseType": "Engraved Hatchet",
+    "crit": 0.05,
+    "damageFrom": 40,
+    "damageTo": 71,
+    "dps": 74.93,
+    "dropLevel": 56,
+    "implicits": [
+      "8% increased Global Physical Damage"
+    ],
+    "itemClass": "One Hand Axes"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Karui Axe",
+    "crit": 0.05,
+    "damageFrom": 49,
+    "damageTo": 77,
+    "dps": 81.9,
+    "dropLevel": 57,
+    "implicits": [],
+    "itemClass": "One Hand Axes"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Siege Axe",
+    "crit": 0.05,
+    "damageFrom": 38,
+    "damageTo": 70,
+    "dps": 81,
+    "dropLevel": 59,
+    "implicits": [],
+    "itemClass": "One Hand Axes"
+  },
+  {
+    "aps": 1.2,
+    "baseType": "Reaver Axe",
+    "crit": 0.05,
+    "damageFrom": 38,
+    "damageTo": 114,
+    "dps": 91.2,
+    "dropLevel": 61,
+    "implicits": [],
+    "itemClass": "One Hand Axes"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Butcher Axe",
+    "crit": 0.05,
+    "damageFrom": 47,
+    "damageTo": 87,
+    "dps": 87.1,
+    "dropLevel": 63,
+    "implicits": [],
+    "itemClass": "One Hand Axes"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Vaal Hatchet",
+    "crit": 0.05,
+    "damageFrom": 30,
+    "damageTo": 90,
+    "dps": 84,
+    "dropLevel": 65,
+    "implicits": [],
+    "itemClass": "One Hand Axes"
+  },
+  {
+    "aps": 1.2,
+    "baseType": "Royal Axe",
+    "crit": 0.05,
+    "damageFrom": 54,
+    "damageTo": 100,
+    "dps": 92.4,
+    "dropLevel": 67,
+    "implicits": [],
+    "itemClass": "One Hand Axes"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Infernal Axe",
+    "crit": 0.05,
+    "damageFrom": 51,
+    "damageTo": 85,
+    "dps": 88.4,
+    "dropLevel": 69,
+    "implicits": [],
+    "itemClass": "One Hand Axes"
+  },
+  {
+    "aps": 1.35,
+    "baseType": "Runic Hatchet",
+    "crit": 0.05,
+    "damageFrom": 44,
+    "damageTo": 79,
+    "dps": 83.03,
+    "dropLevel": 71,
+    "implicits": [
+      "12% increased Global Physical Damage"
+    ],
+    "itemClass": "One Hand Axes"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Stone Axe",
+    "crit": 0.05,
+    "damageFrom": 12,
+    "damageTo": 20,
+    "dps": 20.8,
+    "dropLevel": 4,
+    "implicits": [],
+    "itemClass": "Two Hand Axes"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Jade Chopper",
+    "crit": 0.05,
+    "damageFrom": 19,
+    "damageTo": 30,
+    "dps": 30.62,
+    "dropLevel": 9,
+    "implicits": [],
+    "itemClass": "Two Hand Axes"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Woodsplitter",
+    "crit": 0.05,
+    "damageFrom": 19,
+    "damageTo": 39,
+    "dps": 37.7,
+    "dropLevel": 13,
+    "implicits": [],
+    "itemClass": "Two Hand Axes"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Poleaxe",
+    "crit": 0.05,
+    "damageFrom": 29,
+    "damageTo": 43,
+    "dps": 46.8,
+    "dropLevel": 18,
+    "implicits": [],
+    "itemClass": "Two Hand Axes"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Double Axe",
+    "crit": 0.05,
+    "damageFrom": 36,
+    "damageTo": 60,
+    "dps": 60,
+    "dropLevel": 23,
+    "implicits": [],
+    "itemClass": "Two Hand Axes"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Gilded Axe",
+    "crit": 0.05,
+    "damageFrom": 43,
+    "damageTo": 58,
+    "dps": 65.65,
+    "dropLevel": 28,
+    "implicits": [],
+    "itemClass": "Two Hand Axes"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Shadow Axe",
+    "crit": 0.05,
+    "damageFrom": 49,
+    "damageTo": 73,
+    "dps": 76.25,
+    "dropLevel": 33,
+    "implicits": [],
+    "itemClass": "Two Hand Axes"
+  },
+  {
+    "aps": 1.2,
+    "baseType": "Dagger Axe",
+    "crit": 0.05,
+    "damageFrom": 53,
+    "damageTo": 83,
+    "dps": 81.6,
+    "dropLevel": 36,
+    "implicits": [
+      "50% increased Critical Strike Chance"
+    ],
+    "itemClass": "Two Hand Axes"
+  },
+  {
+    "aps": 1.15,
+    "baseType": "Jasper Chopper",
+    "crit": 0.05,
+    "damageFrom": 58,
+    "damageTo": 91,
+    "dps": 85.67,
+    "dropLevel": 37,
+    "implicits": [],
+    "itemClass": "Two Hand Axes"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Timber Axe",
+    "crit": 0.05,
+    "damageFrom": 48,
+    "damageTo": 99,
+    "dps": 91.88,
+    "dropLevel": 41,
+    "implicits": [],
+    "itemClass": "Two Hand Axes"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Headsman Axe",
+    "crit": 0.05,
+    "damageFrom": 61,
+    "damageTo": 92,
+    "dps": 99.45,
+    "dropLevel": 45,
+    "implicits": [],
+    "itemClass": "Two Hand Axes"
+  },
+  {
+    "aps": 1.2,
+    "baseType": "Labrys",
+    "crit": 0.05,
+    "damageFrom": 74,
+    "damageTo": 123,
+    "dps": 118.2,
+    "dropLevel": 49,
+    "implicits": [],
+    "itemClass": "Two Hand Axes"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Noble Axe",
+    "crit": 0.05,
+    "damageFrom": 76,
+    "damageTo": 103,
+    "dps": 116.35,
+    "dropLevel": 52,
+    "implicits": [],
+    "itemClass": "Two Hand Axes"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Abyssal Axe",
+    "crit": 0.05,
+    "damageFrom": 81,
+    "damageTo": 121,
+    "dps": 126.25,
+    "dropLevel": 55,
+    "implicits": [],
+    "itemClass": "Two Hand Axes"
+  },
+  {
+    "aps": 1.05,
+    "baseType": "Karui Chopper",
+    "crit": 0.05,
+    "damageFrom": 121,
+    "damageTo": 189,
+    "dps": 162.75,
+    "dropLevel": 58,
+    "implicits": [],
+    "itemClass": "Two Hand Axes"
+  },
+  {
+    "aps": 1.2,
+    "baseType": "Talon Axe",
+    "crit": 0.05,
+    "damageFrom": 88,
+    "damageTo": 138,
+    "dps": 135.6,
+    "dropLevel": 59,
+    "implicits": [
+      "50% increased Critical Strike Chance"
+    ],
+    "itemClass": "Two Hand Axes"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Sundering Axe",
+    "crit": 0.05,
+    "damageFrom": 74,
+    "damageTo": 155,
+    "dps": 148.85,
+    "dropLevel": 60,
+    "implicits": [
+      "+20% to Damage over Time Multiplier for Bleeding"
+    ],
+    "itemClass": "Two Hand Axes"
+  },
+  {
+    "aps": 1.35,
+    "baseType": "Ezomyte Axe",
+    "crit": 0.057,
+    "damageFrom": 87,
+    "damageTo": 131,
+    "dps": 147.15,
+    "dropLevel": 62,
+    "implicits": [],
+    "itemClass": "Two Hand Axes"
+  },
+  {
+    "aps": 1.15,
+    "baseType": "Vaal Axe",
+    "crit": 0.05,
+    "damageFrom": 104,
+    "damageTo": 174,
+    "dps": 159.85,
+    "dropLevel": 64,
+    "implicits": [
+      "25% chance to Maim on Hit"
+    ],
+    "itemClass": "Two Hand Axes"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Despot Axe",
+    "crit": 0.05,
+    "damageFrom": 90,
+    "damageTo": 122,
+    "dps": 148.4,
+    "dropLevel": 66,
+    "implicits": [],
+    "itemClass": "Two Hand Axes"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Void Axe",
+    "crit": 0.06,
+    "damageFrom": 96,
+    "damageTo": 144,
+    "dps": 150,
+    "dropLevel": 68,
+    "implicits": [],
+    "itemClass": "Two Hand Axes"
+  },
+  {
+    "aps": 1.2,
+    "baseType": "Fleshripper",
+    "crit": 0.05,
+    "damageFrom": 97,
+    "damageTo": 152,
+    "dps": 149.4,
+    "dropLevel": 70,
+    "implicits": [
+      "50% increased Critical Strike Chance"
+    ],
+    "itemClass": "Two Hand Axes"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Crude Bow",
+    "crit": 0.05,
+    "damageFrom": 5,
+    "damageTo": 13,
+    "dps": 12.6,
+    "dropLevel": 1,
+    "implicits": [],
+    "itemClass": "Bows"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Short Bow",
+    "crit": 0.05,
+    "damageFrom": 6,
+    "damageTo": 16,
+    "dps": 16.5,
+    "dropLevel": 5,
+    "implicits": [],
+    "itemClass": "Bows"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Long Bow",
+    "crit": 0.06,
+    "damageFrom": 8,
+    "damageTo": 33,
+    "dps": 26.65,
+    "dropLevel": 9,
+    "implicits": [],
+    "itemClass": "Bows"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Composite Bow",
+    "crit": 0.06,
+    "damageFrom": 16,
+    "damageTo": 34,
+    "dps": 32.5,
+    "dropLevel": 14,
+    "implicits": [],
+    "itemClass": "Bows"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Recurve Bow",
+    "crit": 0.067,
+    "damageFrom": 15,
+    "damageTo": 45,
+    "dps": 37.5,
+    "dropLevel": 18,
+    "implicits": [
+      "+15-25% to Global Critical Strike Multiplier"
+    ],
+    "itemClass": "Bows"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Bone Bow",
+    "crit": 0.065,
+    "damageFrom": 15,
+    "damageTo": 45,
+    "dps": 42,
+    "dropLevel": 23,
+    "implicits": [],
+    "itemClass": "Bows"
+  },
+  {
+    "aps": 1.45,
+    "baseType": "Royal Bow",
+    "crit": 0.05,
+    "damageFrom": 14,
+    "damageTo": 56,
+    "dps": 50.75,
+    "dropLevel": 28,
+    "implicits": [
+      "20-24% increased Elemental Damage with Attack Skills"
+    ],
+    "itemClass": "Bows"
+  },
+  {
+    "aps": 1.2,
+    "baseType": "Death Bow",
+    "crit": 0.05,
+    "damageFrom": 28,
+    "damageTo": 73,
+    "dps": 60.6,
+    "dropLevel": 32,
+    "implicits": [
+      "30-50% increased Critical Strike Chance"
+    ],
+    "itemClass": "Bows"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Grove Bow",
+    "crit": 0.05,
+    "damageFrom": 20,
+    "damageTo": 61,
+    "dps": 60.75,
+    "dropLevel": 35,
+    "implicits": [],
+    "itemClass": "Bows"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Reflex Bow",
+    "crit": 0.055,
+    "damageFrom": 37,
+    "damageTo": 56,
+    "dps": 65.1,
+    "dropLevel": 36,
+    "implicits": [
+      "6% increased Movement Speed"
+    ],
+    "itemClass": "Bows"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Decurve Bow",
+    "crit": 0.06,
+    "damageFrom": 24,
+    "damageTo": 96,
+    "dps": 75,
+    "dropLevel": 38,
+    "implicits": [],
+    "itemClass": "Bows"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Compound Bow",
+    "crit": 0.06,
+    "damageFrom": 37,
+    "damageTo": 76,
+    "dps": 73.45,
+    "dropLevel": 41,
+    "implicits": [],
+    "itemClass": "Bows"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Sniper Bow",
+    "crit": 0.067,
+    "damageFrom": 32,
+    "damageTo": 96,
+    "dps": 80,
+    "dropLevel": 44,
+    "implicits": [
+      "+15-25% to Global Critical Strike Multiplier"
+    ],
+    "itemClass": "Bows"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Ivory Bow",
+    "crit": 0.065,
+    "damageFrom": 29,
+    "damageTo": 86,
+    "dps": 80.5,
+    "dropLevel": 47,
+    "implicits": [],
+    "itemClass": "Bows"
+  },
+  {
+    "aps": 1.45,
+    "baseType": "Highborn Bow",
+    "crit": 0.05,
+    "damageFrom": 24,
+    "damageTo": 94,
+    "dps": 85.55,
+    "dropLevel": 50,
+    "implicits": [
+      "20-24% increased Elemental Damage with Attack Skills"
+    ],
+    "itemClass": "Bows"
+  },
+  {
+    "aps": 1.2,
+    "baseType": "Decimation Bow",
+    "crit": 0.05,
+    "damageFrom": 44,
+    "damageTo": 116,
+    "dps": 96,
+    "dropLevel": 53,
+    "implicits": [
+      "30-50% increased Critical Strike Chance"
+    ],
+    "itemClass": "Bows"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Thicket Bow",
+    "crit": 0.05,
+    "damageFrom": 32,
+    "damageTo": 96,
+    "dps": 96,
+    "dropLevel": 56,
+    "implicits": [],
+    "itemClass": "Bows"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Steelwood Bow",
+    "crit": 0.055,
+    "damageFrom": 58,
+    "damageTo": 86,
+    "dps": 100.8,
+    "dropLevel": 57,
+    "implicits": [
+      "6% increased Movement Speed"
+    ],
+    "itemClass": "Bows"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Citadel Bow",
+    "crit": 0.06,
+    "damageFrom": 36,
+    "damageTo": 144,
+    "dps": 112.5,
+    "dropLevel": 58,
+    "implicits": [],
+    "itemClass": "Bows"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Ranger Bow",
+    "crit": 0.06,
+    "damageFrom": 56,
+    "damageTo": 117,
+    "dps": 112.45,
+    "dropLevel": 60,
+    "implicits": [],
+    "itemClass": "Bows"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Assassin Bow",
+    "crit": 0.067,
+    "damageFrom": 43,
+    "damageTo": 130,
+    "dps": 108.12,
+    "dropLevel": 62,
+    "implicits": [
+      "+15-25% to Global Critical Strike Multiplier"
+    ],
+    "itemClass": "Bows"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Spine Bow",
+    "crit": 0.065,
+    "damageFrom": 38,
+    "damageTo": 115,
+    "dps": 107.1,
+    "dropLevel": 64,
+    "implicits": [],
+    "itemClass": "Bows"
+  },
+  {
+    "aps": 1.45,
+    "baseType": "Imperial Bow",
+    "crit": 0.05,
+    "damageFrom": 29,
+    "damageTo": 117,
+    "dps": 105.85,
+    "dropLevel": 66,
+    "implicits": [
+      "20-24% increased Elemental Damage with Attack Skills"
+    ],
+    "itemClass": "Bows"
+  },
+  {
+    "aps": 1.2,
+    "baseType": "Harbinger Bow",
+    "crit": 0.05,
+    "damageFrom": 50,
+    "damageTo": 133,
+    "dps": 109.8,
+    "dropLevel": 68,
+    "implicits": [
+      "30-50% increased Critical Strike Chance"
+    ],
+    "itemClass": "Bows"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Maraketh Bow",
+    "crit": 0.055,
+    "damageFrom": 61,
+    "damageTo": 92,
+    "dps": 107.1,
+    "dropLevel": 71,
+    "implicits": [
+      "10% increased Movement Speed"
+    ],
+    "itemClass": "Bows"
+  },
+  {
+    "aps": 1.6,
+    "baseType": "Nailed Fist",
+    "crit": 0.073,
+    "damageFrom": 4,
+    "damageTo": 11,
+    "dps": 12,
+    "dropLevel": 3,
+    "implicits": [
+      "Grants 3 Life per Enemy Hit"
+    ],
+    "itemClass": "Claws"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Sharktooth Claw",
+    "crit": 0.08,
+    "damageFrom": 6,
+    "damageTo": 17,
+    "dps": 17.25,
+    "dropLevel": 7,
+    "implicits": [
+      "Grants 6 Life per Enemy Hit"
+    ],
+    "itemClass": "Claws"
+  },
+  {
+    "aps": 1.55,
+    "baseType": "Awl",
+    "crit": 0.075,
+    "damageFrom": 7,
+    "damageTo": 23,
+    "dps": 23.25,
+    "dropLevel": 12,
+    "implicits": [
+      "Grants 7 Life per Enemy Hit"
+    ],
+    "itemClass": "Claws"
+  },
+  {
+    "aps": 1.6,
+    "baseType": "Cat's Paw",
+    "crit": 0.07,
+    "damageFrom": 12,
+    "damageTo": 22,
+    "dps": 27.2,
+    "dropLevel": 17,
+    "implicits": [
+      "Grants 8 Life per Enemy Hit"
+    ],
+    "itemClass": "Claws"
+  },
+  {
+    "aps": 1.55,
+    "baseType": "Blinder",
+    "crit": 0.075,
+    "damageFrom": 12,
+    "damageTo": 31,
+    "dps": 33.33,
+    "dropLevel": 22,
+    "implicits": [
+      "Grants 12 Life per Enemy Hit"
+    ],
+    "itemClass": "Claws"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Timeworn Claw",
+    "crit": 0.08,
+    "damageFrom": 16,
+    "damageTo": 43,
+    "dps": 38.35,
+    "dropLevel": 26,
+    "implicits": [
+      "Grants 19 Life per Enemy Hit"
+    ],
+    "itemClass": "Claws"
+  },
+  {
+    "aps": 1.6,
+    "baseType": "Sparkling Claw",
+    "crit": 0.07,
+    "damageFrom": 14,
+    "damageTo": 38,
+    "dps": 41.6,
+    "dropLevel": 30,
+    "implicits": [
+      "Grants 15 Life per Enemy Hit"
+    ],
+    "itemClass": "Claws"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Fright Claw",
+    "crit": 0.075,
+    "damageFrom": 12,
+    "damageTo": 46,
+    "dps": 43.5,
+    "dropLevel": 34,
+    "implicits": [
+      "Grants 20 Life per Enemy Hit"
+    ],
+    "itemClass": "Claws"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Double Claw",
+    "crit": 0.075,
+    "damageFrom": 15,
+    "damageTo": 44,
+    "dps": 44.25,
+    "dropLevel": 36,
+    "implicits": [
+      "Grants 6 Mana per Enemy Hit\\nGrants 15 Life per Enemy Hit"
+    ],
+    "itemClass": "Claws"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Thresher Claw",
+    "crit": 0.08,
+    "damageFrom": 20,
+    "damageTo": 53,
+    "dps": 47.45,
+    "dropLevel": 37,
+    "implicits": [
+      "Grants 25 Life per Enemy Hit"
+    ],
+    "itemClass": "Claws"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Gouger",
+    "crit": 0.075,
+    "damageFrom": 15,
+    "damageTo": 51,
+    "dps": 49.5,
+    "dropLevel": 40,
+    "implicits": [
+      "Grants 24 Life per Enemy Hit"
+    ],
+    "itemClass": "Claws"
+  },
+  {
+    "aps": 1.6,
+    "baseType": "Tiger's Paw",
+    "crit": 0.07,
+    "damageFrom": 23,
+    "damageTo": 43,
+    "dps": 52.8,
+    "dropLevel": 43,
+    "implicits": [
+      "1.6% of Physical Attack Damage Leeched as Life"
+    ],
+    "itemClass": "Claws"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Gut Ripper",
+    "crit": 0.075,
+    "damageFrom": 20,
+    "damageTo": 53,
+    "dps": 54.75,
+    "dropLevel": 46,
+    "implicits": [
+      "Grants 44 Life per Enemy Hit"
+    ],
+    "itemClass": "Claws"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Prehistoric Claw",
+    "crit": 0.08,
+    "damageFrom": 26,
+    "damageTo": 68,
+    "dps": 61.1,
+    "dropLevel": 49,
+    "implicits": [
+      "2% of Physical Attack Damage Leeched as Life"
+    ],
+    "itemClass": "Claws"
+  },
+  {
+    "aps": 1.6,
+    "baseType": "Noble Claw",
+    "crit": 0.07,
+    "damageFrom": 21,
+    "damageTo": 56,
+    "dps": 61.6,
+    "dropLevel": 52,
+    "implicits": [
+      "Grants 40 Life per Enemy Hit"
+    ],
+    "itemClass": "Claws"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Eagle Claw",
+    "crit": 0.075,
+    "damageFrom": 17,
+    "damageTo": 69,
+    "dps": 64.5,
+    "dropLevel": 55,
+    "implicits": [
+      "2% of Physical Attack Damage Leeched as Life"
+    ],
+    "itemClass": "Claws"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Twin Claw",
+    "crit": 0.075,
+    "damageFrom": 21,
+    "damageTo": 64,
+    "dps": 63.75,
+    "dropLevel": 57,
+    "implicits": [
+      "Grants 10 Mana per Enemy Hit\\nGrants 28 Life per Enemy Hit"
+    ],
+    "itemClass": "Claws"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Great White Claw",
+    "crit": 0.08,
+    "damageFrom": 30,
+    "damageTo": 78,
+    "dps": 70.2,
+    "dropLevel": 58,
+    "implicits": [
+      "Grants 46 Life per Enemy Hit"
+    ],
+    "itemClass": "Claws"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Throat Stabber",
+    "crit": 0.075,
+    "damageFrom": 21,
+    "damageTo": 73,
+    "dps": 70.5,
+    "dropLevel": 60,
+    "implicits": [
+      "Grants 40 Life per Enemy Hit"
+    ],
+    "itemClass": "Claws"
+  },
+  {
+    "aps": 1.6,
+    "baseType": "Hellion's Paw",
+    "crit": 0.07,
+    "damageFrom": 29,
+    "damageTo": 55,
+    "dps": 67.2,
+    "dropLevel": 62,
+    "implicits": [
+      "1.6% of Physical Attack Damage Leeched as Life"
+    ],
+    "itemClass": "Claws"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Eye Gouger",
+    "crit": 0.075,
+    "damageFrom": 26,
+    "damageTo": 68,
+    "dps": 70.5,
+    "dropLevel": 64,
+    "implicits": [
+      "Grants 50 Life per Enemy Hit"
+    ],
+    "itemClass": "Claws"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Vaal Claw",
+    "crit": 0.08,
+    "damageFrom": 29,
+    "damageTo": 76,
+    "dps": 68.25,
+    "dropLevel": 66,
+    "implicits": [
+      "2% of Physical Attack Damage Leeched as Life"
+    ],
+    "itemClass": "Claws"
+  },
+  {
+    "aps": 1.6,
+    "baseType": "Imperial Claw",
+    "crit": 0.07,
+    "damageFrom": 25,
+    "damageTo": 65,
+    "dps": 72,
+    "dropLevel": 68,
+    "implicits": [
+      "Grants 46 Life per Enemy Hit"
+    ],
+    "itemClass": "Claws"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Terror Claw",
+    "crit": 0.075,
+    "damageFrom": 18,
+    "damageTo": 71,
+    "dps": 66.75,
+    "dropLevel": 70,
+    "implicits": [
+      "2% of Physical Attack Damage Leeched as Life"
+    ],
+    "itemClass": "Claws"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Gemini Claw",
+    "crit": 0.075,
+    "damageFrom": 23,
+    "damageTo": 68,
+    "dps": 68.25,
+    "dropLevel": 72,
+    "implicits": [
+      "Grants 14 Mana per Enemy Hit\\nGrants 38 Life per Enemy Hit"
+    ],
+    "itemClass": "Claws"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Glass Shank",
+    "crit": 0.08,
+    "damageFrom": 6,
+    "damageTo": 10,
+    "dps": 12,
+    "dropLevel": 1,
+    "implicits": [
+      "40-45% increased Global Critical Strike Chance"
+    ],
+    "itemClass": "Daggers"
+  },
+  {
+    "aps": 1.45,
+    "baseType": "Skinning Knife",
+    "crit": 0.08,
+    "damageFrom": 4,
+    "damageTo": 17,
+    "dps": 15.22,
+    "dropLevel": 5,
+    "implicits": [
+      "40-45% increased Global Critical Strike Chance"
+    ],
+    "itemClass": "Daggers"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Stiletto",
+    "crit": 0.083,
+    "damageFrom": 7,
+    "damageTo": 27,
+    "dps": 25.5,
+    "dropLevel": 15,
+    "implicits": [
+      "40-45% increased Global Critical Strike Chance"
+    ],
+    "itemClass": "Daggers"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Flaying Knife",
+    "crit": 0.08,
+    "damageFrom": 11,
+    "damageTo": 45,
+    "dps": 39.2,
+    "dropLevel": 30,
+    "implicits": [
+      "40-45% increased Global Critical Strike Chance"
+    ],
+    "itemClass": "Daggers"
+  },
+  {
+    "aps": 1.35,
+    "baseType": "Prong Dagger",
+    "crit": 0.085,
+    "damageFrom": 14,
+    "damageTo": 54,
+    "dps": 45.9,
+    "dropLevel": 36,
+    "implicits": [
+      "4% Chance to Block Attack Damage"
+    ],
+    "itemClass": "Daggers"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Poignard",
+    "crit": 0.083,
+    "damageFrom": 13,
+    "damageTo": 52,
+    "dps": 48.75,
+    "dropLevel": 41,
+    "implicits": [
+      "40-45% increased Global Critical Strike Chance"
+    ],
+    "itemClass": "Daggers"
+  },
+  {
+    "aps": 1.35,
+    "baseType": "Trisula",
+    "crit": 0.09,
+    "damageFrom": 19,
+    "damageTo": 74,
+    "dps": 62.78,
+    "dropLevel": 51,
+    "implicits": [
+      "4% Chance to Block Attack Damage"
+    ],
+    "itemClass": "Daggers"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Gutting Knife",
+    "crit": 0.09,
+    "damageFrom": 19,
+    "damageTo": 76,
+    "dps": 66.5,
+    "dropLevel": 56,
+    "implicits": [
+      "40-45% increased Global Critical Strike Chance"
+    ],
+    "itemClass": "Daggers"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Ambusher",
+    "crit": 0.083,
+    "damageFrom": 19,
+    "damageTo": 74,
+    "dps": 69.75,
+    "dropLevel": 60,
+    "implicits": [
+      "40-45% increased Global Critical Strike Chance"
+    ],
+    "itemClass": "Daggers"
+  },
+  {
+    "aps": 1.35,
+    "baseType": "Sai",
+    "crit": 0.085,
+    "damageFrom": 22,
+    "damageTo": 88,
+    "dps": 74.25,
+    "dropLevel": 70,
+    "implicits": [
+      "6% Chance to Block Attack Damage"
+    ],
+    "itemClass": "Daggers"
+  },
+  {
+    "aps": 1.45,
+    "baseType": "Carving Knife",
+    "crit": 0.085,
+    "damageFrom": 3,
+    "damageTo": 26,
+    "dps": 21.02,
+    "dropLevel": 10,
+    "implicits": [
+      "40-45% increased Global Critical Strike Chance"
+    ],
+    "itemClass": "Rune Daggers"
+  },
+  {
+    "aps": 1.45,
+    "baseType": "Boot Knife",
+    "crit": 0.085,
+    "damageFrom": 8,
+    "damageTo": 34,
+    "dps": 30.45,
+    "dropLevel": 20,
+    "implicits": [
+      "40-45% increased Global Critical Strike Chance"
+    ],
+    "itemClass": "Rune Daggers"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Copper Kris",
+    "crit": 0.09,
+    "damageFrom": 10,
+    "damageTo": 41,
+    "dps": 33.15,
+    "dropLevel": 24,
+    "implicits": [
+      "60-65% increased Global Critical Strike Chance"
+    ],
+    "itemClass": "Rune Daggers"
+  },
+  {
+    "aps": 1.45,
+    "baseType": "Skean",
+    "crit": 0.085,
+    "damageFrom": 11,
+    "damageTo": 43,
+    "dps": 39.15,
+    "dropLevel": 28,
+    "implicits": [
+      "40-45% increased Global Critical Strike Chance"
+    ],
+    "itemClass": "Rune Daggers"
+  },
+  {
+    "aps": 1.2,
+    "baseType": "Imp Dagger",
+    "crit": 0.09,
+    "damageFrom": 15,
+    "damageTo": 59,
+    "dps": 44.4,
+    "dropLevel": 32,
+    "implicits": [
+      "50-55% increased Global Critical Strike Chance"
+    ],
+    "itemClass": "Rune Daggers"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Butcher Knife",
+    "crit": 0.085,
+    "damageFrom": 7,
+    "damageTo": 62,
+    "dps": 48.3,
+    "dropLevel": 38,
+    "implicits": [
+      "40-45% increased Global Critical Strike Chance"
+    ],
+    "itemClass": "Rune Daggers"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Boot Blade",
+    "crit": 0.085,
+    "damageFrom": 15,
+    "damageTo": 59,
+    "dps": 51.8,
+    "dropLevel": 44,
+    "implicits": [
+      "40-45% increased Global Critical Strike Chance"
+    ],
+    "itemClass": "Rune Daggers"
+  },
+  {
+    "aps": 1.2,
+    "baseType": "Golden Kris",
+    "crit": 0.09,
+    "damageFrom": 19,
+    "damageTo": 75,
+    "dps": 56.4,
+    "dropLevel": 47,
+    "implicits": [
+      "60-65% increased Global Critical Strike Chance"
+    ],
+    "itemClass": "Rune Daggers"
+  },
+  {
+    "aps": 1.45,
+    "baseType": "Royal Skean",
+    "crit": 0.085,
+    "damageFrom": 16,
+    "damageTo": 64,
+    "dps": 58,
+    "dropLevel": 50,
+    "implicits": [
+      "40-45% increased Global Critical Strike Chance"
+    ],
+    "itemClass": "Rune Daggers"
+  },
+  {
+    "aps": 1.2,
+    "baseType": "Fiend Dagger",
+    "crit": 0.09,
+    "damageFrom": 22,
+    "damageTo": 87,
+    "dps": 65.4,
+    "dropLevel": 53,
+    "implicits": [
+      "50-55% increased Global Critical Strike Chance"
+    ],
+    "itemClass": "Rune Daggers"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Slaughter Knife",
+    "crit": 0.085,
+    "damageFrom": 10,
+    "damageTo": 86,
+    "dps": 67.2,
+    "dropLevel": 58,
+    "implicits": [
+      "40-45% increased Global Critical Strike Chance"
+    ],
+    "itemClass": "Rune Daggers"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Ezomyte Dagger",
+    "crit": 0.085,
+    "damageFrom": 20,
+    "damageTo": 79,
+    "dps": 69.3,
+    "dropLevel": 62,
+    "implicits": [
+      "40-45% increased Global Critical Strike Chance"
+    ],
+    "itemClass": "Rune Daggers"
+  },
+  {
+    "aps": 1.2,
+    "baseType": "Platinum Kris",
+    "crit": 0.09,
+    "damageFrom": 24,
+    "damageTo": 95,
+    "dps": 71.4,
+    "dropLevel": 64,
+    "implicits": [
+      "60-65% increased Global Critical Strike Chance"
+    ],
+    "itemClass": "Rune Daggers"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Imperial Skean",
+    "crit": 0.085,
+    "damageFrom": 18,
+    "damageTo": 73,
+    "dps": 68.25,
+    "dropLevel": 66,
+    "implicits": [
+      "40-45% increased Global Critical Strike Chance"
+    ],
+    "itemClass": "Rune Daggers"
+  },
+  {
+    "aps": 1.2,
+    "baseType": "Demon Dagger",
+    "crit": 0.09,
+    "damageFrom": 24,
+    "damageTo": 97,
+    "dps": 72.6,
+    "dropLevel": 68,
+    "implicits": [
+      "50-55% increased Global Critical Strike Chance"
+    ],
+    "itemClass": "Rune Daggers"
+  },
+  {
+    "aps": 1.45,
+    "baseType": "Driftwood Club",
+    "crit": 0.05,
+    "damageFrom": 6,
+    "damageTo": 8,
+    "dps": 10.15,
+    "dropLevel": 1,
+    "implicits": [
+      "10% reduced Enemy Stun Threshold"
+    ],
+    "itemClass": "One Hand Maces"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Tribal Club",
+    "crit": 0.05,
+    "damageFrom": 8,
+    "damageTo": 13,
+    "dps": 14.7,
+    "dropLevel": 5,
+    "implicits": [
+      "10% reduced Enemy Stun Threshold"
+    ],
+    "itemClass": "One Hand Maces"
+  },
+  {
+    "aps": 1.45,
+    "baseType": "Spiked Club",
+    "crit": 0.05,
+    "damageFrom": 13,
+    "damageTo": 16,
+    "dps": 21.02,
+    "dropLevel": 10,
+    "implicits": [
+      "10% reduced Enemy Stun Threshold"
+    ],
+    "itemClass": "One Hand Maces"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Stone Hammer",
+    "crit": 0.05,
+    "damageFrom": 15,
+    "damageTo": 27,
+    "dps": 27.3,
+    "dropLevel": 15,
+    "implicits": [
+      "15% reduced Enemy Stun Threshold"
+    ],
+    "itemClass": "One Hand Maces"
+  },
+  {
+    "aps": 1.45,
+    "baseType": "War Hammer",
+    "crit": 0.05,
+    "damageFrom": 13,
+    "damageTo": 31,
+    "dps": 31.9,
+    "dropLevel": 20,
+    "implicits": [
+      "10% reduced Enemy Stun Threshold"
+    ],
+    "itemClass": "One Hand Maces"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Bladed Mace",
+    "crit": 0.05,
+    "damageFrom": 19,
+    "damageTo": 32,
+    "dps": 35.7,
+    "dropLevel": 24,
+    "implicits": [
+      "10% reduced Enemy Stun Threshold"
+    ],
+    "itemClass": "One Hand Maces"
+  },
+  {
+    "aps": 1.2,
+    "baseType": "Ceremonial Mace",
+    "crit": 0.05,
+    "damageFrom": 32,
+    "damageTo": 40,
+    "dps": 43.2,
+    "dropLevel": 28,
+    "implicits": [
+      "15% reduced Enemy Stun Threshold"
+    ],
+    "itemClass": "One Hand Maces"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Dream Mace",
+    "crit": 0.05,
+    "damageFrom": 21,
+    "damageTo": 43,
+    "dps": 44.8,
+    "dropLevel": 32,
+    "implicits": [
+      "10% reduced Enemy Stun Threshold"
+    ],
+    "itemClass": "One Hand Maces"
+  },
+  {
+    "aps": 1.35,
+    "baseType": "Wyrm Mace",
+    "crit": 0.05,
+    "damageFrom": 28,
+    "damageTo": 42,
+    "dps": 47.25,
+    "dropLevel": 34,
+    "implicits": [
+      "4% increased Attack Speed"
+    ],
+    "itemClass": "One Hand Maces"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Petrified Club",
+    "crit": 0.05,
+    "damageFrom": 31,
+    "damageTo": 51,
+    "dps": 51.25,
+    "dropLevel": 35,
+    "implicits": [
+      "10% reduced Enemy Stun Threshold"
+    ],
+    "itemClass": "One Hand Maces"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Barbed Club",
+    "crit": 0.05,
+    "damageFrom": 33,
+    "damageTo": 42,
+    "dps": 52.5,
+    "dropLevel": 38,
+    "implicits": [
+      "10% reduced Enemy Stun Threshold"
+    ],
+    "itemClass": "One Hand Maces"
+  },
+  {
+    "aps": 1.15,
+    "baseType": "Rock Breaker",
+    "crit": 0.05,
+    "damageFrom": 37,
+    "damageTo": 69,
+    "dps": 60.95,
+    "dropLevel": 41,
+    "implicits": [
+      "15% reduced Enemy Stun Threshold"
+    ],
+    "itemClass": "One Hand Maces"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Battle Hammer",
+    "crit": 0.05,
+    "damageFrom": 25,
+    "damageTo": 59,
+    "dps": 58.8,
+    "dropLevel": 44,
+    "implicits": [
+      "10% reduced Enemy Stun Threshold"
+    ],
+    "itemClass": "One Hand Maces"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Flanged Mace",
+    "crit": 0.05,
+    "damageFrom": 38,
+    "damageTo": 63,
+    "dps": 65.65,
+    "dropLevel": 47,
+    "implicits": [
+      "10% reduced Enemy Stun Threshold"
+    ],
+    "itemClass": "One Hand Maces"
+  },
+  {
+    "aps": 1.2,
+    "baseType": "Ornate Mace",
+    "crit": 0.05,
+    "damageFrom": 53,
+    "damageTo": 67,
+    "dps": 72,
+    "dropLevel": 50,
+    "implicits": [
+      "15% reduced Enemy Stun Threshold"
+    ],
+    "itemClass": "One Hand Maces"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Phantom Mace",
+    "crit": 0.05,
+    "damageFrom": 33,
+    "damageTo": 69,
+    "dps": 71.4,
+    "dropLevel": 53,
+    "implicits": [
+      "10% reduced Enemy Stun Threshold"
+    ],
+    "itemClass": "One Hand Maces"
+  },
+  {
+    "aps": 1.35,
+    "baseType": "Dragon Mace",
+    "crit": 0.05,
+    "damageFrom": 44,
+    "damageTo": 66,
+    "dps": 74.25,
+    "dropLevel": 55,
+    "implicits": [
+      "4% increased Attack Speed"
+    ],
+    "itemClass": "One Hand Maces"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Ancestral Club",
+    "crit": 0.05,
+    "damageFrom": 48,
+    "damageTo": 80,
+    "dps": 80,
+    "dropLevel": 56,
+    "implicits": [
+      "10% reduced Enemy Stun Threshold"
+    ],
+    "itemClass": "One Hand Maces"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Tenderizer",
+    "crit": 0.05,
+    "damageFrom": 49,
+    "damageTo": 62,
+    "dps": 77.7,
+    "dropLevel": 58,
+    "implicits": [
+      "10% reduced Enemy Stun Threshold"
+    ],
+    "itemClass": "One Hand Maces"
+  },
+  {
+    "aps": 1.15,
+    "baseType": "Gavel",
+    "crit": 0.05,
+    "damageFrom": 54,
+    "damageTo": 101,
+    "dps": 89.12,
+    "dropLevel": 60,
+    "implicits": [
+      "15% reduced Enemy Stun Threshold"
+    ],
+    "itemClass": "One Hand Maces"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Legion Hammer",
+    "crit": 0.05,
+    "damageFrom": 35,
+    "damageTo": 81,
+    "dps": 81.2,
+    "dropLevel": 62,
+    "implicits": [
+      "10% reduced Enemy Stun Threshold"
+    ],
+    "itemClass": "One Hand Maces"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Pernach",
+    "crit": 0.05,
+    "damageFrom": 49,
+    "damageTo": 82,
+    "dps": 85.15,
+    "dropLevel": 64,
+    "implicits": [
+      "10% reduced Enemy Stun Threshold"
+    ],
+    "itemClass": "One Hand Maces"
+  },
+  {
+    "aps": 1.2,
+    "baseType": "Auric Mace",
+    "crit": 0.05,
+    "damageFrom": 65,
+    "damageTo": 82,
+    "dps": 88.2,
+    "dropLevel": 66,
+    "implicits": [
+      "15% reduced Enemy Stun Threshold"
+    ],
+    "itemClass": "One Hand Maces"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Nightmare Mace",
+    "crit": 0.05,
+    "damageFrom": 38,
+    "damageTo": 80,
+    "dps": 82.6,
+    "dropLevel": 68,
+    "implicits": [
+      "10% reduced Enemy Stun Threshold"
+    ],
+    "itemClass": "One Hand Maces"
+  },
+  {
+    "aps": 1.35,
+    "baseType": "Behemoth Mace",
+    "crit": 0.05,
+    "damageFrom": 49,
+    "damageTo": 74,
+    "dps": 83.03,
+    "dropLevel": 70,
+    "implicits": [
+      "6% increased Attack Speed"
+    ],
+    "itemClass": "One Hand Maces"
+  },
+  {
+    "aps": 1.2,
+    "baseType": "Driftwood Sceptre",
+    "crit": 0.07,
+    "damageFrom": 8,
+    "damageTo": 11,
+    "dps": 11.4,
+    "dropLevel": 1,
+    "implicits": [
+      "10% increased Elemental Damage"
+    ],
+    "itemClass": "Sceptres"
+  },
+  {
+    "aps": 1.2,
+    "baseType": "Darkwood Sceptre",
+    "crit": 0.07,
+    "damageFrom": 11,
+    "damageTo": 17,
+    "dps": 16.8,
+    "dropLevel": 5,
+    "implicits": [
+      "12% increased Elemental Damage"
+    ],
+    "itemClass": "Sceptres"
+  },
+  {
+    "aps": 1.1,
+    "baseType": "Bronze Sceptre",
+    "crit": 0.07,
+    "damageFrom": 15,
+    "damageTo": 29,
+    "dps": 24.2,
+    "dropLevel": 10,
+    "implicits": [
+      "12% increased Elemental Damage"
+    ],
+    "itemClass": "Sceptres"
+  },
+  {
+    "aps": 1.1,
+    "baseType": "Quartz Sceptre",
+    "crit": 0.08,
+    "damageFrom": 21,
+    "damageTo": 32,
+    "dps": 29.15,
+    "dropLevel": 15,
+    "implicits": [
+      "20% increased Elemental Damage"
+    ],
+    "itemClass": "Sceptres"
+  },
+  {
+    "aps": 1.1,
+    "baseType": "Iron Sceptre",
+    "crit": 0.07,
+    "damageFrom": 27,
+    "damageTo": 40,
+    "dps": 36.85,
+    "dropLevel": 20,
+    "implicits": [
+      "14% increased Elemental Damage"
+    ],
+    "itemClass": "Sceptres"
+  },
+  {
+    "aps": 1.15,
+    "baseType": "Ochre Sceptre",
+    "crit": 0.07,
+    "damageFrom": 24,
+    "damageTo": 45,
+    "dps": 39.67,
+    "dropLevel": 24,
+    "implicits": [
+      "16% increased Elemental Damage"
+    ],
+    "itemClass": "Sceptres"
+  },
+  {
+    "aps": 1.2,
+    "baseType": "Ritual Sceptre",
+    "crit": 0.07,
+    "damageFrom": 21,
+    "damageTo": 50,
+    "dps": 42.6,
+    "dropLevel": 28,
+    "implicits": [
+      "16% increased Elemental Damage"
+    ],
+    "itemClass": "Sceptres"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Shadow Sceptre",
+    "crit": 0.073,
+    "damageFrom": 29,
+    "damageTo": 44,
+    "dps": 45.62,
+    "dropLevel": 32,
+    "implicits": [
+      "22% increased Elemental Damage"
+    ],
+    "itemClass": "Sceptres"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Grinning Fetish",
+    "crit": 0.07,
+    "damageFrom": 24,
+    "damageTo": 36,
+    "dps": 45,
+    "dropLevel": 35,
+    "implicits": [
+      "18% increased Elemental Damage"
+    ],
+    "itemClass": "Sceptres"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Horned Sceptre",
+    "crit": 0.07,
+    "damageFrom": 27,
+    "damageTo": 50,
+    "dps": 50.05,
+    "dropLevel": 36,
+    "implicits": [
+      "Damage Penetrates 4% Elemental Resistances"
+    ],
+    "itemClass": "Sceptres"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Sekhem",
+    "crit": 0.07,
+    "damageFrom": 30,
+    "damageTo": 55,
+    "dps": 53.12,
+    "dropLevel": 38,
+    "implicits": [
+      "18% increased Elemental Damage"
+    ],
+    "itemClass": "Sceptres"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Crystal Sceptre",
+    "crit": 0.08,
+    "damageFrom": 35,
+    "damageTo": 52,
+    "dps": 54.38,
+    "dropLevel": 41,
+    "implicits": [
+      "30% increased Elemental Damage"
+    ],
+    "itemClass": "Sceptres"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Lead Sceptre",
+    "crit": 0.07,
+    "damageFrom": 38,
+    "damageTo": 57,
+    "dps": 59.38,
+    "dropLevel": 44,
+    "implicits": [
+      "22% increased Elemental Damage"
+    ],
+    "itemClass": "Sceptres"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Blood Sceptre",
+    "crit": 0.07,
+    "damageFrom": 30,
+    "damageTo": 55,
+    "dps": 59.5,
+    "dropLevel": 47,
+    "implicits": [
+      "24% increased Elemental Damage"
+    ],
+    "itemClass": "Sceptres"
+  },
+  {
+    "aps": 1.2,
+    "baseType": "Royal Sceptre",
+    "crit": 0.07,
+    "damageFrom": 34,
+    "damageTo": 80,
+    "dps": 68.4,
+    "dropLevel": 50,
+    "implicits": [
+      "24% increased Elemental Damage"
+    ],
+    "itemClass": "Sceptres"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Abyssal Sceptre",
+    "crit": 0.073,
+    "damageFrom": 45,
+    "damageTo": 67,
+    "dps": 70,
+    "dropLevel": 53,
+    "implicits": [
+      "30% increased Elemental Damage"
+    ],
+    "itemClass": "Sceptres"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Stag Sceptre",
+    "crit": 0.07,
+    "damageFrom": 39,
+    "damageTo": 72,
+    "dps": 72.15,
+    "dropLevel": 55,
+    "implicits": [
+      "Damage Penetrates 4% Elemental Resistances"
+    ],
+    "itemClass": "Sceptres"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Karui Sceptre",
+    "crit": 0.07,
+    "damageFrom": 37,
+    "damageTo": 55,
+    "dps": 69,
+    "dropLevel": 56,
+    "implicits": [
+      "26% increased Elemental Damage"
+    ],
+    "itemClass": "Sceptres"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Tyrant's Sekhem",
+    "crit": 0.07,
+    "damageFrom": 43,
+    "damageTo": 80,
+    "dps": 76.88,
+    "dropLevel": 58,
+    "implicits": [
+      "26% increased Elemental Damage"
+    ],
+    "itemClass": "Sceptres"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Opal Sceptre",
+    "crit": 0.08,
+    "damageFrom": 49,
+    "damageTo": 73,
+    "dps": 76.25,
+    "dropLevel": 60,
+    "implicits": [
+      "40% increased Elemental Damage"
+    ],
+    "itemClass": "Sceptres"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Platinum Sceptre",
+    "crit": 0.07,
+    "damageFrom": 51,
+    "damageTo": 76,
+    "dps": 79.38,
+    "dropLevel": 62,
+    "implicits": [
+      "30% increased Elemental Damage"
+    ],
+    "itemClass": "Sceptres"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Vaal Sceptre",
+    "crit": 0.07,
+    "damageFrom": 37,
+    "damageTo": 70,
+    "dps": 74.9,
+    "dropLevel": 64,
+    "implicits": [
+      "32% increased Elemental Damage"
+    ],
+    "itemClass": "Sceptres"
+  },
+  {
+    "aps": 1.2,
+    "baseType": "Carnal Sceptre",
+    "crit": 0.07,
+    "damageFrom": 41,
+    "damageTo": 95,
+    "dps": 81.6,
+    "dropLevel": 66,
+    "implicits": [
+      "32% increased Elemental Damage"
+    ],
+    "itemClass": "Sceptres"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Void Sceptre",
+    "crit": 0.073,
+    "damageFrom": 50,
+    "damageTo": 76,
+    "dps": 78.75,
+    "dropLevel": 68,
+    "implicits": [
+      "40% increased Elemental Damage"
+    ],
+    "itemClass": "Sceptres"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Sambar Sceptre",
+    "crit": 0.07,
+    "damageFrom": 42,
+    "damageTo": 78,
+    "dps": 78,
+    "dropLevel": 70,
+    "implicits": [
+      "Damage Penetrates 6% Elemental Resistances"
+    ],
+    "itemClass": "Sceptres"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Driftwood Maul",
+    "crit": 0.05,
+    "damageFrom": 10,
+    "damageTo": 16,
+    "dps": 16.9,
+    "dropLevel": 3,
+    "implicits": [
+      "30% increased Stun Duration on Enemies"
+    ],
+    "itemClass": "Two Hand Maces"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Tribal Maul",
+    "crit": 0.05,
+    "damageFrom": 17,
+    "damageTo": 25,
+    "dps": 26.25,
+    "dropLevel": 8,
+    "implicits": [
+      "30% increased Stun Duration on Enemies"
+    ],
+    "itemClass": "Two Hand Maces"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Mallet",
+    "crit": 0.05,
+    "damageFrom": 16,
+    "damageTo": 33,
+    "dps": 31.85,
+    "dropLevel": 12,
+    "implicits": [
+      "30% increased Stun Duration on Enemies"
+    ],
+    "itemClass": "Two Hand Maces"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Sledgehammer",
+    "crit": 0.05,
+    "damageFrom": 25,
+    "damageTo": 38,
+    "dps": 40.95,
+    "dropLevel": 17,
+    "implicits": [
+      "45% increased Stun Duration on Enemies"
+    ],
+    "itemClass": "Two Hand Maces"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Jagged Maul",
+    "crit": 0.05,
+    "damageFrom": 27,
+    "damageTo": 49,
+    "dps": 49.4,
+    "dropLevel": 22,
+    "implicits": [
+      "30% increased Stun Duration on Enemies"
+    ],
+    "itemClass": "Two Hand Maces"
+  },
+  {
+    "aps": 1.2,
+    "baseType": "Brass Maul",
+    "crit": 0.05,
+    "damageFrom": 40,
+    "damageTo": 60,
+    "dps": 60,
+    "dropLevel": 27,
+    "implicits": [
+      "30% increased Stun Duration on Enemies"
+    ],
+    "itemClass": "Two Hand Maces"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Fright Maul",
+    "crit": 0.05,
+    "damageFrom": 46,
+    "damageTo": 62,
+    "dps": 67.5,
+    "dropLevel": 32,
+    "implicits": [
+      "30% increased Stun Duration on Enemies"
+    ],
+    "itemClass": "Two Hand Maces"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Morning Star",
+    "crit": 0.05,
+    "damageFrom": 45,
+    "damageTo": 68,
+    "dps": 70.62,
+    "dropLevel": 34,
+    "implicits": [
+      "15% increased Area of Effect"
+    ],
+    "itemClass": "Two Hand Maces"
+  },
+  {
+    "aps": 1.1,
+    "baseType": "Totemic Maul",
+    "crit": 0.05,
+    "damageFrom": 57,
+    "damageTo": 85,
+    "dps": 78.1,
+    "dropLevel": 36,
+    "implicits": [
+      "30% increased Stun Duration on Enemies"
+    ],
+    "itemClass": "Two Hand Maces"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Great Mallet",
+    "crit": 0.05,
+    "damageFrom": 43,
+    "damageTo": 88,
+    "dps": 81.88,
+    "dropLevel": 40,
+    "implicits": [
+      "30% increased Stun Duration on Enemies"
+    ],
+    "itemClass": "Two Hand Maces"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Steelhead",
+    "crit": 0.05,
+    "damageFrom": 54,
+    "damageTo": 81,
+    "dps": 87.75,
+    "dropLevel": 44,
+    "implicits": [
+      "45% increased Stun Duration on Enemies"
+    ],
+    "itemClass": "Two Hand Maces"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Spiny Maul",
+    "crit": 0.05,
+    "damageFrom": 55,
+    "damageTo": 103,
+    "dps": 98.75,
+    "dropLevel": 48,
+    "implicits": [
+      "30% increased Stun Duration on Enemies"
+    ],
+    "itemClass": "Two Hand Maces"
+  },
+  {
+    "aps": 1.2,
+    "baseType": "Plated Maul",
+    "crit": 0.05,
+    "damageFrom": 72,
+    "damageTo": 108,
+    "dps": 108,
+    "dropLevel": 51,
+    "implicits": [
+      "30% increased Stun Duration on Enemies"
+    ],
+    "itemClass": "Two Hand Maces"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Dread Maul",
+    "crit": 0.05,
+    "damageFrom": 77,
+    "damageTo": 104,
+    "dps": 113.12,
+    "dropLevel": 54,
+    "implicits": [
+      "30% increased Stun Duration on Enemies"
+    ],
+    "itemClass": "Two Hand Maces"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Solar Maul",
+    "crit": 0.05,
+    "damageFrom": 75,
+    "damageTo": 113,
+    "dps": 117.5,
+    "dropLevel": 56,
+    "implicits": [
+      "15% increased Area of Effect"
+    ],
+    "itemClass": "Two Hand Maces"
+  },
+  {
+    "aps": 1,
+    "baseType": "Karui Maul",
+    "crit": 0.05,
+    "damageFrom": 112,
+    "damageTo": 168,
+    "dps": 140,
+    "dropLevel": 57,
+    "implicits": [
+      "45% increased Stun Duration on Enemies"
+    ],
+    "itemClass": "Two Hand Maces"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Colossus Mallet",
+    "crit": 0.055,
+    "damageFrom": 65,
+    "damageTo": 135,
+    "dps": 130,
+    "dropLevel": 59,
+    "implicits": [
+      "30% increased Area Damage"
+    ],
+    "itemClass": "Two Hand Maces"
+  },
+  {
+    "aps": 1.35,
+    "baseType": "Piledriver",
+    "crit": 0.05,
+    "damageFrom": 77,
+    "damageTo": 115,
+    "dps": 129.6,
+    "dropLevel": 61,
+    "implicits": [
+      "20% reduced Enemy Stun Threshold"
+    ],
+    "itemClass": "Two Hand Maces"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Meatgrinder",
+    "crit": 0.05,
+    "damageFrom": 74,
+    "damageTo": 138,
+    "dps": 132.5,
+    "dropLevel": 63,
+    "implicits": [
+      "5% chance to deal Double Damage"
+    ],
+    "itemClass": "Two Hand Maces"
+  },
+  {
+    "aps": 1.1,
+    "baseType": "Imperial Maul",
+    "crit": 0.05,
+    "damageFrom": 102,
+    "damageTo": 153,
+    "dps": 140.25,
+    "dropLevel": 65,
+    "implicits": [
+      "10% increased Strength"
+    ],
+    "itemClass": "Two Hand Maces"
+  },
+  {
+    "aps": 1.15,
+    "baseType": "Terror Maul",
+    "crit": 0.06,
+    "damageFrom": 101,
+    "damageTo": 137,
+    "dps": 136.85,
+    "dropLevel": 67,
+    "implicits": [
+      "25% chance to double Stun Duration"
+    ],
+    "itemClass": "Two Hand Maces"
+  },
+  {
+    "aps": 1.2,
+    "baseType": "Coronal Maul",
+    "crit": 0.05,
+    "damageFrom": 91,
+    "damageTo": 136,
+    "dps": 136.2,
+    "dropLevel": 69,
+    "implicits": [
+      "20% increased Area of Effect"
+    ],
+    "itemClass": "Two Hand Maces"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Gnarled Branch",
+    "crit": 0.075,
+    "damageFrom": 9,
+    "damageTo": 19,
+    "dps": 18.2,
+    "dropLevel": 4,
+    "implicits": [
+      "+20% Chance to Block Spell Damage"
+    ],
+    "itemClass": "Staves"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Primitive Staff",
+    "crit": 0.08,
+    "damageFrom": 10,
+    "damageTo": 31,
+    "dps": 26.65,
+    "dropLevel": 9,
+    "implicits": [
+      "+20% Chance to Block Spell Damage"
+    ],
+    "itemClass": "Staves"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Long Staff",
+    "crit": 0.075,
+    "damageFrom": 24,
+    "damageTo": 41,
+    "dps": 42.25,
+    "dropLevel": 18,
+    "implicits": [
+      "+20% Chance to Block Spell Damage"
+    ],
+    "itemClass": "Staves"
+  },
+  {
+    "aps": 1.15,
+    "baseType": "Royal Staff",
+    "crit": 0.085,
+    "damageFrom": 27,
+    "damageTo": 81,
+    "dps": 62.1,
+    "dropLevel": 28,
+    "implicits": [
+      "+20% Chance to Block Spell Damage"
+    ],
+    "itemClass": "Staves"
+  },
+  {
+    "aps": 1.2,
+    "baseType": "Crescent Staff",
+    "crit": 0.075,
+    "damageFrom": 41,
+    "damageTo": 85,
+    "dps": 75.6,
+    "dropLevel": 36,
+    "implicits": [
+      "80% increased Global Critical Strike Chance"
+    ],
+    "itemClass": "Staves"
+  },
+  {
+    "aps": 1.15,
+    "baseType": "Woodful Staff",
+    "crit": 0.08,
+    "damageFrom": 34,
+    "damageTo": 102,
+    "dps": 78.2,
+    "dropLevel": 37,
+    "implicits": [
+      "+22% Chance to Block Spell Damage"
+    ],
+    "itemClass": "Staves"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Quarterstaff",
+    "crit": 0.075,
+    "damageFrom": 51,
+    "damageTo": 86,
+    "dps": 89.05,
+    "dropLevel": 45,
+    "implicits": [
+      "+22% Chance to Block Spell Damage"
+    ],
+    "itemClass": "Staves"
+  },
+  {
+    "aps": 1.15,
+    "baseType": "Highborn Staff",
+    "crit": 0.0825,
+    "damageFrom": 48,
+    "damageTo": 145,
+    "dps": 110.97,
+    "dropLevel": 52,
+    "implicits": [
+      "+22% Chance to Block Spell Damage"
+    ],
+    "itemClass": "Staves"
+  },
+  {
+    "aps": 1.2,
+    "baseType": "Moon Staff",
+    "crit": 0.075,
+    "damageFrom": 66,
+    "damageTo": 138,
+    "dps": 122.4,
+    "dropLevel": 57,
+    "implicits": [
+      "80% increased Global Critical Strike Chance"
+    ],
+    "itemClass": "Staves"
+  },
+  {
+    "aps": 1.15,
+    "baseType": "Primordial Staff",
+    "crit": 0.08,
+    "damageFrom": 55,
+    "damageTo": 165,
+    "dps": 126.5,
+    "dropLevel": 58,
+    "implicits": [
+      "+25% Chance to Block Spell Damage"
+    ],
+    "itemClass": "Staves"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Lathi",
+    "crit": 0.075,
+    "damageFrom": 72,
+    "damageTo": 120,
+    "dps": 124.8,
+    "dropLevel": 62,
+    "implicits": [
+      "+25% Chance to Block Spell Damage"
+    ],
+    "itemClass": "Staves"
+  },
+  {
+    "aps": 1.15,
+    "baseType": "Imperial Staff",
+    "crit": 0.085,
+    "damageFrom": 57,
+    "damageTo": 171,
+    "dps": 131.1,
+    "dropLevel": 66,
+    "implicits": [
+      "+25% Chance to Block Spell Damage"
+    ],
+    "itemClass": "Staves"
+  },
+  {
+    "aps": 1.2,
+    "baseType": "Eclipse Staff",
+    "crit": 0.075,
+    "damageFrom": 70,
+    "damageTo": 145,
+    "dps": 129,
+    "dropLevel": 70,
+    "implicits": [
+      "100% increased Global Critical Strike Chance"
+    ],
+    "itemClass": "Staves"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Iron Staff",
+    "crit": 0.076,
+    "damageFrom": 14,
+    "damageTo": 42,
+    "dps": 36.4,
+    "dropLevel": 13,
+    "implicits": [
+      "+20% Chance to Block Attack Damage"
+    ],
+    "itemClass": "Warstaves"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Coiled Staff",
+    "crit": 0.077,
+    "damageFrom": 27,
+    "damageTo": 57,
+    "dps": 54.6,
+    "dropLevel": 23,
+    "implicits": [
+      "+20% Chance to Block Attack Damage"
+    ],
+    "itemClass": "Warstaves"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Vile Staff",
+    "crit": 0.075,
+    "damageFrom": 41,
+    "damageTo": 76,
+    "dps": 76.05,
+    "dropLevel": 33,
+    "implicits": [
+      "+20% Chance to Block Attack Damage"
+    ],
+    "itemClass": "Warstaves"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Military Staff",
+    "crit": 0.079,
+    "damageFrom": 38,
+    "damageTo": 114,
+    "dps": 95,
+    "dropLevel": 41,
+    "implicits": [
+      "+22% Chance to Block Attack Damage"
+    ],
+    "itemClass": "Warstaves"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Serpentine Staff",
+    "crit": 0.078,
+    "damageFrom": 56,
+    "damageTo": 117,
+    "dps": 108.12,
+    "dropLevel": 49,
+    "implicits": [
+      "+22% Chance to Block Attack Damage"
+    ],
+    "itemClass": "Warstaves"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Foul Staff",
+    "crit": 0.075,
+    "damageFrom": 65,
+    "damageTo": 121,
+    "dps": 120.9,
+    "dropLevel": 55,
+    "implicits": [
+      "+22% Chance to Block Attack Damage"
+    ],
+    "itemClass": "Warstaves"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Ezomyte Staff",
+    "crit": 0.085,
+    "damageFrom": 53,
+    "damageTo": 160,
+    "dps": 133.12,
+    "dropLevel": 60,
+    "implicits": [
+      "+25% Chance to Block Attack Damage"
+    ],
+    "itemClass": "Warstaves"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Maelström Staff",
+    "crit": 0.081,
+    "damageFrom": 71,
+    "damageTo": 147,
+    "dps": 136.25,
+    "dropLevel": 64,
+    "implicits": [
+      "+25% Chance to Block Attack Damage"
+    ],
+    "itemClass": "Warstaves"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Judgement Staff",
+    "crit": 0.08,
+    "damageFrom": 73,
+    "damageTo": 136,
+    "dps": 135.85,
+    "dropLevel": 68,
+    "implicits": [
+      "+25% Chance to Block Attack Damage"
+    ],
+    "itemClass": "Warstaves"
+  },
+  {
+    "aps": 1.45,
+    "baseType": "Charan's Sword",
+    "crit": 0.05,
+    "damageFrom": 5,
+    "damageTo": 11,
+    "dps": 11.6,
+    "dropLevel": 2,
+    "implicits": [
+      "40% increased Global Accuracy Rating"
+    ],
+    "itemClass": "One Hand Swords"
+  },
+  {
+    "aps": 1.55,
+    "baseType": "Rusted Sword",
+    "crit": 0.05,
+    "damageFrom": 4,
+    "damageTo": 9,
+    "dps": 10.08,
+    "dropLevel": 1,
+    "implicits": [
+      "40% increased Global Accuracy Rating"
+    ],
+    "itemClass": "One Hand Swords"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Copper Sword",
+    "crit": 0.05,
+    "damageFrom": 6,
+    "damageTo": 14,
+    "dps": 15,
+    "dropLevel": 5,
+    "implicits": [
+      "+45 to Accuracy Rating"
+    ],
+    "itemClass": "One Hand Swords"
+  },
+  {
+    "aps": 1.55,
+    "baseType": "Sabre",
+    "crit": 0.05,
+    "damageFrom": 5,
+    "damageTo": 22,
+    "dps": 20.93,
+    "dropLevel": 10,
+    "implicits": [
+      "40% increased Global Accuracy Rating"
+    ],
+    "itemClass": "One Hand Swords"
+  },
+  {
+    "aps": 1.45,
+    "baseType": "Broad Sword",
+    "crit": 0.05,
+    "damageFrom": 15,
+    "damageTo": 21,
+    "dps": 26.1,
+    "dropLevel": 15,
+    "implicits": [
+      "40% increased Global Accuracy Rating"
+    ],
+    "itemClass": "One Hand Swords"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "War Sword",
+    "crit": 0.05,
+    "damageFrom": 16,
+    "damageTo": 30,
+    "dps": 32.2,
+    "dropLevel": 20,
+    "implicits": [
+      "40% increased Global Accuracy Rating"
+    ],
+    "itemClass": "One Hand Swords"
+  },
+  {
+    "aps": 1.45,
+    "baseType": "Ancient Sword",
+    "crit": 0.05,
+    "damageFrom": 18,
+    "damageTo": 33,
+    "dps": 36.98,
+    "dropLevel": 24,
+    "implicits": [
+      "+165 to Accuracy Rating"
+    ],
+    "itemClass": "One Hand Swords"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Elegant Sword",
+    "crit": 0.05,
+    "damageFrom": 20,
+    "damageTo": 33,
+    "dps": 39.75,
+    "dropLevel": 28,
+    "implicits": [
+      "+190 to Accuracy Rating"
+    ],
+    "itemClass": "One Hand Swords"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Dusk Blade",
+    "crit": 0.05,
+    "damageFrom": 19,
+    "damageTo": 54,
+    "dps": 47.45,
+    "dropLevel": 32,
+    "implicits": [
+      "40% increased Global Accuracy Rating"
+    ],
+    "itemClass": "One Hand Swords"
+  },
+  {
+    "aps": 1.15,
+    "baseType": "Hook Sword",
+    "crit": 0.05,
+    "damageFrom": 28,
+    "damageTo": 60,
+    "dps": 50.6,
+    "dropLevel": 34,
+    "implicits": [
+      "15% chance to Maim on Hit"
+    ],
+    "itemClass": "One Hand Swords"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Variscite Blade",
+    "crit": 0.05,
+    "damageFrom": 25,
+    "damageTo": 53,
+    "dps": 50.7,
+    "dropLevel": 35,
+    "implicits": [
+      "+240 to Accuracy Rating"
+    ],
+    "itemClass": "One Hand Swords"
+  },
+  {
+    "aps": 1.55,
+    "baseType": "Cutlass",
+    "crit": 0.05,
+    "damageFrom": 13,
+    "damageTo": 53,
+    "dps": 51.15,
+    "dropLevel": 38,
+    "implicits": [
+      "40% increased Global Accuracy Rating"
+    ],
+    "itemClass": "One Hand Swords"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Baselard",
+    "crit": 0.05,
+    "damageFrom": 37,
+    "damageTo": 53,
+    "dps": 58.5,
+    "dropLevel": 41,
+    "implicits": [
+      "40% increased Global Accuracy Rating"
+    ],
+    "itemClass": "One Hand Swords"
+  },
+  {
+    "aps": 1.2,
+    "baseType": "Battle Sword",
+    "crit": 0.05,
+    "damageFrom": 38,
+    "damageTo": 70,
+    "dps": 64.8,
+    "dropLevel": 44,
+    "implicits": [
+      "40% increased Global Accuracy Rating"
+    ],
+    "itemClass": "One Hand Swords"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Elder Sword",
+    "crit": 0.05,
+    "damageFrom": 36,
+    "damageTo": 66,
+    "dps": 66.3,
+    "dropLevel": 47,
+    "implicits": [
+      "+330 to Accuracy Rating"
+    ],
+    "itemClass": "One Hand Swords"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Graceful Sword",
+    "crit": 0.05,
+    "damageFrom": 34,
+    "damageTo": 55,
+    "dps": 66.75,
+    "dropLevel": 50,
+    "implicits": [
+      "+350 to Accuracy Rating"
+    ],
+    "itemClass": "One Hand Swords"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Twilight Blade",
+    "crit": 0.05,
+    "damageFrom": 30,
+    "damageTo": 86,
+    "dps": 75.4,
+    "dropLevel": 53,
+    "implicits": [
+      "40% increased Global Accuracy Rating"
+    ],
+    "itemClass": "One Hand Swords"
+  },
+  {
+    "aps": 1.15,
+    "baseType": "Grappler",
+    "crit": 0.05,
+    "damageFrom": 44,
+    "damageTo": 94,
+    "dps": 79.35,
+    "dropLevel": 55,
+    "implicits": [
+      "15% chance to Maim on Hit"
+    ],
+    "itemClass": "One Hand Swords"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Gemstone Sword",
+    "crit": 0.05,
+    "damageFrom": 39,
+    "damageTo": 83,
+    "dps": 79.3,
+    "dropLevel": 56,
+    "implicits": [
+      "+400 to Accuracy Rating"
+    ],
+    "itemClass": "One Hand Swords"
+  },
+  {
+    "aps": 1.55,
+    "baseType": "Corsair Sword",
+    "crit": 0.05,
+    "damageFrom": 20,
+    "damageTo": 80,
+    "dps": 77.5,
+    "dropLevel": 58,
+    "implicits": [
+      "40% increased Global Accuracy Rating"
+    ],
+    "itemClass": "One Hand Swords"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Gladius",
+    "crit": 0.05,
+    "damageFrom": 54,
+    "damageTo": 78,
+    "dps": 85.8,
+    "dropLevel": 60,
+    "implicits": [
+      "40% increased Global Accuracy Rating"
+    ],
+    "itemClass": "One Hand Swords"
+  },
+  {
+    "aps": 1.2,
+    "baseType": "Legion Sword",
+    "crit": 0.05,
+    "damageFrom": 53,
+    "damageTo": 98,
+    "dps": 90.6,
+    "dropLevel": 62,
+    "implicits": [
+      "40% increased Global Accuracy Rating"
+    ],
+    "itemClass": "One Hand Swords"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Vaal Blade",
+    "crit": 0.05,
+    "damageFrom": 46,
+    "damageTo": 86,
+    "dps": 85.8,
+    "dropLevel": 64,
+    "implicits": [
+      "+460 to Accuracy Rating"
+    ],
+    "itemClass": "One Hand Swords"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Eternal Sword",
+    "crit": 0.05,
+    "damageFrom": 41,
+    "damageTo": 68,
+    "dps": 81.75,
+    "dropLevel": 66,
+    "implicits": [
+      "+475 to Accuracy Rating"
+    ],
+    "itemClass": "One Hand Swords"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Midnight Blade",
+    "crit": 0.05,
+    "damageFrom": 35,
+    "damageTo": 99,
+    "dps": 87.1,
+    "dropLevel": 68,
+    "implicits": [
+      "40% increased Global Accuracy Rating"
+    ],
+    "itemClass": "One Hand Swords"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Tiger Hook",
+    "crit": 0.05,
+    "damageFrom": 37,
+    "damageTo": 80,
+    "dps": 81.9,
+    "dropLevel": 70,
+    "implicits": [
+      "20% chance to Maim on Hit"
+    ],
+    "itemClass": "One Hand Swords"
+  },
+  {
+    "aps": 1.55,
+    "baseType": "Rusted Spike",
+    "crit": 0.055,
+    "damageFrom": 5,
+    "damageTo": 11,
+    "dps": 12.4,
+    "dropLevel": 3,
+    "implicits": [
+      "+25% to Global Critical Strike Multiplier"
+    ],
+    "itemClass": "Thrusting One Hand Swords"
+  },
+  {
+    "aps": 1.6,
+    "baseType": "Whalebone Rapier",
+    "crit": 0.055,
+    "damageFrom": 4,
+    "damageTo": 17,
+    "dps": 16.8,
+    "dropLevel": 7,
+    "implicits": [
+      "+25% to Global Critical Strike Multiplier"
+    ],
+    "itemClass": "Thrusting One Hand Swords"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Battered Foil",
+    "crit": 0.06,
+    "damageFrom": 11,
+    "damageTo": 20,
+    "dps": 23.25,
+    "dropLevel": 12,
+    "implicits": [
+      "+25% to Global Critical Strike Multiplier"
+    ],
+    "itemClass": "Thrusting One Hand Swords"
+  },
+  {
+    "aps": 1.55,
+    "baseType": "Basket Rapier",
+    "crit": 0.055,
+    "damageFrom": 11,
+    "damageTo": 25,
+    "dps": 27.9,
+    "dropLevel": 17,
+    "implicits": [
+      "+25% to Global Critical Strike Multiplier"
+    ],
+    "itemClass": "Thrusting One Hand Swords"
+  },
+  {
+    "aps": 1.6,
+    "baseType": "Jagged Foil",
+    "crit": 0.055,
+    "damageFrom": 12,
+    "damageTo": 29,
+    "dps": 32.8,
+    "dropLevel": 22,
+    "implicits": [
+      "+25% to Global Critical Strike Multiplier"
+    ],
+    "itemClass": "Thrusting One Hand Swords"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Antique Rapier",
+    "crit": 0.065,
+    "damageFrom": 12,
+    "damageTo": 46,
+    "dps": 37.7,
+    "dropLevel": 26,
+    "implicits": [
+      "+25% to Global Critical Strike Multiplier"
+    ],
+    "itemClass": "Thrusting One Hand Swords"
+  },
+  {
+    "aps": 1.6,
+    "baseType": "Elegant Foil",
+    "crit": 0.055,
+    "damageFrom": 18,
+    "damageTo": 33,
+    "dps": 40.8,
+    "dropLevel": 30,
+    "implicits": [
+      "+25% to Global Critical Strike Multiplier"
+    ],
+    "itemClass": "Thrusting One Hand Swords"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Thorn Rapier",
+    "crit": 0.057,
+    "damageFrom": 19,
+    "damageTo": 44,
+    "dps": 44.1,
+    "dropLevel": 34,
+    "implicits": [
+      "+35% to Global Critical Strike Multiplier"
+    ],
+    "itemClass": "Thrusting One Hand Swords"
+  },
+  {
+    "aps": 1.55,
+    "baseType": "Smallsword",
+    "crit": 0.06,
+    "damageFrom": 19,
+    "damageTo": 40,
+    "dps": 45.73,
+    "dropLevel": 36,
+    "implicits": [
+      "15% chance to cause Bleeding on Hit"
+    ],
+    "itemClass": "Thrusting One Hand Swords"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Wyrmbone Rapier",
+    "crit": 0.055,
+    "damageFrom": 13,
+    "damageTo": 51,
+    "dps": 48,
+    "dropLevel": 37,
+    "implicits": [
+      "+25% to Global Critical Strike Multiplier"
+    ],
+    "itemClass": "Thrusting One Hand Swords"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Burnished Foil",
+    "crit": 0.06,
+    "damageFrom": 25,
+    "damageTo": 46,
+    "dps": 49.7,
+    "dropLevel": 40,
+    "implicits": [
+      "+25% to Global Critical Strike Multiplier"
+    ],
+    "itemClass": "Thrusting One Hand Swords"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Estoc",
+    "crit": 0.055,
+    "damageFrom": 21,
+    "damageTo": 50,
+    "dps": 53.25,
+    "dropLevel": 43,
+    "implicits": [
+      "+25% to Global Critical Strike Multiplier"
+    ],
+    "itemClass": "Thrusting One Hand Swords"
+  },
+  {
+    "aps": 1.6,
+    "baseType": "Serrated Foil",
+    "crit": 0.055,
+    "damageFrom": 21,
+    "damageTo": 49,
+    "dps": 56,
+    "dropLevel": 46,
+    "implicits": [
+      "+25% to Global Critical Strike Multiplier"
+    ],
+    "itemClass": "Thrusting One Hand Swords"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Primeval Rapier",
+    "crit": 0.065,
+    "damageFrom": 18,
+    "damageTo": 73,
+    "dps": 59.15,
+    "dropLevel": 49,
+    "implicits": [
+      "+25% to Global Critical Strike Multiplier"
+    ],
+    "itemClass": "Thrusting One Hand Swords"
+  },
+  {
+    "aps": 1.6,
+    "baseType": "Fancy Foil",
+    "crit": 0.055,
+    "damageFrom": 28,
+    "damageTo": 51,
+    "dps": 63.2,
+    "dropLevel": 52,
+    "implicits": [
+      "+25% to Global Critical Strike Multiplier"
+    ],
+    "itemClass": "Thrusting One Hand Swords"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Apex Rapier",
+    "crit": 0.057,
+    "damageFrom": 29,
+    "damageTo": 67,
+    "dps": 67.2,
+    "dropLevel": 55,
+    "implicits": [
+      "+35% to Global Critical Strike Multiplier"
+    ],
+    "itemClass": "Thrusting One Hand Swords"
+  },
+  {
+    "aps": 1.55,
+    "baseType": "Courtesan Sword",
+    "crit": 0.06,
+    "damageFrom": 29,
+    "damageTo": 60,
+    "dps": 68.98,
+    "dropLevel": 57,
+    "implicits": [
+      "15% chance to cause Bleeding on Hit"
+    ],
+    "itemClass": "Thrusting One Hand Swords"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Dragonbone Rapier",
+    "crit": 0.055,
+    "damageFrom": 19,
+    "damageTo": 75,
+    "dps": 70.5,
+    "dropLevel": 58,
+    "implicits": [
+      "+25% to Global Critical Strike Multiplier"
+    ],
+    "itemClass": "Thrusting One Hand Swords"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Tempered Foil",
+    "crit": 0.06,
+    "damageFrom": 35,
+    "damageTo": 65,
+    "dps": 70,
+    "dropLevel": 60,
+    "implicits": [
+      "+25% to Global Critical Strike Multiplier"
+    ],
+    "itemClass": "Thrusting One Hand Swords"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Pecoraro",
+    "crit": 0.055,
+    "damageFrom": 29,
+    "damageTo": 69,
+    "dps": 73.5,
+    "dropLevel": 62,
+    "implicits": [
+      "+25% to Global Critical Strike Multiplier"
+    ],
+    "itemClass": "Thrusting One Hand Swords"
+  },
+  {
+    "aps": 1.6,
+    "baseType": "Spiraled Foil",
+    "crit": 0.055,
+    "damageFrom": 27,
+    "damageTo": 64,
+    "dps": 72.8,
+    "dropLevel": 64,
+    "implicits": [
+      "+25% to Global Critical Strike Multiplier"
+    ],
+    "itemClass": "Thrusting One Hand Swords"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Vaal Rapier",
+    "crit": 0.065,
+    "damageFrom": 22,
+    "damageTo": 87,
+    "dps": 70.85,
+    "dropLevel": 66,
+    "implicits": [
+      "+25% to Global Critical Strike Multiplier"
+    ],
+    "itemClass": "Thrusting One Hand Swords"
+  },
+  {
+    "aps": 1.6,
+    "baseType": "Jewelled Foil",
+    "crit": 0.055,
+    "damageFrom": 32,
+    "damageTo": 60,
+    "dps": 73.6,
+    "dropLevel": 68,
+    "implicits": [
+      "+25% to Global Critical Strike Multiplier"
+    ],
+    "itemClass": "Thrusting One Hand Swords"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Harpy Rapier",
+    "crit": 0.057,
+    "damageFrom": 31,
+    "damageTo": 72,
+    "dps": 72.1,
+    "dropLevel": 70,
+    "implicits": [
+      "+35% to Global Critical Strike Multiplier"
+    ],
+    "itemClass": "Thrusting One Hand Swords"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Dragoon Sword",
+    "crit": 0.06,
+    "damageFrom": 32,
+    "damageTo": 66,
+    "dps": 73.5,
+    "dropLevel": 72,
+    "implicits": [
+      "20% chance to cause Bleeding on Hit"
+    ],
+    "itemClass": "Thrusting One Hand Swords"
+  },
+  {
+    "aps": 1.45,
+    "baseType": "Corroded Blade",
+    "crit": 0.05,
+    "damageFrom": 8,
+    "damageTo": 16,
+    "dps": 17.4,
+    "dropLevel": 3,
+    "implicits": [
+      "40% increased Global Accuracy Rating"
+    ],
+    "itemClass": "Two Hand Swords"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Longsword",
+    "crit": 0.05,
+    "damageFrom": 11,
+    "damageTo": 26,
+    "dps": 25.9,
+    "dropLevel": 8,
+    "implicits": [
+      "+60 to Accuracy Rating"
+    ],
+    "itemClass": "Two Hand Swords"
+  },
+  {
+    "aps": 1.45,
+    "baseType": "Bastard Sword",
+    "crit": 0.05,
+    "damageFrom": 17,
+    "damageTo": 29,
+    "dps": 33.35,
+    "dropLevel": 12,
+    "implicits": [
+      "60% increased Global Accuracy Rating"
+    ],
+    "itemClass": "Two Hand Swords"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Two-Handed Sword",
+    "crit": 0.05,
+    "damageFrom": 20,
+    "damageTo": 38,
+    "dps": 40.6,
+    "dropLevel": 17,
+    "implicits": [
+      "+120 to Accuracy Rating"
+    ],
+    "itemClass": "Two Hand Swords"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Etched Greatsword",
+    "crit": 0.05,
+    "damageFrom": 23,
+    "damageTo": 48,
+    "dps": 49.7,
+    "dropLevel": 22,
+    "implicits": [
+      "60% increased Global Accuracy Rating"
+    ],
+    "itemClass": "Two Hand Swords"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Ornate Sword",
+    "crit": 0.05,
+    "damageFrom": 30,
+    "damageTo": 50,
+    "dps": 56,
+    "dropLevel": 27,
+    "implicits": [
+      "+185 to Accuracy Rating"
+    ],
+    "itemClass": "Two Hand Swords"
+  },
+  {
+    "aps": 1.35,
+    "baseType": "Spectral Sword",
+    "crit": 0.05,
+    "damageFrom": 31,
+    "damageTo": 65,
+    "dps": 64.8,
+    "dropLevel": 32,
+    "implicits": [
+      "45% increased Global Accuracy Rating"
+    ],
+    "itemClass": "Two Hand Swords"
+  },
+  {
+    "aps": 1.35,
+    "baseType": "Curved Blade",
+    "crit": 0.06,
+    "damageFrom": 41,
+    "damageTo": 68,
+    "dps": 73.58,
+    "dropLevel": 35,
+    "implicits": [
+      "+40% to Global Critical Strike Multiplier"
+    ],
+    "itemClass": "Two Hand Swords"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Butcher Sword",
+    "crit": 0.05,
+    "damageFrom": 34,
+    "damageTo": 79,
+    "dps": 73.45,
+    "dropLevel": 36,
+    "implicits": [
+      "+250 to Accuracy Rating"
+    ],
+    "itemClass": "Two Hand Swords"
+  },
+  {
+    "aps": 1.45,
+    "baseType": "Footman Sword",
+    "crit": 0.05,
+    "damageFrom": 39,
+    "damageTo": 65,
+    "dps": 75.4,
+    "dropLevel": 40,
+    "implicits": [
+      "60% increased Global Accuracy Rating"
+    ],
+    "itemClass": "Two Hand Swords"
+  },
+  {
+    "aps": 1.35,
+    "baseType": "Highland Blade",
+    "crit": 0.05,
+    "damageFrom": 45,
+    "damageTo": 84,
+    "dps": 87.08,
+    "dropLevel": 44,
+    "implicits": [
+      "+305 to Accuracy Rating"
+    ],
+    "itemClass": "Two Hand Swords"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Engraved Greatsword",
+    "crit": 0.05,
+    "damageFrom": 49,
+    "damageTo": 102,
+    "dps": 98.15,
+    "dropLevel": 48,
+    "implicits": [
+      "60% increased Global Accuracy Rating"
+    ],
+    "itemClass": "Two Hand Swords"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Tiger Sword",
+    "crit": 0.05,
+    "damageFrom": 54,
+    "damageTo": 89,
+    "dps": 100.1,
+    "dropLevel": 51,
+    "implicits": [
+      "+360 to Accuracy Rating"
+    ],
+    "itemClass": "Two Hand Swords"
+  },
+  {
+    "aps": 1.35,
+    "baseType": "Wraith Sword",
+    "crit": 0.05,
+    "damageFrom": 52,
+    "damageTo": 109,
+    "dps": 108.68,
+    "dropLevel": 54,
+    "implicits": [
+      "45% increased Global Accuracy Rating"
+    ],
+    "itemClass": "Two Hand Swords"
+  },
+  {
+    "aps": 1.35,
+    "baseType": "Lithe Blade",
+    "crit": 0.06,
+    "damageFrom": 63,
+    "damageTo": 104,
+    "dps": 112.73,
+    "dropLevel": 56,
+    "implicits": [
+      "+40% to Global Critical Strike Multiplier"
+    ],
+    "itemClass": "Two Hand Swords"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Headman's Sword",
+    "crit": 0.05,
+    "damageFrom": 55,
+    "damageTo": 128,
+    "dps": 118.95,
+    "dropLevel": 57,
+    "implicits": [
+      "+400 to Accuracy Rating"
+    ],
+    "itemClass": "Two Hand Swords"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Reaver Sword",
+    "crit": 0.05,
+    "damageFrom": 62,
+    "damageTo": 104,
+    "dps": 124.5,
+    "dropLevel": 59,
+    "implicits": [
+      "60% increased Global Accuracy Rating"
+    ],
+    "itemClass": "Two Hand Swords"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Ezomyte Blade",
+    "crit": 0.065,
+    "damageFrom": 62,
+    "damageTo": 115,
+    "dps": 123.9,
+    "dropLevel": 61,
+    "implicits": [
+      "+25% to Global Critical Strike Multiplier"
+    ],
+    "itemClass": "Two Hand Swords"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Vaal Greatsword",
+    "crit": 0.05,
+    "damageFrom": 68,
+    "damageTo": 142,
+    "dps": 136.5,
+    "dropLevel": 63,
+    "implicits": [
+      "+470 to Accuracy Rating"
+    ],
+    "itemClass": "Two Hand Swords"
+  },
+  {
+    "aps": 1.45,
+    "baseType": "Lion Sword",
+    "crit": 0.05,
+    "damageFrom": 69,
+    "damageTo": 115,
+    "dps": 133.4,
+    "dropLevel": 65,
+    "implicits": [
+      "+50 to Strength and Dexterity"
+    ],
+    "itemClass": "Two Hand Swords"
+  },
+  {
+    "aps": 1.35,
+    "baseType": "Infernal Sword",
+    "crit": 0.05,
+    "damageFrom": 62,
+    "damageTo": 129,
+    "dps": 128.93,
+    "dropLevel": 67,
+    "implicits": [
+      "30% increased Elemental Damage with Attack Skills"
+    ],
+    "itemClass": "Two Hand Swords"
+  },
+  {
+    "aps": 1.35,
+    "baseType": "Exquisite Blade",
+    "crit": 0.057,
+    "damageFrom": 67,
+    "damageTo": 112,
+    "dps": 120.83,
+    "dropLevel": 70,
+    "implicits": [
+      "+50% to Global Critical Strike Multiplier"
+    ],
+    "itemClass": "Two Hand Swords"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Driftwood Wand",
+    "crit": 0.083,
+    "damageFrom": 5,
+    "damageTo": 9,
+    "dps": 9.8,
+    "dropLevel": 1,
+    "implicits": [
+      "8-12% increased Spell Damage"
+    ],
+    "itemClass": "Wands"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Goat's Horn",
+    "crit": 0.08,
+    "damageFrom": 7,
+    "damageTo": 13,
+    "dps": 14,
+    "dropLevel": 6,
+    "implicits": [
+      "Adds 1-2 to 3-4 Fire Damage to Spells and Attacks"
+    ],
+    "itemClass": "Wands"
+  },
+  {
+    "aps": 1.6,
+    "baseType": "Somatic Wand",
+    "crit": 0.085,
+    "damageFrom": 9,
+    "damageTo": 18,
+    "dps": 21.6,
+    "dropLevel": 12,
+    "implicits": [
+      "Cannot roll Caster Modifiers"
+    ],
+    "itemClass": "Wands"
+  },
+  {
+    "aps": 1.45,
+    "baseType": "Quartz Wand",
+    "crit": 0.08,
+    "damageFrom": 12,
+    "damageTo": 23,
+    "dps": 25.38,
+    "dropLevel": 18,
+    "implicits": [
+      "Adds 2-3 to 4-7 Cold Damage to Spells and Attacks"
+    ],
+    "itemClass": "Wands"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Calling Wand",
+    "crit": 0.08,
+    "damageFrom": 13,
+    "damageTo": 23,
+    "dps": 27,
+    "dropLevel": 20,
+    "implicits": [
+      "Minions deal 12-16% increased Damage"
+    ],
+    "itemClass": "Wands"
+  },
+  {
+    "aps": 1.45,
+    "baseType": "Spiraled Wand",
+    "crit": 0.08,
+    "damageFrom": 11,
+    "damageTo": 32,
+    "dps": 31.18,
+    "dropLevel": 24,
+    "implicits": [
+      "Adds 1-2 to 9-11 Lightning Damage to Spells and Attacks"
+    ],
+    "itemClass": "Wands"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Sage Wand",
+    "crit": 0.087,
+    "damageFrom": 17,
+    "damageTo": 32,
+    "dps": 36.75,
+    "dropLevel": 30,
+    "implicits": [
+      "17-21% increased Spell Damage"
+    ],
+    "itemClass": "Wands"
+  },
+  {
+    "aps": 1.45,
+    "baseType": "Pagan Wand",
+    "crit": 0.08,
+    "damageFrom": 20,
+    "damageTo": 37,
+    "dps": 41.32,
+    "dropLevel": 34,
+    "implicits": [
+      "10% increased Cast Speed"
+    ],
+    "itemClass": "Wands"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Faun's Horn",
+    "crit": 0.08,
+    "damageFrom": 21,
+    "damageTo": 38,
+    "dps": 41.3,
+    "dropLevel": 35,
+    "implicits": [
+      "Adds 5-10 to 11-13 Fire Damage to Spells and Attacks"
+    ],
+    "itemClass": "Wands"
+  },
+  {
+    "aps": 1.6,
+    "baseType": "Blasting Wand",
+    "crit": 0.085,
+    "damageFrom": 21,
+    "damageTo": 39,
+    "dps": 48,
+    "dropLevel": 40,
+    "implicits": [
+      "Cannot roll Caster Modifiers"
+    ],
+    "itemClass": "Wands"
+  },
+  {
+    "aps": 1.45,
+    "baseType": "Crystal Wand",
+    "crit": 0.08,
+    "damageFrom": 24,
+    "damageTo": 45,
+    "dps": 50.02,
+    "dropLevel": 45,
+    "implicits": [
+      "Adds 4-8 to 10-12 Cold Damage to Spells and Attacks"
+    ],
+    "itemClass": "Wands"
+  },
+  {
+    "aps": 1.45,
+    "baseType": "Coiled Wand",
+    "crit": 0.08,
+    "damageFrom": 18,
+    "damageTo": 55,
+    "dps": 52.92,
+    "dropLevel": 49,
+    "implicits": [
+      "Adds 1-2 to 22-24 Lightning Damage to Spells and Attacks"
+    ],
+    "itemClass": "Wands"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Convening Wand",
+    "crit": 0.08,
+    "damageFrom": 25,
+    "damageTo": 47,
+    "dps": 54,
+    "dropLevel": 50,
+    "implicits": [
+      "Minions deal 20-24% increased Damage"
+    ],
+    "itemClass": "Wands"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Omen Wand",
+    "crit": 0.087,
+    "damageFrom": 24,
+    "damageTo": 45,
+    "dps": 51.75,
+    "dropLevel": 53,
+    "implicits": [
+      "27-31% increased Spell Damage"
+    ],
+    "itemClass": "Wands"
+  },
+  {
+    "aps": 1.45,
+    "baseType": "Heathen Wand",
+    "crit": 0.08,
+    "damageFrom": 28,
+    "damageTo": 52,
+    "dps": 58,
+    "dropLevel": 55,
+    "implicits": [
+      "10% increased Cast Speed"
+    ],
+    "itemClass": "Wands"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Demon's Horn",
+    "crit": 0.08,
+    "damageFrom": 31,
+    "damageTo": 57,
+    "dps": 61.6,
+    "dropLevel": 56,
+    "implicits": [
+      "30-34% increased Spell Damage"
+    ],
+    "itemClass": "Wands"
+  },
+  {
+    "aps": 1.6,
+    "baseType": "Kinetic Wand",
+    "crit": 0.085,
+    "damageFrom": 29,
+    "damageTo": 54,
+    "dps": 66.4,
+    "dropLevel": 59,
+    "implicits": [
+      "Cannot roll Caster Modifiers"
+    ],
+    "itemClass": "Wands"
+  },
+  {
+    "aps": 1.45,
+    "baseType": "Opal Wand",
+    "crit": 0.08,
+    "damageFrom": 30,
+    "damageTo": 56,
+    "dps": 62.35,
+    "dropLevel": 62,
+    "implicits": [
+      "31-35% increased Spell Damage"
+    ],
+    "itemClass": "Wands"
+  },
+  {
+    "aps": 1.45,
+    "baseType": "Tornado Wand",
+    "crit": 0.08,
+    "damageFrom": 22,
+    "damageTo": 65,
+    "dps": 63.07,
+    "dropLevel": 65,
+    "implicits": [
+      "35-39% increased Spell Damage"
+    ],
+    "itemClass": "Wands"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Prophecy Wand",
+    "crit": 0.087,
+    "damageFrom": 26,
+    "damageTo": 48,
+    "dps": 55.5,
+    "dropLevel": 68,
+    "implicits": [
+      "36-40% increased Spell Damage"
+    ],
+    "itemClass": "Wands"
+  },
+  {
+    "aps": 1.45,
+    "baseType": "Profane Wand",
+    "crit": 0.08,
+    "damageFrom": 30,
+    "damageTo": 56,
+    "dps": 62.35,
+    "dropLevel": 70,
+    "implicits": [
+      "14% increased Cast Speed"
+    ],
+    "itemClass": "Wands"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Convoking Wand",
+    "crit": 0.08,
+    "damageFrom": 28,
+    "damageTo": 52,
+    "dps": 60,
+    "dropLevel": 72,
+    "implicits": [
+      "Minions deal 26-30% increased Damage"
+    ],
+    "itemClass": "Wands"
+  },
+  {
+    "aps": 1.2,
+    "baseType": "Fishing Rod",
+    "crit": 0.05,
+    "damageFrom": 8,
+    "damageTo": 15,
+    "dps": 13.8,
+    "dropLevel": 1,
+    "implicits": [],
+    "itemClass": "Fishing Rods"
+  },
+  {
+    "baseType": "Splintered Tower Shield",
+    "dropLevel": 1,
+    "implicits": [],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Corroded Tower Shield",
+    "dropLevel": 5,
+    "implicits": [
+      "+10-20 to maximum Life"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Rawhide Tower Shield",
+    "dropLevel": 11,
+    "implicits": [
+      "+10-20 to maximum Life"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Cedar Tower Shield",
+    "dropLevel": 17,
+    "implicits": [
+      "+20-30 to maximum Life"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Copper Tower Shield",
+    "dropLevel": 24,
+    "implicits": [
+      "+30-40 to maximum Life"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Reinforced Tower Shield",
+    "dropLevel": 30,
+    "implicits": [
+      "+10-20 to maximum Life"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Painted Tower Shield",
+    "dropLevel": 35,
+    "implicits": [
+      "+20-30 to maximum Life"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Buckskin Tower Shield",
+    "dropLevel": 39,
+    "implicits": [
+      "+10-20 to maximum Life"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Mahogany Tower Shield",
+    "dropLevel": 43,
+    "implicits": [
+      "+20-30 to maximum Life"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Bronze Tower Shield",
+    "dropLevel": 47,
+    "implicits": [
+      "+30-40 to maximum Life"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Girded Tower Shield",
+    "dropLevel": 51,
+    "implicits": [
+      "+10-20 to maximum Life"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Crested Tower Shield",
+    "dropLevel": 55,
+    "implicits": [
+      "+20-30 to maximum Life"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Shagreen Tower Shield",
+    "dropLevel": 58,
+    "implicits": [
+      "+10-20 to maximum Life"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Ebony Tower Shield",
+    "dropLevel": 61,
+    "implicits": [
+      "+20-30 to maximum Life"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Ezomyte Tower Shield",
+    "dropLevel": 64,
+    "implicits": [
+      "+30-40 to maximum Life"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Colossal Tower Shield",
+    "dropLevel": 67,
+    "implicits": [
+      "+10-20 to maximum Life"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Pinnacle Tower Shield",
+    "dropLevel": 70,
+    "implicits": [
+      "+20-30 to maximum Life"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Goathide Buckler",
+    "dropLevel": 2,
+    "implicits": [
+      "3% increased Movement Speed"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Pine Buckler",
+    "dropLevel": 8,
+    "implicits": [
+      "3% increased Movement Speed"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Painted Buckler",
+    "dropLevel": 16,
+    "implicits": [
+      "6% increased Movement Speed"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Hammered Buckler",
+    "dropLevel": 23,
+    "implicits": [
+      "3% increased Movement Speed"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "War Buckler",
+    "dropLevel": 29,
+    "implicits": [
+      "9% increased Movement Speed"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Gilded Buckler",
+    "dropLevel": 34,
+    "implicits": [
+      "6% increased Movement Speed"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Oak Buckler",
+    "dropLevel": 38,
+    "implicits": [
+      "3% increased Movement Speed"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Enameled Buckler",
+    "dropLevel": 42,
+    "implicits": [
+      "6% increased Movement Speed"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Corrugated Buckler",
+    "dropLevel": 46,
+    "implicits": [
+      "3% increased Movement Speed"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Battle Buckler",
+    "dropLevel": 50,
+    "implicits": [
+      "9% increased Movement Speed"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Golden Buckler",
+    "dropLevel": 54,
+    "implicits": [
+      "6% increased Movement Speed"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Ironwood Buckler",
+    "dropLevel": 57,
+    "implicits": [
+      "3% increased Movement Speed"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Lacquered Buckler",
+    "dropLevel": 60,
+    "implicits": [
+      "6% increased Movement Speed"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Vaal Buckler",
+    "dropLevel": 63,
+    "implicits": [
+      "3% increased Movement Speed"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Crusader Buckler",
+    "dropLevel": 66,
+    "implicits": [
+      "9% increased Movement Speed"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Imperial Buckler",
+    "dropLevel": 69,
+    "implicits": [
+      "6% increased Movement Speed"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Twig Spirit Shield",
+    "dropLevel": 3,
+    "implicits": [
+      "10-15% increased Spell Damage"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Yew Spirit Shield",
+    "dropLevel": 9,
+    "implicits": [
+      "5-10% increased Spell Damage"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Bone Spirit Shield",
+    "dropLevel": 15,
+    "implicits": [
+      "Minions deal 5-10% increased Damage"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Tarnished Spirit Shield",
+    "dropLevel": 23,
+    "implicits": [
+      "5-10% increased Spell Damage"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Jingling Spirit Shield",
+    "dropLevel": 28,
+    "implicits": [
+      "10-15% increased Spell Damage"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Brass Spirit Shield",
+    "dropLevel": 33,
+    "implicits": [],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Walnut Spirit Shield",
+    "dropLevel": 37,
+    "implicits": [
+      "5-10% increased Spell Damage"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Ivory Spirit Shield",
+    "dropLevel": 41,
+    "implicits": [
+      "Minions deal 5-10% increased Damage"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Ancient Spirit Shield",
+    "dropLevel": 45,
+    "implicits": [
+      "5-10% increased Spell Damage"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Chiming Spirit Shield",
+    "dropLevel": 49,
+    "implicits": [
+      "10-15% increased Spell Damage"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Thorium Spirit Shield",
+    "dropLevel": 53,
+    "implicits": [],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Lacewood Spirit Shield",
+    "dropLevel": 56,
+    "implicits": [
+      "5-10% increased Spell Damage"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Fossilised Spirit Shield",
+    "dropLevel": 59,
+    "implicits": [
+      "Minions deal 5-10% increased Damage"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Vaal Spirit Shield",
+    "dropLevel": 62,
+    "implicits": [
+      "5-10% increased Spell Damage"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Harmonic Spirit Shield",
+    "dropLevel": 65,
+    "implicits": [
+      "10-15% increased Spell Damage"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Titanium Spirit Shield",
+    "dropLevel": 68,
+    "implicits": [],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Rotted Round Shield",
+    "dropLevel": 5,
+    "implicits": [
+      "60% increased Block Recovery"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Fir Round Shield",
+    "dropLevel": 12,
+    "implicits": [
+      "180% increased Block Recovery"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Studded Round Shield",
+    "dropLevel": 20,
+    "implicits": [
+      "60% increased Block Recovery"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Scarlet Round Shield",
+    "dropLevel": 27,
+    "implicits": [],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Splendid Round Shield",
+    "dropLevel": 33,
+    "implicits": [
+      "120% increased Block Recovery"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Maple Round Shield",
+    "dropLevel": 39,
+    "implicits": [
+      "180% increased Block Recovery"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Spiked Round Shield",
+    "dropLevel": 45,
+    "implicits": [
+      "60% increased Block Recovery"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Crimson Round Shield",
+    "dropLevel": 49,
+    "implicits": [],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Baroque Round Shield",
+    "dropLevel": 54,
+    "implicits": [
+      "120% increased Block Recovery"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Teak Round Shield",
+    "dropLevel": 58,
+    "implicits": [
+      "180% increased Block Recovery"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Spiny Round Shield",
+    "dropLevel": 62,
+    "implicits": [
+      "60% increased Block Recovery"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Cardinal Round Shield",
+    "dropLevel": 66,
+    "implicits": [],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Elegant Round Shield",
+    "dropLevel": 70,
+    "implicits": [
+      "120% increased Block Recovery"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Plank Kite Shield",
+    "dropLevel": 7,
+    "implicits": [
+      "+4% to all Elemental Resistances"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Linden Kite Shield",
+    "dropLevel": 13,
+    "implicits": [
+      "+4% to all Elemental Resistances"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Reinforced Kite Shield",
+    "dropLevel": 20,
+    "implicits": [],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Layered Kite Shield",
+    "dropLevel": 27,
+    "implicits": [
+      "+8% to all Elemental Resistances"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Ceremonial Kite Shield",
+    "dropLevel": 34,
+    "implicits": [
+      "+12% to all Elemental Resistances"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Etched Kite Shield",
+    "dropLevel": 40,
+    "implicits": [
+      "+4% to all Elemental Resistances"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Steel Kite Shield",
+    "dropLevel": 46,
+    "implicits": [],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Laminated Kite Shield",
+    "dropLevel": 50,
+    "implicits": [
+      "+8% to all Elemental Resistances"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Angelic Kite Shield",
+    "dropLevel": 55,
+    "implicits": [
+      "+12% to all Elemental Resistances"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Branded Kite Shield",
+    "dropLevel": 59,
+    "implicits": [
+      "+4% to all Elemental Resistances"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Champion Kite Shield",
+    "dropLevel": 62,
+    "implicits": [],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Mosaic Kite Shield",
+    "dropLevel": 65,
+    "implicits": [
+      "+8% to all Elemental Resistances"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Archon Kite Shield",
+    "dropLevel": 68,
+    "implicits": [
+      "+12% to all Elemental Resistances"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Spiked Bundle",
+    "dropLevel": 5,
+    "implicits": [
+      "+3% chance to Suppress Spell Damage"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Driftwood Spiked Shield",
+    "dropLevel": 12,
+    "implicits": [
+      "+3% chance to Suppress Spell Damage"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Alloyed Spiked Shield",
+    "dropLevel": 20,
+    "implicits": [
+      "+3% chance to Suppress Spell Damage"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Burnished Spiked Shield",
+    "dropLevel": 27,
+    "implicits": [
+      "+5% chance to Suppress Spell Damage"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Ornate Spiked Shield",
+    "dropLevel": 33,
+    "implicits": [
+      "+5% chance to Suppress Spell Damage"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Redwood Spiked Shield",
+    "dropLevel": 39,
+    "implicits": [
+      "+3% chance to Suppress Spell Damage"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Compound Spiked Shield",
+    "dropLevel": 45,
+    "implicits": [
+      "+3% chance to Suppress Spell Damage"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Polished Spiked Shield",
+    "dropLevel": 49,
+    "implicits": [
+      "+5% chance to Suppress Spell Damage"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Sovereign Spiked Shield",
+    "dropLevel": 54,
+    "implicits": [
+      "+5% chance to Suppress Spell Damage"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Alder Spiked Shield",
+    "dropLevel": 58,
+    "implicits": [
+      "+3% chance to Suppress Spell Damage"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Ezomyte Spiked Shield",
+    "dropLevel": 62,
+    "implicits": [
+      "+3% chance to Suppress Spell Damage"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Mirrored Spiked Shield",
+    "dropLevel": 66,
+    "implicits": [
+      "+5% chance to Suppress Spell Damage"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Supreme Spiked Shield",
+    "dropLevel": 70,
+    "implicits": [
+      "+5% chance to Suppress Spell Damage"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Assembler Wand",
+    "crit": 0.085,
+    "damageFrom": 15,
+    "damageTo": 28,
+    "dps": 32.25,
+    "dropLevel": 30,
+    "implicits": [
+      "Gain an Endurance, Frenzy or Power Charge every 6 seconds"
+    ],
+    "itemClass": "Wands"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Congregator Wand",
+    "crit": 0.085,
+    "damageFrom": 23,
+    "damageTo": 43,
+    "dps": 49.5,
+    "dropLevel": 50,
+    "implicits": [
+      "Gain an Endurance, Frenzy or Power Charge every 6 seconds"
+    ],
+    "itemClass": "Wands"
+  },
+  {
+    "aps": 1.5,
+    "baseType": "Accumulator Wand",
+    "crit": 0.085,
+    "damageFrom": 27,
+    "damageTo": 50,
+    "dps": 57.75,
+    "dropLevel": 70,
+    "implicits": [
+      "Gain 2 Endurance, Frenzy or Power Charges every 6 seconds"
+    ],
+    "itemClass": "Wands"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Hollowpoint Dagger",
+    "crit": 0.088,
+    "damageFrom": 12,
+    "damageTo": 46,
+    "dps": 40.6,
+    "dropLevel": 30,
+    "implicits": [
+      "All Damage from Hits with This Weapon can Poison"
+    ],
+    "itemClass": "Daggers"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Pressurised Dagger",
+    "crit": 0.088,
+    "damageFrom": 18,
+    "damageTo": 71,
+    "dps": 62.3,
+    "dropLevel": 50,
+    "implicits": [
+      "All Damage from Hits with This Weapon can Poison"
+    ],
+    "itemClass": "Daggers"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Pneumatic Dagger",
+    "crit": 0.088,
+    "damageFrom": 20,
+    "damageTo": 79,
+    "dps": 69.3,
+    "dropLevel": 70,
+    "implicits": [
+      "All Damage from Hits with This Weapon can Poison"
+    ],
+    "itemClass": "Daggers"
+  },
+  {
+    "aps": 1.45,
+    "baseType": "Flickerflame Blade",
+    "crit": 0.085,
+    "damageFrom": 12,
+    "damageTo": 47,
+    "dps": 42.77,
+    "dropLevel": 30,
+    "implicits": [
+      "Trigger Level 10 Flame Dash when you use a Socketed Skill"
+    ],
+    "itemClass": "Rune Daggers"
+  },
+  {
+    "aps": 1.45,
+    "baseType": "Flashfire Blade",
+    "crit": 0.085,
+    "damageFrom": 18,
+    "damageTo": 73,
+    "dps": 65.97,
+    "dropLevel": 50,
+    "implicits": [
+      "Trigger Level 20 Flame Dash when you use a Socketed Skill\\n20% increased Cooldown Recovery Rate of Travel Skills"
+    ],
+    "itemClass": "Rune Daggers"
+  },
+  {
+    "aps": 1.45,
+    "baseType": "Infernal Blade",
+    "crit": 0.085,
+    "damageFrom": 21,
+    "damageTo": 85,
+    "dps": 76.85,
+    "dropLevel": 70,
+    "implicits": [
+      "Trigger Level 30 Flame Dash when you use a Socketed Skill\\n40% increased Cooldown Recovery Rate of Travel Skills"
+    ],
+    "itemClass": "Rune Daggers"
+  },
+  {
+    "aps": 1.6,
+    "baseType": "Shadow Fangs",
+    "crit": 0.07,
+    "damageFrom": 13,
+    "damageTo": 24,
+    "dps": 29.6,
+    "dropLevel": 30,
+    "implicits": [
+      "Adds 26-38 to 52-70 Chaos Damage"
+    ],
+    "itemClass": "Claws"
+  },
+  {
+    "aps": 1.6,
+    "baseType": "Malign Fangs",
+    "crit": 0.07,
+    "damageFrom": 20,
+    "damageTo": 37,
+    "dps": 45.6,
+    "dropLevel": 50,
+    "implicits": [
+      "Adds 43-55 to 81-104 Chaos Damage"
+    ],
+    "itemClass": "Claws"
+  },
+  {
+    "aps": 1.6,
+    "baseType": "Void Fangs",
+    "crit": 0.07,
+    "damageFrom": 22,
+    "damageTo": 41,
+    "dps": 50.4,
+    "dropLevel": 70,
+    "implicits": [
+      "Adds 46-63 to 92-113 Chaos Damage"
+    ],
+    "itemClass": "Claws"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Maltreatment Axe",
+    "crit": 0.05,
+    "damageFrom": 19,
+    "damageTo": 39,
+    "dps": 37.7,
+    "dropLevel": 30,
+    "implicits": [
+      "Gain 3 Rage on Melee Hit"
+    ],
+    "itemClass": "One Hand Axes"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Disapprobation Axe",
+    "crit": 0.05,
+    "damageFrom": 29,
+    "damageTo": 60,
+    "dps": 57.85,
+    "dropLevel": 50,
+    "implicits": [
+      "Gain 4 Rage on Melee Hit"
+    ],
+    "itemClass": "One Hand Axes"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Psychotic Axe",
+    "crit": 0.05,
+    "damageFrom": 34,
+    "damageTo": 71,
+    "dps": 68.25,
+    "dropLevel": 70,
+    "implicits": [
+      "Gain 5 Rage on Melee Hit"
+    ],
+    "itemClass": "One Hand Axes"
+  },
+  {
+    "aps": 1.6,
+    "baseType": "Fickle Spiritblade",
+    "crit": 0.065,
+    "damageFrom": 18,
+    "damageTo": 33,
+    "dps": 40.8,
+    "dropLevel": 30,
+    "implicits": [
+      "100% of Physical Damage from Hits with this Weapon is Converted to a random Element"
+    ],
+    "itemClass": "One Hand Swords"
+  },
+  {
+    "aps": 1.6,
+    "baseType": "Capricious Spiritblade",
+    "crit": 0.065,
+    "damageFrom": 27,
+    "damageTo": 51,
+    "dps": 62.4,
+    "dropLevel": 50,
+    "implicits": [
+      "100% of Physical Damage from Hits with this Weapon is Converted to a random Element"
+    ],
+    "itemClass": "One Hand Swords"
+  },
+  {
+    "aps": 1.6,
+    "baseType": "Anarchic Spiritblade",
+    "crit": 0.065,
+    "damageFrom": 34,
+    "damageTo": 63,
+    "dps": 77.6,
+    "dropLevel": 70,
+    "implicits": [
+      "100% of Physical Damage from Hits with this Weapon is Converted to a random Element"
+    ],
+    "itemClass": "One Hand Swords"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Flare Mace",
+    "crit": 0.05,
+    "damageFrom": 20,
+    "damageTo": 41,
+    "dps": 39.65,
+    "dropLevel": 30,
+    "implicits": [
+      "Trigger Level 10 Fiery Impact on Melee Hit with this Weapon"
+    ],
+    "itemClass": "One Hand Maces"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Crack Mace",
+    "crit": 0.05,
+    "damageFrom": 31,
+    "damageTo": 64,
+    "dps": 61.75,
+    "dropLevel": 50,
+    "implicits": [
+      "Trigger Level 15 Fiery Impact on Melee Hit with this Weapon"
+    ],
+    "itemClass": "One Hand Maces"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Boom Mace",
+    "crit": 0.05,
+    "damageFrom": 39,
+    "damageTo": 81,
+    "dps": 78,
+    "dropLevel": 70,
+    "implicits": [
+      "Trigger Level 20 Fiery Impact on Melee Hit with this Weapon"
+    ],
+    "itemClass": "One Hand Maces"
+  },
+  {
+    "aps": 1.45,
+    "baseType": "Oscillating Sceptre",
+    "crit": 0.076,
+    "damageFrom": 23,
+    "damageTo": 34,
+    "dps": 41.32,
+    "dropLevel": 30,
+    "implicits": [
+      "Elemental Overload"
+    ],
+    "itemClass": "Sceptres"
+  },
+  {
+    "aps": 1.45,
+    "baseType": "Stabilising Sceptre",
+    "crit": 0.076,
+    "damageFrom": 35,
+    "damageTo": 52,
+    "dps": 63.07,
+    "dropLevel": 50,
+    "implicits": [
+      "Elemental Equilibrium"
+    ],
+    "itemClass": "Sceptres"
+  },
+  {
+    "aps": 1.45,
+    "baseType": "Alternating Sceptre",
+    "crit": 0.076,
+    "damageFrom": 41,
+    "damageTo": 61,
+    "dps": 73.95,
+    "dropLevel": 70,
+    "implicits": [
+      "Secrets of Suffering"
+    ],
+    "itemClass": "Sceptres"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Hedron Bow",
+    "crit": 0.055,
+    "damageFrom": 9,
+    "damageTo": 13,
+    "dps": 14.3,
+    "dropLevel": 30,
+    "implicits": [
+      "Adds 46-55 to 69-83 Fire Damage"
+    ],
+    "itemClass": "Bows"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Foundry Bow",
+    "crit": 0.055,
+    "damageFrom": 13,
+    "damageTo": 20,
+    "dps": 21.45,
+    "dropLevel": 50,
+    "implicits": [
+      "Adds 80-97 to 126-144 Fire Damage"
+    ],
+    "itemClass": "Bows"
+  },
+  {
+    "aps": 1.3,
+    "baseType": "Solarine Bow",
+    "crit": 0.055,
+    "damageFrom": 16,
+    "damageTo": 24,
+    "dps": 26,
+    "dropLevel": 70,
+    "implicits": [
+      "Adds 121-133 to 184-197 Fire Damage"
+    ],
+    "itemClass": "Bows"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Transformer Staff",
+    "crit": 0.075,
+    "damageFrom": 36,
+    "damageTo": 66,
+    "dps": 63.75,
+    "dropLevel": 30,
+    "implicits": [
+      "+66-80 to maximum Energy Shield\\nSpend Energy Shield before Mana for Costs of Socketed Skills"
+    ],
+    "itemClass": "Staves"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Reciprocation Staff",
+    "crit": 0.075,
+    "damageFrom": 55,
+    "damageTo": 102,
+    "dps": 98.12,
+    "dropLevel": 50,
+    "implicits": [
+      "+100-120 to maximum Energy Shield\\nSpend Energy Shield before Mana for Costs of Socketed Skills"
+    ],
+    "itemClass": "Staves"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Battery Staff",
+    "crit": 0.075,
+    "damageFrom": 65,
+    "damageTo": 120,
+    "dps": 115.62,
+    "dropLevel": 70,
+    "implicits": [
+      "+140-165 to maximum Energy Shield\\nSpend Energy Shield before Mana for Costs of Socketed Skills"
+    ],
+    "itemClass": "Staves"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Capacity Rod",
+    "crit": 0.083,
+    "damageFrom": 39,
+    "damageTo": 73,
+    "dps": 70,
+    "dropLevel": 30,
+    "implicits": [
+      "+1 to Maximum Power Charges and Maximum Endurance Charges"
+    ],
+    "itemClass": "Warstaves"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Potentiality Rod",
+    "crit": 0.083,
+    "damageFrom": 61,
+    "damageTo": 113,
+    "dps": 108.75,
+    "dropLevel": 50,
+    "implicits": [
+      "+1 to Maximum Power Charges and Maximum Endurance Charges"
+    ],
+    "itemClass": "Warstaves"
+  },
+  {
+    "aps": 1.25,
+    "baseType": "Eventuality Rod",
+    "crit": 0.083,
+    "damageFrom": 78,
+    "damageTo": 144,
+    "dps": 138.75,
+    "dropLevel": 70,
+    "implicits": [
+      "+1 to Maximum Power Charges and Maximum Endurance Charges"
+    ],
+    "itemClass": "Warstaves"
+  },
+  {
+    "aps": 1.35,
+    "baseType": "Prime Cleaver",
+    "crit": 0.05,
+    "damageFrom": 39,
+    "damageTo": 61,
+    "dps": 67.5,
+    "dropLevel": 30,
+    "implicits": [
+      "Hits with this Weapon have 30% chance to ignore Enemy Physical Damage Reduction"
+    ],
+    "itemClass": "Two Hand Axes"
+  },
+  {
+    "aps": 1.35,
+    "baseType": "Honed Cleaver",
+    "crit": 0.05,
+    "damageFrom": 60,
+    "damageTo": 95,
+    "dps": 104.62,
+    "dropLevel": 50,
+    "implicits": [
+      "Hits with this Weapon have 50% chance to ignore Enemy Physical Damage Reduction"
+    ],
+    "itemClass": "Two Hand Axes"
+  },
+  {
+    "aps": 1.35,
+    "baseType": "Apex Cleaver",
+    "crit": 0.05,
+    "damageFrom": 78,
+    "damageTo": 121,
+    "dps": 134.33,
+    "dropLevel": 70,
+    "implicits": [
+      "Hits with this Weapon ignore Enemy Physical Damage Reduction"
+    ],
+    "itemClass": "Two Hand Axes"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Rebuking Blade",
+    "crit": 0.065,
+    "damageFrom": 30,
+    "damageTo": 56,
+    "dps": 60.2,
+    "dropLevel": 30,
+    "implicits": [
+      "Attack Critical Strikes ignore Enemy Monster Elemental Resistances"
+    ],
+    "itemClass": "Two Hand Swords"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Blasting Blade",
+    "crit": 0.065,
+    "damageFrom": 47,
+    "damageTo": 87,
+    "dps": 93.8,
+    "dropLevel": 50,
+    "implicits": [
+      "Attack Critical Strikes ignore Enemy Monster Elemental Resistances"
+    ],
+    "itemClass": "Two Hand Swords"
+  },
+  {
+    "aps": 1.4,
+    "baseType": "Banishing Blade",
+    "crit": 0.065,
+    "damageFrom": 55,
+    "damageTo": 102,
+    "dps": 109.9,
+    "dropLevel": 70,
+    "implicits": [
+      "Attack Critical Strikes ignore Enemy Monster Elemental Resistances"
+    ],
+    "itemClass": "Two Hand Swords"
+  },
+  {
+    "aps": 1.15,
+    "baseType": "Blunt Force Condenser",
+    "crit": 0.05,
+    "damageFrom": 39,
+    "damageTo": 64,
+    "dps": 59.22,
+    "dropLevel": 30,
+    "implicits": [
+      "Warcries Exert 1 additional Attack"
+    ],
+    "itemClass": "Two Hand Maces"
+  },
+  {
+    "aps": 1.15,
+    "baseType": "Crushing Force Magnifier",
+    "crit": 0.05,
+    "damageFrom": 62,
+    "damageTo": 103,
+    "dps": 94.87,
+    "dropLevel": 50,
+    "implicits": [
+      "Warcries Exert 1 additional Attack"
+    ],
+    "itemClass": "Two Hand Maces"
+  },
+  {
+    "aps": 1.15,
+    "baseType": "Impact Force Propagator",
+    "crit": 0.05,
+    "damageFrom": 81,
+    "damageTo": 135,
+    "dps": 124.2,
+    "dropLevel": 70,
+    "implicits": [
+      "Warcries Exert 2 additional Attacks"
+    ],
+    "itemClass": "Two Hand Maces"
+  },
+  {
+    "baseType": "Exhausting Spirit Shield",
+    "dropLevel": 30,
+    "implicits": [
+      "Sap Enemies when you Block their Damage"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Subsuming Spirit Shield",
+    "dropLevel": 50,
+    "implicits": [
+      "Sap Enemies when you Block their Damage"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Transfer-attuned Spirit Shield",
+    "dropLevel": 70,
+    "implicits": [
+      "Sap Enemies when you Block their Damage"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Endothermic Buckler",
+    "dropLevel": 30,
+    "implicits": [
+      "Inflict Brittle on Enemies when you Block their Damage"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Polar Buckler",
+    "dropLevel": 50,
+    "implicits": [
+      "Inflict Brittle on Enemies when you Block their Damage"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Cold-attuned Buckler",
+    "dropLevel": 70,
+    "implicits": [
+      "Inflict Brittle on Enemies when you Block their Damage"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Exothermic Tower Shield",
+    "dropLevel": 30,
+    "implicits": [
+      "Scorch Enemies when you Block their Damage"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Magmatic Tower Shield",
+    "dropLevel": 50,
+    "implicits": [
+      "Scorch Enemies when you Block their Damage"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "baseType": "Heat-attuned Tower Shield",
+    "dropLevel": 70,
+    "implicits": [
+      "Scorch Enemies when you Block their Damage"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "aps": 1.1,
+    "baseType": "Golden Blade",
+    "crit": 0.05,
+    "damageFrom": 3,
+    "damageTo": 23,
+    "dps": 14.3,
+    "dropLevel": 1,
+    "implicits": [
+      "+16-24 to all Attributes"
+    ],
+    "itemClass": "One Hand Swords"
+  },
+  {
+    "baseType": "Golden Flame",
+    "dropLevel": 15,
+    "implicits": [
+      "+11-19% to Chaos Resistance"
+    ],
+    "itemClass": "Shields"
+  },
+  {
+    "aps": 1.55,
+    "baseType": "Ghostflame Blade",
+    "crit": 0.065,
+    "damageFrom": 21,
+    "damageTo": 82,
+    "dps": 79.83,
+    "dropLevel": 68,
+    "implicits": [],
+    "itemClass": "One Hand Swords"
+  }
+]

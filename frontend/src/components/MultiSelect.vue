@@ -1,0 +1,138 @@
+<script setup lang="ts">
+import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from "vue"
+
+const props = defineProps<{ modelValue: string[]; options: string[] }>()
+const emit = defineEmits<{ "update:modelValue": [value: string[]] }>()
+
+const query = ref("")
+const open = ref(false)
+const root = ref<HTMLElement | null>(null)
+const searchInput = ref<HTMLInputElement | null>(null)
+const listRef = ref<HTMLUListElement | null>(null)
+const highlightedIndex = ref(-1)
+
+function toggleOpen() {
+  open.value = !open.value
+  if (open.value) {
+    query.value = ""
+    highlightedIndex.value = -1
+    void nextTick(() => searchInput.value?.focus())
+  }
+}
+
+function onDocumentClick(event: MouseEvent) {
+  if (open.value && root.value && !root.value.contains(event.target as Node)) {
+    open.value = false
+  }
+}
+
+onMounted(() => document.addEventListener("mousedown", onDocumentClick))
+onBeforeUnmount(() => document.removeEventListener("mousedown", onDocumentClick))
+
+const selected = computed(() => props.modelValue ?? [])
+
+const filtered = computed(() => {
+  const q = query.value.trim().toLowerCase()
+  return q ? props.options.filter((option) => option.toLowerCase().includes(q)) : props.options
+})
+
+watch(query, () => {
+  highlightedIndex.value = query.value.trim() ? 0 : -1
+})
+
+watch(filtered, (list) => {
+  if (highlightedIndex.value >= list.length) highlightedIndex.value = list.length - 1
+})
+
+function toggle(option: string) {
+  const next = selected.value.includes(option) ? selected.value.filter((o) => o !== option) : [...selected.value, option]
+  emit("update:modelValue", next)
+}
+
+function scrollHighlightedIntoView() {
+  const items = listRef.value?.querySelectorAll("li")
+  const el = items?.[highlightedIndex.value]
+  el?.scrollIntoView({ block: "nearest" })
+}
+
+function moveHighlight(delta: number) {
+  const count = filtered.value.length
+  if (count === 0) {
+    highlightedIndex.value = -1
+    return
+  }
+  let next = highlightedIndex.value + delta
+  if (next < 0) next = count - 1
+  else if (next >= count) next = 0
+  highlightedIndex.value = next
+  scrollHighlightedIntoView()
+}
+
+function onKeydown(event: KeyboardEvent) {
+  if (event.key === "ArrowDown") {
+    event.preventDefault()
+    moveHighlight(1)
+  } else if (event.key === "ArrowUp") {
+    event.preventDefault()
+    moveHighlight(-1)
+  } else if (event.key === "Enter") {
+    event.preventDefault()
+    const option = filtered.value[highlightedIndex.value]
+    if (option !== undefined) toggle(option)
+  } else if (event.key === "Escape") {
+    open.value = false
+  }
+}
+</script>
+
+<template>
+  <div ref="root" class="relative">
+    <div
+      class="flex min-h-9 w-full cursor-pointer flex-wrap items-center gap-1 rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-sm transition-colors hover:border-blue-500 focus-visible:border-blue-500 focus-visible:outline-none"
+      role="group"
+      aria-label="Select options"
+      tabindex="0"
+      @click="toggleOpen"
+      @keydown.enter.self.prevent="toggleOpen"
+      @keydown.space.self.prevent="toggleOpen"
+    >
+      <button
+        v-for="value in selected"
+        :key="value"
+        type="button"
+        class="rounded bg-neutral-800 px-1.5 py-0.5 text-xs text-neutral-200 hover:bg-neutral-700"
+        :aria-label="`Remove ${value}`"
+        @click.stop="toggle(value)"
+      >
+        {{ value }} <span aria-hidden="true">×</span>
+      </button>
+      <span v-if="selected.length === 0" class="text-xs text-neutral-500">None selected</span>
+      <span class="ml-auto text-xs text-neutral-400" aria-hidden="true">{{ open ? "▴" : "▾" }}</span>
+    </div>
+
+    <div v-if="open" class="absolute z-20 mt-1 w-full rounded border border-neutral-700 bg-neutral-900 shadow-lg">
+      <input
+        ref="searchInput"
+        v-model="query"
+        type="search"
+        aria-label="Search options"
+        placeholder="Search…"
+        class="w-full border-b border-neutral-700 bg-transparent px-2 py-1.5 text-sm outline-none"
+        @keydown="onKeydown"
+      />
+      <ul ref="listRef" class="max-h-48 overflow-y-auto py-1 text-sm">
+        <li v-for="(option, index) in filtered" :key="option">
+          <label
+            class="flex cursor-pointer items-center gap-2 px-2 py-1"
+            :class="index === highlightedIndex ? 'bg-neutral-800' : 'hover:bg-neutral-800'"
+            @mouseenter="highlightedIndex = index"
+          >
+            <input type="checkbox" :checked="selected.includes(option)" @change="toggle(option)" />
+            <span class="truncate">{{ option }}</span>
+          </label>
+        </li>
+        <li v-if="filtered.length === 0" class="px-2 py-1 text-neutral-500">No matches</li>
+      </ul>
+    </div>
+  </div>
+</template>

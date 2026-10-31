@@ -1,0 +1,74 @@
+{
+  "buildProfile": {
+    "preferredArmour": [
+      "armour",
+      "evasion",
+      "es",
+      "armour-evasion",
+      "armour-es",
+      "es-evasion"
+    ],
+    "preferredColors": [
+      "R",
+      "R",
+      "B"
+    ],
+    "shieldProgression": "full"
+  },
+  "buildSpecificOptions": {
+    "early": {
+      "earlyMaxAreaLevel": 20,
+      "shieldMaxAreaLevel": 25,
+      "twoSocketMaxAreaLevel": 10,
+      "threeSocketMaxAreaLevel": 15,
+      "earlyBootsMaxAreaLevel": 30
+    },
+    "links": {
+      "genericThreeLinkMaxAreaLevel": 18,
+      "twoLinkMaxAreaLevel": 12,
+      "threeLinkMaxAreaLevel": 40,
+      "fourLinkMaxAreaLevel": 70,
+      "fourLinkTtsCutoffLevel": 30,
+      "threeLinkTtsCutoffLevel": 15,
+      "genericThreeLinksEnabled": true,
+      "genericFourLinksEnabled": true
+    },
+    "jewellery": {
+      "amulets": [
+        {
+          "shortBaseType": "Lapis"
+        },
+        "Amber"
+      ],
+      "amuletMaxAreaLevel": 50,
+      "elementalRingMaxAreaLevel": 22,
+      "beltMaxAreaLevel": 11
+    },
+    "magicItems": {
+      "bigMaxAreaLevel": 3,
+      "smallMaxAreaLevel": 8
+    },
+    "rareItems": {
+      "maxAreaLevel": 60
+    },
+    "normalItems": {
+      "maxAreaLevel": 8
+    },
+    "tinctures": {
+      "baseTypes": [
+        "Prismatic Tincture",
+        "Ironwood Tincture"
+      ]
+    },
+    "flasks": {
+      "utilityFlasks": [
+        "Gold",
+        "Iron",
+        "Corundum",
+        "Quicksilver",
+        "Stibnite",
+        "Aquamarine"
+      ]
+    }
+  }
+}
