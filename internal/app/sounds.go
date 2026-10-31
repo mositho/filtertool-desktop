@@ -141,7 +141,7 @@ func (s *Store) generateFile(filename, text string, settings Object) error {
 		return nil
 	}
 	if s.AudioProcessor == nil {
-		return errors.New("FFmpeg was not found on PATH. Install FFmpeg and make sure ffmpeg.exe is available on PATH to generate TTS sounds, then restart Filtertool.")
+		return errors.New("TTS sound generation requires FFmpeg to be installed. Refer to the README for installation help.")
 	}
 	fetch := s.FetchAudio
 	if fetch == nil {
