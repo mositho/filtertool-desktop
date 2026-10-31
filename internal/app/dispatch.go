@@ -220,10 +220,16 @@ func (s *Store) Dispatch(action string, input Object) (any, error) {
 		exported := 0
 		for _, filter := range filters {
 			n := c.Text(filter["name"])
+			if s.Emit != nil {
+				s.Emit("export-progress", Object{"done": exported + len(failures), "total": len(filters), "name": n})
+			}
 			if _, err = s.export(Object{"name": n}); err != nil {
 				failures = append(failures, Object{"name": n, "error": err.Error()})
 			} else {
 				exported++
+			}
+			if s.Emit != nil {
+				s.Emit("export-progress", Object{"done": exported + len(failures), "total": len(filters), "name": n})
 			}
 		}
 		return Object{"exported": exported, "total": len(filters), "errors": failures}, nil

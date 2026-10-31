@@ -165,10 +165,146 @@ func (s *Store) writeSource(kind string, value Object) error {
 		return errors.New("repository writes are only available in dev mode")
 	}
 	// Never silently create a replacement for a missing or invalid source file.
+	path := filepath.Join(s.SourceDir, kind+".json")
 	if _, err := s.source(kind); err != nil {
 		return err
 	}
-	return writeJSON(filepath.Join(s.SourceDir, kind+".json"), value)
+	prior, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	original, err := decodeOrderedJSON(prior)
+	if err != nil {
+		return err
+	}
+	var current any = value
+	ordered := preserveJSONOrder(current, original)
+	b, err := json.MarshalIndent(ordered, "", "  ")
+	if err != nil {
+		return err
+	}
+	return writeAtomic(path, append(b, '\n'))
+}
+
+// orderedObject retains the order of keys already present in source JSON.
+// encoding/json sorts map keys, which used to turn a one-field edit into a
+// repository-wide reorder whenever the dev editor saved a file.
+type orderedObject []orderedField
+
+type orderedField struct {
+	key   string
+	value any
+}
+
+func (o orderedObject) MarshalJSON() ([]byte, error) {
+	var b strings.Builder
+	b.WriteByte('{')
+	for i, field := range o {
+		if i > 0 {
+			b.WriteByte(',')
+		}
+		key, err := json.Marshal(field.key)
+		if err != nil {
+			return nil, err
+		}
+		value, err := json.Marshal(field.value)
+		if err != nil {
+			return nil, err
+		}
+		b.Write(key)
+		b.WriteByte(':')
+		b.Write(value)
+	}
+	b.WriteByte('}')
+	return []byte(b.String()), nil
+}
+
+func decodeOrderedJSON(data []byte) (any, error) {
+	decoder := json.NewDecoder(strings.NewReader(string(data)))
+	return decodeOrderedValue(decoder)
+}
+
+func decodeOrderedValue(decoder *json.Decoder) (any, error) {
+	token, err := decoder.Token()
+	if err != nil {
+		return nil, err
+	}
+	switch token {
+	case json.Delim('{'):
+		object := orderedObject{}
+		for decoder.More() {
+			keyToken, err := decoder.Token()
+			if err != nil {
+				return nil, err
+			}
+			key := keyToken.(string)
+			value, err := decodeOrderedValue(decoder)
+			if err != nil {
+				return nil, err
+			}
+			object = append(object, orderedField{key, value})
+		}
+		_, err := decoder.Token()
+		return object, err
+	case json.Delim('['):
+		array := []any{}
+		for decoder.More() {
+			value, err := decodeOrderedValue(decoder)
+			if err != nil {
+				return nil, err
+			}
+			array = append(array, value)
+		}
+		_, err := decoder.Token()
+		return array, err
+	default:
+		return token, nil
+	}
+}
+
+func preserveJSONOrder(value, original any) any {
+	current, ok := value.(map[string]any)
+	if ok {
+		old, _ := original.(orderedObject)
+		keys := make([]string, 0, len(current))
+		seen := make(map[string]bool, len(current))
+		for _, field := range old {
+			if _, exists := current[field.key]; exists {
+				keys = append(keys, field.key)
+				seen[field.key] = true
+			}
+		}
+		var extra []string
+		for key := range current {
+			if !seen[key] {
+				extra = append(extra, key)
+			}
+		}
+		sort.Strings(extra)
+		keys = append(keys, extra...)
+		out := make(orderedObject, 0, len(keys))
+		oldValues := make(map[string]any, len(old))
+		for _, field := range old {
+			oldValues[field.key] = field.value
+		}
+		for _, key := range keys {
+			out = append(out, orderedField{key, preserveJSONOrder(current[key], oldValues[key])})
+		}
+		return out
+	}
+	if current, ok := value.([]any); ok {
+		old, _ := original.([]any)
+		out := make([]any, len(current))
+		for i := range current {
+			var prior any
+			if i < len(old) {
+				prior = old[i]
+			}
+			out[i] = preserveJSONOrder(current[i], prior)
+		}
+		return out
+	}
+	return value
 }
 func readObject(path string) (Object, error) {
 	st, err := os.Lstat(path)

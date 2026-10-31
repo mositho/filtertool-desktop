@@ -1,23 +1,78 @@
 {
-  "Caster Template": {
-    "buildProfile": {
-      "preferredColors": ["B"],
-      "preferredArmour": ["es", "es-evasion"],
-      "shieldProgression": "full",
-      "misc": { "whetstoneRecipe": false },
-      "weaponPhases": [{ "itemClasses": ["Wands", "Sceptres"] }]
-    },
-    "buildSpecificOptions": {
-      "jewellery": { "amulets": ["Amber", "Jade", "Turquoise", "Citrine", "Agate", "Onyx"] }
-    }
-  },
   "Attack Template": {
     "buildProfile": {
-      "preferredColors": ["R", "G"],
-      "preferredArmour": ["armour", "armour-evasion"],
+      "preferredArmour": [
+        "armour",
+        "armour-evasion"
+      ],
+      "preferredColors": [
+        "R",
+        "G"
+      ],
       "shieldProgression": "early",
-      "weaponPhases": [{ "itemClasses": ["Two Hand Axes", "Two Hand Swords"], "minAps": 1.3 }]
+      "weaponPhases": [
+        {
+          "itemClasses": [
+            "Two Hand Axes",
+            "Two Hand Swords"
+          ],
+          "minAps": 1.3
+        },
+        {
+          "itemClasses": [
+            "Two Hand Maces"
+          ],
+          "maxAreaLevel": 12,
+          "perRarityCustomization": true
+        }
+      ]
     },
-    "buildSpecificOptions": { "jewellery": { "amulets": ["Jade", "Lapis", "Turquoise", "Citrine", "Agate", "Onyx"] } }
+    "buildSpecificOptions": {
+      "jewellery": {
+        "amulets": [
+          "Jade",
+          "Lapis",
+          "Turquoise",
+          "Citrine",
+          "Agate",
+          "Onyx"
+        ]
+      }
+    }
+  },
+  "Caster Template": {
+    "buildProfile": {
+      "misc": {
+        "whetstoneRecipe": false
+      },
+      "preferredArmour": [
+        "es",
+        "es-evasion"
+      ],
+      "preferredColors": [
+        "B"
+      ],
+      "shieldProgression": "full",
+      "weaponPhases": [
+        {
+          "itemClasses": [
+            "Wands",
+            "Sceptres"
+          ]
+        }
+      ]
+    },
+    "buildSpecificOptions": {
+      "jewellery": {
+        "amulets": [
+          "Amber",
+          "Jade",
+          "Turquoise",
+          "Citrine",
+          "Agate",
+          "Onyx"
+        ]
+      }
+    }
   }
 }

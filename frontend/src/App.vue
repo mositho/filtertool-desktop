@@ -40,6 +40,7 @@ let toastTimer: ReturnType<typeof setTimeout> | undefined
 
 const exporting = ref(false)
 const exportingAll = ref(false)
+const exportProgress = ref("")
 
 const settings = ref<AppSettings | null>(null)
 const showQuickstart = ref(false)
@@ -259,6 +260,7 @@ async function onSaveAndExport() {
 async function onExportAll() {
   if (devMode.value) return
   exportingAll.value = true
+  exportProgress.value = "Preparing export…"
   try {
     if (selected.value && dirty.value) {
       const [error] = filterRangeErrors(config.value)
@@ -266,7 +268,9 @@ async function onExportAll() {
       await api.saveConfig(selected.value, config.value)
       savedConfig.value = clone(config.value)
     }
-    const result = await api.exportAllFilters()
+    const result = await api.exportAllFilters((done, total, name) => {
+      exportProgress.value = `Exporting ${done}/${total}: ${name}`
+    })
     if (result.total === 0) {
       flash("No filters to export")
     } else if (result.errors.length > 0) {
@@ -278,6 +282,7 @@ async function onExportAll() {
     flash((e as Error).message, "error")
   } finally {
     exportingAll.value = false
+    exportProgress.value = ""
   }
 }
 
@@ -644,6 +649,7 @@ onUnmounted(() => {
           :selected="selected"
           :view="view"
           :exporting="exportingAll"
+          :export-progress="exportProgress"
           :adding="adding"
           :renaming="renaming"
           @select="onSelect"
@@ -670,6 +676,7 @@ onUnmounted(() => {
         :selected="selected"
         :view="view"
         :exporting="exportingAll"
+        :export-progress="exportProgress"
         :adding="adding"
         :renaming="renaming"
         @select="onSelect"

@@ -1,227 +1,227 @@
 {
+  "chromatic": {
+    "background": "#000000",
+    "backgroundOpacity": 0.9019607843137255,
+    "border": "#F789FF",
+    "size": 40,
+    "text": "#F789FF"
+  },
   "currencyA": {
-    "text": "#00A8FF",
     "background": "#FFFFFF",
-    "border": "#00A8FF"
+    "border": "#00A8FF",
+    "text": "#00A8FF"
   },
   "currencyB": {
-    "text": "#FFFFFF",
     "background": "#00A8FF",
-    "border": "#FFFFFF"
+    "border": "#FFFFFF",
+    "text": "#FFFFFF"
   },
   "currencyC": {
-    "text": "#00FFFF",
     "background": "#000000",
-    "border": "#00FFFF"
-  },
-  "earlyShieldLink": {
-    "text": "#000000",
-    "background": "#ffffff",
-    "border": "#ff0000"
-  },
-  "earlyShieldBase": {
-    "text": "#000000",
-    "background": "#d2d2d2",
-    "border": "#000000"
-  },
-  "twoLink": {
-    "text": "#DADADA",
-    "background": "#000000",
-    "border": "#fdfb4e",
-    "backgroundOpacity": 0.9019607843137255
-  },
-  "goodTwoLink": {
-    "text": "#DADADA",
-    "background": "#000000",
-    "border": "#FFC800"
-  },
-  "selectedTwoLink": {
-    "text": "#FFFFFF",
-    "background": "#000000",
-    "border": "#FFC800"
-  },
-  "threeLink": {
-    "text": "#B9FF66",
-    "background": "#000000",
-    "border": "#B9FF66",
-    "backgroundOpacity": 0.9019607843137255
-  },
-  "goodThreeLink": {
-    "text": "#B9FF66",
-    "background": "#000000",
-    "border": "#B9FF66"
-  },
-  "selectedThreeLink": {
-    "text": "#51FF00",
-    "background": "#000000",
-    "border": "#51FF00"
-  },
-  "fourLink": {
-    "text": "#00ff80",
-    "background": "#000000",
-    "border": "#00ff80",
-    "backgroundOpacity": 0.9019607843137255
-  },
-  "goodFourLink": {
-    "text": "#00ff80",
-    "background": "#000000",
-    "border": "#00ff80"
-  },
-  "selectedFourLink": {
-    "text": "#00FF95",
-    "background": "#000000",
-    "border": "#00FF95"
-  },
-  "lifeFlask": {
-    "text": "#ffffff",
-    "background": "#630401",
-    "border": "#ff0000"
-  },
-  "manaFlask": {
-    "text": "#ffffff",
-    "background": "#000e75",
-    "border": "#0055ff"
-  },
-  "magicLifeFlask": {
-    "text": "#66b4fb",
-    "background": "#660200",
-    "border": "#ff0b00"
-  },
-  "magicManaFlask": {
-    "text": "#66b5f8",
-    "background": "#011572",
-    "border": "#065cf9"
-  },
-  "utilityFlask": {
-    "text": "#32C87D",
-    "background": "#003228",
-    "border": "#32C87D"
-  },
-  "gold": {
-    "text": "#DADADA",
-    "background": "#000000",
-    "border": "#000000",
-    "backgroundOpacity": 0.39215686274509803,
-    "size": 25
-  },
-  "goldHighStack": {
-    "text": "#DADADA",
-    "background": "#000000",
-    "border": "#000000",
-    "backgroundOpacity": 0.7058823529411765,
-    "size": 25
-  },
-  "unique": {
-    "text": "#FF4400",
-    "background": "#000000",
-    "border": "#FF4400"
-  },
-  "wisdom": {
-    "text": "#FF7D4E",
-    "background": "#000000",
-    "border": "#FF7D4E"
-  },
-  "portal": {
-    "text": "#6A94FD",
-    "background": "#000000",
-    "border": "#6A94FD"
-  },
-  "gem": {
-    "text": "#00FFFF",
-    "background": "#000000",
-    "border": "#000000"
-  },
-  "gemCallout": {
-    "text": "#00FFFF",
-    "background": "#002a2a",
-    "border": "#00FFFF"
-  },
-  "chromatic": {
-    "text": "#F789FF",
-    "background": "#000000",
-    "border": "#F789FF",
-    "backgroundOpacity": 0.9019607843137255,
-    "size": 40
-  },
-  "whetstoneRecipe": {
-    "text": "#9e9e9e",
-    "background": "#000000",
-    "border": "#999999",
-    "backgroundOpacity": 0.96
-  },
-  "jewellery": {
-    "text": "#F5D8FF",
-    "background": "#320046",
-    "border": "#C000FF"
-  },
-  "magicJewellery": {
-    "text": "#66B3FF",
-    "background": "#320046",
-    "border": "#C000FF"
-  },
-  "rareJewellery": {
-    "text": "#FFF34D",
-    "background": "#320046",
-    "border": "#C000FF"
-  },
-  "rareArmour": {
-    "text": "#FFF34D",
-    "background": "#322800",
-    "border": "#FFF34D"
-  },
-  "highlightedEquipmentRare": {
-    "text": "#FFFF00",
-    "background": "#001515",
-    "border": "#00FFFF"
-  },
-  "highlightedEquipmentMagic": {
-    "text": "#66B3FF",
-    "background": "#001515",
-    "border": "#00FFFF"
-  },
-  "highlightedEquipmentNormal": {
-    "text": "#D9FFFF",
-    "background": "#001515",
-    "border": "#00FFFF"
-  },
-  "sixSocket": {
-    "text": "#FFFFFF",
-    "background": "#00A800",
-    "border": "#FFFFFF"
-  },
-  "tincture": {
-    "text": "#FF415E",
-    "background": "#46001E",
-    "border": "#FF415E"
-  },
-  "questItem": {
-    "text": "#00FF00",
-    "background": "#000000",
-    "border": "#00FF00"
+    "border": "#00FFFF",
+    "text": "#00FFFF"
   },
   "divinationCard": {
-    "text": "#8800ff",
     "background": "#000000",
-    "border": "#8800ff"
+    "border": "#8800ff",
+    "text": "#8800ff"
   },
-  "maps": {
-    "text": "#FFFFFF",
-    "background": "#282828",
-    "border": "#FFFFFF"
+  "earlyShieldBase": {
+    "background": "#d2d2d2",
+    "border": "#000000",
+    "text": "#000000"
+  },
+  "earlyShieldLink": {
+    "background": "#ffffff",
+    "border": "#ff0000",
+    "text": "#000000"
+  },
+  "fourLink": {
+    "background": "#000000",
+    "backgroundOpacity": 0.9019607843137255,
+    "border": "#00ff80",
+    "text": "#00ff80"
   },
   "fragments": {
-    "text": "#FF0032",
     "background": "#000000",
-    "border": "#FF0032"
+    "border": "#FF0032",
+    "text": "#FF0032"
+  },
+  "gem": {
+    "background": "#000000",
+    "border": "#000000",
+    "text": "#00FFFF"
+  },
+  "gemCallout": {
+    "background": "#002a2a",
+    "border": "#00FFFF",
+    "text": "#00FFFF"
+  },
+  "gold": {
+    "background": "#000000",
+    "backgroundOpacity": 0.39215686274509803,
+    "border": "#000000",
+    "size": 25,
+    "text": "#DADADA"
+  },
+  "goldHighStack": {
+    "background": "#000000",
+    "backgroundOpacity": 0.7058823529411765,
+    "border": "#000000",
+    "size": 25,
+    "text": "#DADADA"
+  },
+  "goodFourLink": {
+    "background": "#000000",
+    "border": "#00ff80",
+    "text": "#00ff80"
+  },
+  "goodThreeLink": {
+    "background": "#000000",
+    "border": "#B9FF66",
+    "text": "#B9FF66"
+  },
+  "goodTwoLink": {
+    "background": "#000000",
+    "border": "#FFC800",
+    "text": "#DADADA"
+  },
+  "highlightedEquipmentMagic": {
+    "background": "#001515",
+    "border": "#00FFFF",
+    "text": "#66B3FF"
+  },
+  "highlightedEquipmentNormal": {
+    "background": "#001515",
+    "border": "#00FFFF",
+    "text": "#D9FFFF"
+  },
+  "highlightedEquipmentRare": {
+    "background": "#001515",
+    "border": "#00FFFF",
+    "text": "#FFFF00"
+  },
+  "jewellery": {
+    "background": "#320046",
+    "border": "#C000FF",
+    "text": "#F5D8FF"
+  },
+  "lifeFlask": {
+    "background": "#630401",
+    "border": "#ff0000",
+    "text": "#ffffff"
+  },
+  "magicJewellery": {
+    "background": "#320046",
+    "border": "#C000FF",
+    "text": "#66B3FF"
+  },
+  "magicLifeFlask": {
+    "background": "#660200",
+    "border": "#ff0b00",
+    "text": "#66b4fb"
+  },
+  "magicManaFlask": {
+    "background": "#011572",
+    "border": "#065cf9",
+    "text": "#66b5f8"
+  },
+  "manaFlask": {
+    "background": "#000e75",
+    "border": "#0055ff",
+    "text": "#ffffff"
+  },
+  "maps": {
+    "background": "#282828",
+    "border": "#FFFFFF",
+    "text": "#FFFFFF"
+  },
+  "portal": {
+    "background": "#000000",
+    "border": "#6A94FD",
+    "text": "#6A94FD"
+  },
+  "questItem": {
+    "background": "#000000",
+    "border": "#00FF00",
+    "text": "#00FF00"
+  },
+  "rareArmour": {
+    "background": "#322800",
+    "border": "#FFF34D",
+    "text": "#FFF34D"
+  },
+  "rareJewellery": {
+    "background": "#320046",
+    "border": "#C000FF",
+    "text": "#FFF34D"
   },
   "relics": {
-    "text": "#FF0032",
     "background": "#280014",
-    "border": "#FF0032"
+    "border": "#FF0032",
+    "text": "#FF0032"
+  },
+  "selectedFourLink": {
+    "background": "#000000",
+    "border": "#00FF95",
+    "text": "#00FF95"
+  },
+  "selectedThreeLink": {
+    "background": "#000000",
+    "border": "#51FF00",
+    "text": "#51FF00"
+  },
+  "selectedTwoLink": {
+    "background": "#000000",
+    "border": "#FFC800",
+    "text": "#FFFFFF"
+  },
+  "sixSocket": {
+    "background": "#00A800",
+    "border": "#FFFFFF",
+    "text": "#FFFFFF"
+  },
+  "threeLink": {
+    "background": "#000000",
+    "backgroundOpacity": 0.9019607843137255,
+    "border": "#B9FF66",
+    "text": "#B9FF66"
+  },
+  "tincture": {
+    "background": "#46001E",
+    "border": "#FF415E",
+    "text": "#FF415E"
+  },
+  "twoLink": {
+    "background": "#000000",
+    "backgroundOpacity": 0.9019607843137255,
+    "border": "#fdfb4e",
+    "text": "#DADADA"
+  },
+  "unique": {
+    "background": "#000000",
+    "border": "#FF4400",
+    "text": "#FF4400"
   },
   "unknownItem": {
-    "text": "#E100FF",
     "background": "#000000",
-    "border": "#E100FF"
+    "border": "#E100FF",
+    "text": "#E100FF"
+  },
+  "utilityFlask": {
+    "background": "#003228",
+    "border": "#32C87D",
+    "text": "#32C87D"
+  },
+  "whetstoneRecipe": {
+    "background": "#000000",
+    "backgroundOpacity": 0.96,
+    "border": "#999999",
+    "text": "#9e9e9e"
+  },
+  "wisdom": {
+    "background": "#000000",
+    "border": "#FF7D4E",
+    "text": "#FF7D4E"
   }
 }

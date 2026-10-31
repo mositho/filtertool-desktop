@@ -8,6 +8,7 @@ const props = defineProps<{
   selected: string | null
   view: "filter" | "global"
   exporting: boolean
+  exportProgress?: string
   adding: boolean
   renaming: string | null
   devMode?: boolean
@@ -211,7 +212,7 @@ function confirmRename() {
       :title="devMode ? 'Export is disabled in Dev Editor' : undefined"
       class="flex items-center justify-center gap-2 border-t border-neutral-800 bg-green-700 px-4 py-3 text-sm font-medium text-white hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500 disabled:opacity-50"
     >
-      <span>{{ exporting ? "Exporting…" : "Export All" }}</span>
+      <span>{{ exporting ? exportProgress || "Exporting…" : "Export All" }}</span>
       <svg
         class="h-4 w-4"
         viewBox="0 0 24 24"

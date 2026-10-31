@@ -11,6 +11,22 @@ import (
 	c "github.com/mositho/filtertool-desktop/internal/compiler"
 )
 
+func TestPreserveJSONOrderOnSourceSave(t *testing.T) {
+	original := []byte(`{"zeta":{"last":1,"first":2},"alpha":3}`)
+	prior, err := decodeOrderedJSON(original)
+	if err != nil {
+		t.Fatal(err)
+	}
+	updated := preserveJSONOrder(Object{"alpha": float64(4), "zeta": Object{"first": float64(2), "last": float64(9)}}, prior)
+	got, err := json.Marshal(updated)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(got) != `{"zeta":{"last":9,"first":2},"alpha":4}` {
+		t.Fatalf("save changed JSON key order or values: %s", got)
+	}
+}
+
 func testStore(t *testing.T) *Store {
 	t.Helper()
 	s, err := Open(t.TempDir())

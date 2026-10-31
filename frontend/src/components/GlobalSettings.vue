@@ -127,7 +127,11 @@ async function saveAllAndExport(): Promise<Feedback> {
   if (saveResult.kind === "error") return saveResult
   exporting.value = true
   try {
-    const result = await api.exportAllFilters()
+    soundProgress.value = "Preparing export…"
+    const result = await api.exportAllFilters((done, total, name) => {
+      soundProgress.value = `Exporting ${done}/${total}: ${name}`
+    })
+    soundProgress.value = ""
     if (result.total === 0) {
       return { message: "No filters to export", kind: "notice" }
     } else if (result.errors.length > 0) {
@@ -135,6 +139,7 @@ async function saveAllAndExport(): Promise<Feedback> {
     }
     return { message: `Exported ${result.exported} filter${result.exported === 1 ? "" : "s"}`, kind: "notice" }
   } catch (e) {
+    soundProgress.value = ""
     return { message: (e as Error).message, kind: "error" }
   } finally {
     exporting.value = false

@@ -54,7 +54,10 @@ export const api = {
   preview: (name: string, config?: FilterConfig) => call<{ output: string }>("preview", { name, config }),
   exportFilter: (name: string, config?: FilterConfig) =>
     call<{ fileName: string; filterPath: string; soundFolder: string }>("exportFilter", { name, config }),
-  exportAllFilters: () => call<ExportResult>("exportAllFilters"),
+  exportAllFilters: (onProgress?: (done: number, total: number, name: string) => void) => {
+    const off = onProgress ? Events.On("export-progress", ({ data }) => onProgress(data.done, data.total, data.name)) : undefined
+    return call<ExportResult>("exportAllFilters").finally(() => off?.())
+  },
   getSettings: () => call<AppSettings>("getSettings"),
   saveSettings: (settings: AppSettings) => call<AppSettings>("saveSettings", { settings }),
   getDefaults: () =>
