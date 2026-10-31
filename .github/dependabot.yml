@@ -3,9 +3,24 @@ updates:
   - package-ecosystem: npm
     directory: /
     schedule: { interval: weekly }
+    groups:
+      minor-and-patch:
+        applies-to: version-updates
+        update-types: [minor, patch]
+        patterns: ["*"]
   - package-ecosystem: gomod
     directory: /
     schedule: { interval: weekly }
+    groups:
+      minor-and-patch:
+        applies-to: version-updates
+        update-types: [minor, patch]
+        patterns: ["*"]
   - package-ecosystem: github-actions
     directory: /
     schedule: { interval: weekly }
+    groups:
+      minor-and-patch:
+        applies-to: version-updates
+        update-types: [minor, patch]
+        patterns: ["*"]
