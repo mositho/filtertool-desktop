@@ -10,11 +10,12 @@ const props = defineProps<{
   exporting: boolean
   adding: boolean
   renaming: string | null
+  templateMode?: boolean
 }>()
 
 const emit = defineEmits<{
   "select": [name: string]
-  "create": [name: string]
+  "create": [name: string, template?: string]
   "start-add": []
   "cancel-add": []
   "start-rename": [name: string]
@@ -31,6 +32,7 @@ const emit = defineEmits<{
 const NAME_ERROR = "Only letters, numbers, spaces, underscores and hyphens are allowed."
 
 const newName = ref("")
+const template = ref("")
 const addInput = ref<HTMLInputElement | null>(null)
 const addError = ref("")
 
@@ -47,6 +49,7 @@ watch(
   async (isAdding) => {
     if (!isAdding) return
     newName.value = ""
+    template.value = ""
     addError.value = ""
     await nextTick()
     addInput.value?.focus()
@@ -65,7 +68,7 @@ function confirmAdd() {
   }
   addError.value = ""
   newName.value = ""
-  emit("create", name)
+  emit("create", name, template.value || undefined)
   emit("cancel-add")
 }
 
@@ -102,7 +105,7 @@ function confirmRename() {
   <aside class="flex w-64 shrink-0 flex-col border-r border-neutral-800 bg-neutral-950">
     <div class="flex h-14 items-center justify-between px-4 border-b border-neutral-800">
       <button type="button" @click="emit('home')" class="font-semibold hover:text-neutral-300" title="Show welcome screen">Filters</button>
-      <div class="flex items-center gap-1">
+      <div v-if="!templateMode" class="flex items-center gap-1">
         <button
           v-if="!adding"
           type="button"
@@ -144,6 +147,7 @@ function confirmRename() {
     </div>
 
     <button
+      v-if="!templateMode"
       @click="emit('global')"
       class="flex items-center justify-center border-b border-neutral-800 bg-neutral-300 px-4 py-1.5 text-sm font-medium text-black hover:bg-neutral-200"
     >
@@ -170,8 +174,8 @@ function confirmRename() {
           :class="renameError ? 'border-red-500' : 'border-neutral-700'"
           :title="renameError || undefined"
         />
-        <span v-else class="truncate" @dblclick.stop="emit('start-rename', filter.name)">{{ filter.name }}</span>
-        <span v-if="renaming !== filter.name" class="hidden group-hover:flex gap-1">
+        <span v-else class="truncate" @dblclick.stop="!templateMode && emit('start-rename', filter.name)">{{ filter.name }}</span>
+        <span v-if="!templateMode && renaming !== filter.name" class="hidden group-hover:flex gap-1">
           <button title="Duplicate" @click.stop="emit('duplicate', filter.name)" class="px-1 text-neutral-400 hover:text-white">⧉</button>
           <button title="Rename" @click.stop="emit('start-rename', filter.name)" class="px-1 text-neutral-400 hover:text-white">✎</button>
           <button title="Delete" @click.stop="emit('delete', filter.name)" class="px-1 text-neutral-400 hover:text-red-400">✕</button>
@@ -179,17 +183,26 @@ function confirmRename() {
       </button>
       <p v-if="filters.length === 0" class="px-4 py-2 text-sm text-neutral-500">No filters yet.</p>
       <div v-if="adding" class="px-4 py-2">
+        <select
+          v-model="template"
+          aria-label="Starting template"
+          class="mb-2 w-full rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-sm"
+        >
+          <option value="">Blank filter</option>
+          <option value="Caster Template">Caster Template</option>
+          <option value="Attack Template">Attack Template</option>
+        </select>
         <input
           ref="addInput"
           v-model="newName"
           @keydown.enter.prevent="confirmAdd"
           @keydown.esc="emit('cancel-add')"
-          @blur="confirmAdd"
           placeholder="Filter name"
           class="w-full rounded border bg-neutral-900 px-2 py-1 text-sm text-white focus:border-blue-500 focus:outline-none"
           :class="addError ? 'border-red-500' : 'border-neutral-700'"
         />
         <p v-if="addError" class="mt-1 text-xs text-red-400">{{ addError }}</p>
+        <button type="button" @click="confirmAdd" class="mt-2 rounded bg-blue-700 px-3 py-1 text-sm hover:bg-blue-600">Create</button>
       </div>
     </nav>
 

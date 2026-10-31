@@ -3,6 +3,11 @@ import { describe, expect, it } from "vitest"
 import { wailsEnvironment } from "../scripts/dev-environment.mjs"
 
 describe("WSL development launcher", () => {
+  it("forwards the template profile to the Windows app without duplicate entries", () => {
+    const result = wailsEnvironment({ FILTERTOOL_PROFILE: "templates", WSLENV: "FILTERTOOL_PROFILE/up:WT_SESSION" }, "linux", "microsoft")
+    expect(result.FILTERTOOL_PROFILE).toBe("templates")
+    expect(result.WSLENV).toBe("WT_SESSION:FRONTEND_DEVSERVER_URL/w:FILTERTOOL_PROFILE/w")
+  })
   it("forwards the Wails URL without changing unrelated WSLENV entries", () => {
     const environment = { WSL_DISTRO_NAME: "Ubuntu", WSLENV: "WT_SESSION:MY_PATH/p", OTHER: "keep" }
     expect(wailsEnvironment(environment, "linux", "6.6.0-microsoft-standard-WSL2")).toEqual({

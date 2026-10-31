@@ -17,6 +17,9 @@ func testStore(t *testing.T) *Store {
 	if err != nil {
 		t.Fatal(err)
 	}
+	for _, name := range []string{"Caster Template", "Attack Template"} {
+		mustCall(t, s, "createFilter", Object{"name": name, "template": name})
+	}
 	return s
 }
 func mustCall(t *testing.T, s *Store, action string, input Object) any {
@@ -27,21 +30,22 @@ func mustCall(t *testing.T, s *Store, action string, input Object) any {
 	}
 	return v
 }
-func TestFirstLaunchOnlySeedsExamples(t *testing.T) {
-	s := testStore(t)
+func TestPersonalLaunchDoesNotSeedTemplates(t *testing.T) {
+	s, err := Open(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
 	filters, err := s.filters()
-	if err != nil || len(filters) != 2 {
+	if err != nil || len(filters) != 0 {
 		t.Fatal(filters, err)
 	}
-	for _, f := range filters {
-		mustCall(t, s, "deleteFilter", Object{"name": f["name"]})
-	}
+	mustCall(t, s, "createFilter", Object{"name": "My Caster", "template": "Caster Template"})
 	if _, err = Open(s.Root); err != nil {
 		t.Fatal(err)
 	}
 	filters, _ = s.filters()
-	if len(filters) != 0 {
-		t.Fatal("deleted examples recreated")
+	if len(filters) != 1 || filters[0]["name"] != "My Caster" {
+		t.Fatal("personal filters changed on reopening", filters)
 	}
 }
 func TestLifecycleValidationAndPreview(t *testing.T) {
@@ -81,7 +85,7 @@ func TestSharePreservesOutputWithoutChangingRecipientGlobals(t *testing.T) {
 	mustCall(t, recipient, "saveStyles", Object{"styles": Object{"currencyA": Object{"size": float64(25), "backgroundOpacity": 0.2}}})
 	beforeD, _ := os.ReadFile(filepath.Join(recipient.Root, "defaults.json"))
 	beforeS, _ := os.ReadFile(filepath.Join(recipient.Root, "styles.json"))
-	shared := mustCall(t, sender, "share", Object{"name": "Caster Example", "includeGlobals": true}).(Object)
+	shared := mustCall(t, sender, "share", Object{"name": "Caster Template", "includeGlobals": true}).(Object)
 	text := c.Text(shared["text"])
 	if strings.ContainsAny(text, "\n\r") {
 		t.Fatal("share was not minified")
@@ -91,7 +95,7 @@ func TestSharePreservesOutputWithoutChangingRecipientGlobals(t *testing.T) {
 		t.Fatal(err)
 	}
 	mustCall(t, recipient, "importJSON", Object{"name": "Imported", "value": value})
-	want := mustCall(t, sender, "preview", Object{"name": "Caster Example"}).(Object)["output"]
+	want := mustCall(t, sender, "preview", Object{"name": "Caster Template"}).(Object)["output"]
 	got := mustCall(t, recipient, "preview", Object{"name": "Imported"}).(Object)["output"]
 	if got != want {
 		t.Fatal("shared filter changed behavior on recipient")
@@ -104,7 +108,7 @@ func TestSharePreservesOutputWithoutChangingRecipientGlobals(t *testing.T) {
 	if len(c.Obj(c.Obj(mustCall(t, recipient, "getConfig", Object{"name": "Imported"}))["localStyles"])) == 0 {
 		t.Fatal("local style differences missing")
 	}
-	raw := mustCall(t, sender, "share", Object{"name": "Caster Example", "includeGlobals": false}).(Object)
+	raw := mustCall(t, sender, "share", Object{"name": "Caster Template", "includeGlobals": false}).(Object)
 	if strings.Contains(c.Text(raw["text"]), `"format"`) {
 		t.Fatal("raw share contains global envelope")
 	}
@@ -181,7 +185,7 @@ func TestExportOfflineAndNoPartialGameWrite(t *testing.T) {
 	mustCall(t, s, "saveSettings", Object{"settings": settings})
 	s.FetchAudio = func(string, string) ([]byte, error) { return []byte("fake TTS"), nil }
 	s.AudioProcessor = func(b []byte, path string, _ float64) error { return os.WriteFile(path, b, 0600) }
-	result := mustCall(t, s, "exportFilter", Object{"name": "Caster Example"}).(Object)
+	result := mustCall(t, s, "exportFilter", Object{"name": "Caster Template"}).(Object)
 	path := filepath.Join(game, c.Text(result["fileName"]))
 	out, err := os.ReadFile(path)
 	if err != nil || !strings.Contains(string(out), "### Show Unknown Items") {
@@ -193,7 +197,7 @@ func TestExportOfflineAndNoPartialGameWrite(t *testing.T) {
 	settings["tts"] = Object{"locale": "en-US", "speed": float64(1.7)}
 	mustCall(t, s, "saveSettings", Object{"settings": settings})
 	s.FetchAudio = func(string, string) ([]byte, error) { return nil, errors.New("offline") }
-	if _, err = s.Dispatch("exportFilter", Object{"name": "Caster Example"}); err == nil {
+	if _, err = s.Dispatch("exportFilter", Object{"name": "Caster Template"}); err == nil {
 		t.Fatal("expected sound-generation error")
 	}
 	after, _ := os.ReadFile(path)

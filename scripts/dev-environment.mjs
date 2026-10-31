@@ -7,6 +7,12 @@ export function wailsEnvironment(environment, platform, osRelease) {
     const entries = (environment.WSLENV ?? "").split(":").filter(Boolean)
     // Replace flags on this one entry: a URL must not undergo path translation.
     result.WSLENV = [...entries.filter((entry) => entry.split("/")[0] !== "FRONTEND_DEVSERVER_URL"), "FRONTEND_DEVSERVER_URL/w"].join(":")
+    if (environment.FILTERTOOL_PROFILE) {
+      result.WSLENV = [
+        ...result.WSLENV.split(":").filter((entry) => entry.split("/")[0] !== "FILTERTOOL_PROFILE"),
+        "FILTERTOOL_PROFILE/w",
+      ].join(":")
+    }
   }
   return result
 }

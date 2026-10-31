@@ -1,0 +1,23 @@
+{
+  "Caster Template": {
+    "buildProfile": {
+      "preferredColors": ["B"],
+      "preferredArmour": ["es", "es-evasion"],
+      "shieldProgression": "full",
+      "misc": { "whetstoneRecipe": false },
+      "weaponPhases": [{ "itemClasses": ["Wands", "Sceptres"] }]
+    },
+    "buildSpecificOptions": {
+      "jewellery": { "amulets": ["Amber", "Jade", "Turquoise", "Citrine", "Agate", "Onyx"] }
+    }
+  },
+  "Attack Template": {
+    "buildProfile": {
+      "preferredColors": ["R", "G"],
+      "preferredArmour": ["armour", "armour-evasion"],
+      "shieldProgression": "early",
+      "weaponPhases": [{ "itemClasses": ["Two Hand Axes", "Two Hand Swords"], "minAps": 1.3 }]
+    },
+    "buildSpecificOptions": { "jewellery": { "amulets": ["Jade", "Lapis", "Turquoise", "Citrine", "Agate", "Onyx"] } }
+  }
+}

@@ -2,6 +2,7 @@ package app
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -21,10 +22,20 @@ func (s *Store) Dispatch(action string, input Object) (any, error) {
 		input = Object{}
 	}
 	name := c.Text(input["name"])
+	if s.TemplateMode {
+		switch action {
+		case "createFilter", "duplicateFilter", "renameFilter", "deleteFilter", "importJSON", "importFiles", "importFolder", "saveDefaults", "saveStyles":
+			return nil, errors.New("the template workspace only edits the bundled templates")
+		case "saveConfig":
+			if _, ok := data.Load[Object]("templates.json")[name]; !ok {
+				return nil, errors.New("not a bundled template")
+			}
+		}
+	}
 	switch action {
 	case "listFilters":
 		filters, err := s.filters()
-		return Object{"filters": filters}, err
+		return Object{"filters": filters, "templateMode": s.TemplateMode}, err
 	case "getConfig":
 		return s.readFilter(name)
 	case "saveConfig":
@@ -41,6 +52,13 @@ func (s *Store) Dispatch(action string, input Object) (any, error) {
 			return nil, err
 		}
 		cfg := Object{"buildProfile": Object{}, "buildSpecificOptions": Object{}}
+		if template := c.Text(input["template"]); template != "" {
+			value, ok := data.Load[Object]("templates.json")[template]
+			if !ok {
+				return nil, errors.New("unknown template")
+			}
+			cfg = c.Obj(value)
+		}
 		return Object{"name": name}, s.writeFilter(name, cfg)
 	case "duplicateFilter":
 		newName := c.Text(input["newName"])
@@ -202,6 +220,29 @@ func (s *Store) Dispatch(action string, input Object) (any, error) {
 		return Object{"exported": exported, "total": len(filters), "errors": failures}, nil
 	case "share":
 		return s.share(input)
+	case "saveTemplateBundle":
+		if !s.TemplateMode {
+			return nil, errors.New("template bundle export is only available in the template workspace")
+		}
+		if s.SaveShareFile == nil {
+			return nil, errors.New("native save dialog is unavailable")
+		}
+		bundle := Object{}
+		for template := range data.Load[Object]("templates.json") {
+			cfg, err := s.readFilter(template)
+			if err != nil {
+				return nil, err
+			}
+			if err = c.Validate(cfg); err != nil {
+				return nil, err
+			}
+			bundle[template] = cfg
+		}
+		text, err := json.MarshalIndent(bundle, "", "  ")
+		if err != nil {
+			return nil, err
+		}
+		return s.SaveShareFile("templates.json", string(text)+"\n")
 	case "saveShareFile":
 		if s.SaveShareFile == nil {
 			return nil, errors.New("native save dialog is unavailable")

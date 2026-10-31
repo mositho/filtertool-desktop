@@ -11,6 +11,7 @@ import PreviewPane from "./components/PreviewPane.vue"
 import GlobalSettings from "./components/GlobalSettings.vue"
 
 const filters = ref<FilterInfo[]>([])
+const templateMode = ref(false)
 const selected = ref<string | null>(null)
 const config = ref<FilterConfig>(clone(EMPTY_FILTER_CONFIG))
 const savedConfig = ref<FilterConfig>(clone(EMPTY_FILTER_CONFIG))
@@ -134,7 +135,8 @@ function discardChanges() {
 }
 
 async function refreshFilters(selectName?: string) {
-  const { filters: list } = await api.listFilters()
+  const { filters: list, templateMode: templates } = await api.listFilters()
+  templateMode.value = templates
   filters.value = list
   if (selectName && list.some((f) => f.name === selectName)) {
     selected.value = selectName
@@ -410,9 +412,9 @@ async function browseHomePath() {
   }
 }
 
-async function onCreate(name: string) {
+async function onCreate(name: string, template?: string) {
   try {
-    await api.createFilter(name.trim())
+    await api.createFilter(name.trim(), template)
     await refreshFilters(name.trim())
     flash(`Created filter "${name}"`, "create")
   } catch (e) {
@@ -453,6 +455,15 @@ async function saveShareFile() {
     await api.saveShareFile(selected.value, config.value, shareGlobals.value)
   } catch (error) {
     shareError.value = (error as Error).message
+  }
+}
+async function exportTemplateBundle() {
+  try {
+    if (dirty.value) await saveOnly()
+    const path = await api.saveTemplateBundle()
+    if (path) flash("Template bundle saved. Review changes before including them in a build.", "save")
+  } catch (error) {
+    flash((error as Error).message, "error")
   }
 }
 async function importFromPicker(folder: boolean) {
@@ -635,6 +646,7 @@ onUnmounted(() => {
       <div class="absolute inset-0 bg-black/60" @click="sidebarOpen = false"></div>
       <div class="absolute inset-y-0 left-0 flex w-64">
         <Sidebar
+          :template-mode="templateMode"
           :filters="filters"
           :selected="selected"
           :view="view"
@@ -660,6 +672,7 @@ onUnmounted(() => {
 
     <div class="hidden shrink-0 md:flex">
       <Sidebar
+        :template-mode="templateMode"
         :filters="filters"
         :selected="selected"
         :view="view"
@@ -683,6 +696,19 @@ onUnmounted(() => {
     </div>
 
     <main class="flex-1 flex flex-col min-w-0">
+      <div
+        v-if="templateMode"
+        class="flex items-center justify-between gap-3 border-b border-amber-800 bg-amber-950/40 px-4 py-2 text-xs text-amber-200"
+      >
+        <span>Template Editor — isolated from your personal filters. Save edits, then export to update the bundled templates.</span>
+        <button
+          type="button"
+          @click="exportTemplateBundle"
+          class="shrink-0 rounded border border-amber-700 px-3 py-1 hover:bg-amber-900/40"
+        >
+          Export template bundle…
+        </button>
+      </div>
       <header class="flex h-14 items-center justify-between gap-2 border-b border-neutral-800 px-3 sm:px-6">
         <div class="flex min-w-0 items-center gap-2">
           <button
@@ -901,7 +927,7 @@ onUnmounted(() => {
                 <button @click="browseHomePath" class="rounded border border-neutral-700 px-3 text-sm hover:bg-neutral-800">Browse…</button>
               </div>
             </div>
-            <div class="flex flex-col items-stretch gap-3">
+            <div v-if="!templateMode" class="flex flex-col items-stretch gap-3">
               <button
                 type="button"
                 @click="createFromLanding"

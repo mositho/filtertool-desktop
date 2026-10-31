@@ -19,6 +19,7 @@ import (
 type Object = map[string]any
 type Store struct {
 	Root            string
+	TemplateMode    bool
 	mu              sync.Mutex
 	ChooseFolder    func(string) (string, error)
 	ChooseFiles     func() ([]string, error)
@@ -39,10 +40,22 @@ func UserDataDir() (string, error) {
 	return filepath.Join(root, "Filtertool"), nil
 }
 func Open(root string) (*Store, error) {
+	return open(root, false)
+}
+
+// OpenTemplates opens an isolated authoring workspace, never the personal root.
+func OpenTemplates(root string) (*Store, error) {
 	if root == "" {
 		return nil, errors.New("data directory is required")
 	}
-	s := &Store{Root: root}
+	return open(filepath.Join(root, "profiles", "templates"), true)
+}
+
+func open(root string, templates bool) (*Store, error) {
+	if root == "" {
+		return nil, errors.New("data directory is required")
+	}
+	s := &Store{Root: root, TemplateMode: templates}
 	for _, dir := range []string{"filters", "sounds", "cache"} {
 		if err := os.MkdirAll(filepath.Join(root, dir), 0700); err != nil {
 			return nil, err
@@ -53,15 +66,19 @@ func Open(root string) (*Store, error) {
 		if err != nil {
 			return nil, err
 		}
-		if len(filters) == 0 {
-			for name, value := range data.Load[Object]("examples.json") {
+		if templates && len(filters) == 0 {
+			for name, value := range data.Load[Object]("templates.json") {
 				if err = s.writeFilter(name, c.Obj(value)); err != nil {
 					return nil, err
 				}
 			}
 		}
 		if _, err = os.Stat(filepath.Join(root, "settings.json")); errors.Is(err, os.ErrNotExist) {
-			if err = s.write("settings.json", Object{"filterPath": DetectFilterPath(), "soundsFolder": "", "tts": Object{"locale": "en-US", "speed": 1.6}}); err != nil {
+			filterPath := ""
+			if !templates {
+				filterPath = DetectFilterPath()
+			}
+			if err = s.write("settings.json", Object{"filterPath": filterPath, "soundsFolder": "", "welcomeComplete": templates, "tts": Object{"locale": "en-US", "speed": 1.6}}); err != nil {
 				return nil, err
 			}
 		}

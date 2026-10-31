@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "node scripts/wails.mjs dev -config build/config.yml -port 5173",
+    "dev:templates": "node scripts/wails.mjs dev --templates -config build/config.yml -port 5173",
     "build": "node scripts/build.mjs",
     "frontend:dev": "vite --config frontend/vite.config.ts",
     "frontend:typecheck": "vue-tsc --noEmit -p frontend/tsconfig.json",

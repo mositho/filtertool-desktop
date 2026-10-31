@@ -38,14 +38,26 @@ func (a *App) Dispatch(action string, input map[string]any) (any, error) {
 	return a.store.Dispatch(action, input)
 }
 func main() {
+	templateMode := os.Getenv("FILTERTOOL_PROFILE") == "templates"
+	for _, arg := range os.Args[1:] {
+		if arg == "--templates" {
+			templateMode = true
+		}
+	}
 	root, err := app.UserDataDir()
 	if err != nil {
 		log.Fatal(err)
 	}
-	store, err := app.Open(root)
+	var store *app.Store
+	if templateMode {
+		store, err = app.OpenTemplates(root)
+	} else {
+		store, err = app.Open(root)
+	}
 	if err != nil {
 		log.Fatal(err)
 	}
+	root = store.Root
 	processor, err := bundle.Prepare(root)
 	if err != nil {
 		log.Fatal(err)
@@ -54,14 +66,20 @@ func main() {
 	service := &App{store: store}
 	icon, _ := assets.ReadFile("branding/logo.png")
 	var window *application.WebviewWindow
-	native := application.New(application.Options{Name: "Filtertool", Description: "Path of Exile leveling filter builder", Icon: icon, Services: []application.Service{application.NewService(service)}, Assets: application.AssetOptions{Handler: application.AssetFileServerFS(assets)}, Windows: application.WindowsOptions{WebviewUserDataPath: filepath.Join(root, "cache", "webview2")}, SingleInstance: &application.SingleInstanceOptions{UniqueID: "io.github.mositho.filtertool-desktop", OnSecondInstanceLaunch: func(application.SecondInstanceData) {
+	title := "Filtertool"
+	instanceID := "io.github.mositho.filtertool-desktop"
+	if templateMode {
+		title += " — Template Editor"
+		instanceID += ".templates"
+	}
+	native := application.New(application.Options{Name: title, Description: "Path of Exile leveling filter builder", Icon: icon, Services: []application.Service{application.NewService(service)}, Assets: application.AssetOptions{Handler: application.AssetFileServerFS(assets)}, Windows: application.WindowsOptions{WebviewUserDataPath: filepath.Join(root, "cache", "webview2")}, SingleInstance: &application.SingleInstanceOptions{UniqueID: instanceID, OnSecondInstanceLaunch: func(application.SecondInstanceData) {
 		if window != nil {
 			window.Show()
 			window.Focus()
 		}
 	}}})
 	service.native = native
-	window = native.Window.NewWithOptions(application.WebviewWindowOptions{Title: "Filtertool", Width: 1440, Height: 960, MinWidth: 900, MinHeight: 640, BackgroundColour: application.NewRGB(10, 10, 10), URL: "/"})
+	window = native.Window.NewWithOptions(application.WebviewWindowOptions{Title: title, Width: 1440, Height: 960, MinWidth: 900, MinHeight: 640, BackgroundColour: application.NewRGB(10, 10, 10), URL: "/"})
 	window.RegisterHook(events.Common.WindowClosing, func(e *application.WindowEvent) {
 		if service.dirty.Load() {
 			e.Cancel()
@@ -79,7 +97,11 @@ func main() {
 	}
 	store.SaveShareFile = func(name, text string) (string, error) {
 		dialog := native.Dialog.SaveFile()
-		dialog.SetOptions(&application.SaveFileDialogOptions{Title: "Save shared filter", Filename: name, CanCreateDirectories: true, Window: window, Filters: []application.FileFilter{{DisplayName: "Filtertool JSON", Pattern: "*.json"}}})
+		title := "Save shared filter"
+		if templateMode && name == "templates.json" {
+			title = "Export template bundle"
+		}
+		dialog.SetOptions(&application.SaveFileDialogOptions{Title: title, Filename: name, CanCreateDirectories: true, Window: window, Filters: []application.FileFilter{{DisplayName: "Filtertool JSON", Pattern: "*.json"}}})
 		path, err := dialog.PromptForSingleSelection()
 		if err != nil || path == "" {
 			return path, err
