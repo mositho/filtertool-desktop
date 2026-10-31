@@ -100,12 +100,17 @@ func (c *Compiler) Compile(config Object) (string, error) {
 	return strings.Join(result, "\n\n"), nil
 }
 func (c *Compiler) gems(cfg Object) string {
+	cfg = Merge(Obj(c.Defaults["gemCallouts"]), cfg)
 	rules := []*rule{}
-	for _, gem := range Strings(cfg["gems"]) {
+	sounding := Strings(cfg["gems"])
+	for _, gem := range sounding {
 		r := newRule().quoted("BaseType", true, gem).icon("Cyan", "Star", 2).style(Obj(c.Styles["gemCallout"]))
 		rules = append(rules, c.tts(r, strings.TrimSuffix(gem, " Support")))
 	}
 	for _, gem := range Strings(cfg["styleOnly"]) {
+		if contains(sounding, gem) {
+			continue
+		}
 		rules = append(rules, newRule().quoted("BaseType", true, gem).style(Obj(c.Styles["gem"])))
 	}
 	rules = append(rules, c.template(Text(c.templates["gems"]))...)

@@ -37,6 +37,9 @@ func TestWebCompilerParity(t *testing.T) {
 				t.Fatal(err)
 			}
 			compiler := New(Obj(cfg["_defaults"]), Obj(cfg["_styles"]), "")
+			// The captured web compiler predates starter-support defaults. Keep
+			// that historical baseline here; current defaults have separate tests.
+			compiler.Defaults["gemCallouts"] = Object{}
 			compiler.weapons = referenceWeapons
 			got, err := compiler.Compile(cfg)
 			if err != nil {

@@ -1,4 +1,5 @@
 import { EQUIPMENT_FOOTPRINTS, EQUIPMENT_RARITY_TEXT } from "../filters/shared/equipment-rules"
+import builtInDefaults from "../../internal/data/defaults.json"
 
 type BuildProfile = Record<string, unknown>
 type BuildSpecificOptions = Record<string, unknown>
@@ -784,7 +785,9 @@ export const BUILD_SPECIFIC_SCHEMA: FieldGroup[] = [
         label: "Gem style only",
         control: "multiselect",
         options: [],
-        tooltip: "Highlight selected gems with the gem style, without a sound. Matched before the generic gem rules.",
+        defaultValue: builtInDefaults.gemCallouts.styleOnly,
+        tooltip:
+          "Highlight selected gems without sound. Includes the Twilight Strand starter supports by default. Gem style + sound takes priority.",
       },
     ],
   },
