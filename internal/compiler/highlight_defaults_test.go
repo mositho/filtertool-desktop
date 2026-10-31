@@ -66,7 +66,7 @@ func TestOptionalModulesOnlyApplyWhenAdded(t *testing.T) {
 	phase["minAreaLevel"] = float64(2)
 	phase["maxAreaLevel"] = float64(30)
 	phase["minSockets"] = float64(6)
-	phase["minAps"] = float64(99)
+	phase["minAps"] = float64(1)
 	phase["iconShape"] = "Star"
 	phase["soundId"] = float64(5)
 	output := c.phases([]any{phase})
@@ -76,8 +76,11 @@ func TestOptionalModulesOnlyApplyWhenAdded(t *testing.T) {
 	if strings.Contains(output, "Sockets >=") || strings.Contains(output, "MinimapIcon") || strings.Contains(output, "AlertSound") {
 		t.Fatal("unadded module fields affected phase output", output)
 	}
-	if output := c.highlight(phase)[0].render(); strings.Contains(output, "AreaLevel") {
-		t.Fatal("highlight bounds should require their module when metadata exists", output)
+	if strings.Contains(output, `BaseType == "Test Weapon"`) {
+		t.Fatal("unadded minimum attack speed module affected phase output", output)
+	}
+	if output := c.highlight(phase)[0].render(); strings.Contains(output, "AreaLevel") || strings.Contains(output, `BaseType == "Test Weapon"`) {
+		t.Fatal("unadded highlight modules should not affect output when metadata exists", output)
 	}
 	delete(phase, "modules")
 	delete(phase, "minAps")

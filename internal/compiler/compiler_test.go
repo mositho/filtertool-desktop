@@ -92,3 +92,16 @@ func TestOverridesAndValidation(t *testing.T) {
 		t.Fatal("accepted reversed range")
 	}
 }
+
+func TestWeaponPhaseRequiresTarget(t *testing.T) {
+	base := Object{"buildProfile": Object{"weaponPhases": []any{Object{"name": "Fast weapons", "minAps": float64(1.4)}}}, "buildSpecificOptions": Object{}}
+	if err := Validate(base); err == nil || !strings.Contains(err.Error(), "Fast weapons: select at least one item class or base type") {
+		t.Fatalf("expected empty weapon phase to be rejected, got %v", err)
+	}
+	for _, target := range []Object{{"itemClasses": []any{"One Hand Axes"}}, {"baseTypes": []any{"Rusted Hatchet"}}} {
+		base["buildProfile"] = Object{"weaponPhases": []any{target}}
+		if err := Validate(base); err != nil {
+			t.Fatalf("valid weapon phase rejected: %v", err)
+		}
+	}
+}

@@ -98,6 +98,21 @@ func Validate(config Object) error {
 			return fmt.Errorf("%s must be a JSON object", key)
 		}
 	}
+	if phases, ok := Obj(config["buildProfile"])["weaponPhases"].([]any); ok {
+		for i, value := range phases {
+			phase, ok := value.(map[string]any)
+			if !ok {
+				continue // The recursive validation below reports the malformed entry.
+			}
+			if len(Strings(phase["itemClasses"])) == 0 && len(Strings(phase["baseTypes"])) == 0 {
+				name := strings.TrimSpace(Text(phase["name"]))
+				if name == "" {
+					name = fmt.Sprintf("Phase %d", i+1)
+				}
+				return fmt.Errorf("%s: select at least one item class or base type", name)
+			}
+		}
+	}
 	var walk func(any, string) error
 	walk = func(v any, path string) error {
 		switch x := v.(type) {
