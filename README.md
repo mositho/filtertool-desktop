@@ -10,9 +10,6 @@ A Windows item-filter builder for Path of Exile 1, focused on leveling.
 
 </div>
 
-> [!NOTE]
-> The first desktop release, **1.0.0**, is being prepared. Downloads will appear on the Releases page after publication.
-
 ## Get started
 
 Download a stable version from [Releases](https://github.com/mositho/filtertool-desktop/releases):
