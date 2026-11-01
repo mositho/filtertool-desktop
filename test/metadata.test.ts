@@ -3,6 +3,19 @@ import { readFileSync } from "node:fs"
 import { spawnSync } from "node:child_process"
 import { expect, it } from "vitest"
 
+it("keeps the Node runtime, package engines and type definitions on the same major", () => {
+  const read = (path: string) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8")
+  const major = Number(read(".nvmrc").trim())
+  const pkg = JSON.parse(read("package.json"))
+  const lock = JSON.parse(read("package-lock.json"))
+  expect(Number.isSafeInteger(major) && major > 0).toBe(true)
+  expect(pkg.engines.node).toBe(`>=${major} <${major + 1}`)
+  expect(pkg.devDependencies["@types/node"]).toMatch(new RegExp(`^\\^${major}\\.`))
+  expect(lock.packages[""].engines.node).toBe(pkg.engines.node)
+  expect(lock.packages[""].devDependencies["@types/node"]).toBe(pkg.devDependencies["@types/node"])
+  expect(lock.packages["node_modules/@types/node"].version.split(".")[0]).toBe(String(major))
+})
+
 it("credits mositho in package and Windows publisher metadata", () => {
   const read = (path: string) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8")
   expect(JSON.parse(read("package.json")).author).toBe("mositho")

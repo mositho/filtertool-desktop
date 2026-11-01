@@ -1,6 +1,6 @@
 # Contributing
 
-Requires Go 1.26+ and Node.js 24. Running the desktop UI requires 64-bit Windows 10+ and WebView2; development checks and builds are not Windows-only.
+Requires Go 1.26+ and Node.js 26 (see `.nvmrc`). Use `nvm install && nvm use`, or `fnm use --install-if-missing`, before installing dependencies. Running the desktop UI requires 64-bit Windows 10+ and WebView2; development checks and builds are not Windows-only.
 
 ```sh
 npm ci
