@@ -3,6 +3,17 @@ import { readFileSync } from "node:fs"
 import { spawnSync } from "node:child_process"
 import { expect, it } from "vitest"
 
+it("does not retain the unused PrimeVue license-managed UI stack", () => {
+  const read = (path: string) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8")
+  const pkg = JSON.parse(read("package.json"))
+  const lock = JSON.parse(read("package-lock.json"))
+  expect(pkg.dependencies).not.toHaveProperty("primevue")
+  expect(read("frontend/src/main.ts")).not.toContain("primevue")
+  for (const path of Object.keys(lock.packages)) {
+    expect(path).not.toMatch(/node_modules\/(?:primevue(?:\/|$)|@prime(?:vue|ui|uix|icons)\/)/)
+  }
+})
+
 it("keeps the Node runtime, package engines and type definitions on the same major", () => {
   const read = (path: string) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8")
   const major = Number(read(".nvmrc").trim())
