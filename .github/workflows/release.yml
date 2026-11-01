@@ -160,4 +160,19 @@ jobs:
           export GIT_CONFIG_KEY_0=http.https://github.com/.extraheader
           export GIT_CONFIG_VALUE_0="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 | tr -d '\r\n')"
           git push origin "refs/tags/$TAG"
-          gh release create "$TAG" release-assets/Filtertool.exe release-assets/Filtertool-Setup.exe release-assets/SHA256SUMS.txt LICENSE docs/THIRD_PARTY.md --draft --verify-tag --generate-notes --title "Filtertool $TAG" --notes 'Requires 64-bit Windows 10/11 and WebView2. TTS generation additionally requires a separately installed FFmpeg on PATH and internet access; FFmpeg is not included. User data is stored in %APPDATA%\Filtertool. Before publishing this draft, complete docs/RELEASING.md.'
+          REPO_URL="https://github.com/$GITHUB_REPOSITORY"
+          CHANGELOG_URL="$REPO_URL/commits/$TAG"
+          if PREVIOUS_TAG=$(git describe --tags --abbrev=0 "$TAG^" 2>/dev/null); then
+            CHANGELOG_URL="$REPO_URL/compare/$PREVIOUS_TAG...$TAG"
+          fi
+          cat > release-notes.md <<EOF
+          ## Download
+
+          - **[Filtertool-Setup.exe]($REPO_URL/releases/download/$TAG/Filtertool-Setup.exe)** — recommended; installs Filtertool and sets up WebView2 if needed.
+          - **[Filtertool.exe]($REPO_URL/releases/download/$TAG/Filtertool.exe)** — run without installing (requires WebView2).
+
+          For 64-bit Windows 10 or 11. TTS sound generation also needs a separate FFmpeg installation.
+
+          **[Get started]($REPO_URL/blob/$TAG/README.md#get-started)** · [Quick guide]($REPO_URL/blob/$TAG/README.md#quick-guide) · [Changelog]($CHANGELOG_URL)
+          EOF
+          gh release create "$TAG" release-assets/Filtertool.exe release-assets/Filtertool-Setup.exe release-assets/SHA256SUMS.txt LICENSE docs/THIRD_PARTY.md --draft --verify-tag --title "Filtertool $TAG" --notes-file release-notes.md

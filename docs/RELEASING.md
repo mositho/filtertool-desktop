@@ -22,7 +22,7 @@ Release versions use stable `major.minor.patch` numbers, starting with **1.0.0**
 ## Review and publish
 
 - Download and smoke-test the draft artifacts. Review checksums, license/notice attachments, release notes and any known limitations. Standalone downloads need the accompanying license/notice files too.
-- Replace the pre-publication README note when publishing. Publish the draft only after explicit approval and completed checks above.
+- Draft notes contain download links, requirements, and links to the versioned README and changelog (a comparison with the previous tag, or commit history for the first release). Keep them user-facing and concise; add any important release-specific warnings before publishing. Publish the draft only after explicit approval and completed checks above.
 - If draft creation fails after tagging succeeded, do not delete or move the tag. Recover by creating a draft for the existing tag and attaching the `release-assets` artifact from that workflow run; the normal workflow intentionally rejects duplicate tags.
 
 See [Security maintenance](SECURITY.md) for repository policies and the remaining supply-chain risks.
