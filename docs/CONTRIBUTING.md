@@ -1,6 +1,6 @@
 # Contributing
 
-Requires Go 1.26+ and Node.js 26 (see `.nvmrc`). Use `nvm install && nvm use`, or `fnm use --install-if-missing`, before installing dependencies. Running the desktop UI requires 64-bit Windows 10+ and WebView2; development checks and builds are not Windows-only.
+Requires Go 1.26.10+ and Node.js 26 (see `.nvmrc`). Use `nvm install && nvm use`, or `fnm use --install-if-missing`, before installing dependencies. Running the desktop UI requires 64-bit Windows 10+ and WebView2; development checks and builds are not Windows-only.
 
 ```sh
 npm ci
@@ -14,7 +14,7 @@ Dev **Save** edits templates/defaults/styles in `internal/data/`, not personal d
 To build the installer locally:
 
 1. Run `npm run build` in WSL/Linux or Windows to produce `bin/Filtertool.exe`.
-2. From the repository root in Windows PowerShell (5.1 or 7), run `powershell -NoProfile -File scripts/package-windows.ps1` (or use `pwsh`).
+2. From the repository root in Windows PowerShell (5.1 or 7), run `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-windows.ps1` (or use `pwsh`). The override applies only to that process, not system-wide.
 
 The packaging step needs no Node.js, Go or global NSIS installation on Windows. It downloads checksum-pinned portable NSIS and the signed Microsoft WebView2 bootstrapper, then writes `bin/Filtertool-Setup.exe` and `bin/SHA256SUMS.txt`.
 

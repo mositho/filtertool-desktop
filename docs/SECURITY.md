@@ -1,7 +1,7 @@
 # Security maintenance
 
 - Review dependency and workflow updates manually. Dependabot opens PRs with a seven-day cooldown for routine updates; security updates are not delayed.
-- `main` requires PRs and up-to-date Linux/Windows CI plus dependency review. No bot bypasses, force pushes or branch deletion. Required approving-review count is zero for solo maintenance.
+- Maintainers can push directly to `main`. CI and dependency review are advisory, not required merge gates; review results before releases. Force pushes and branch deletion are blocked.
 - Actions default to read-only, use allowlisted SHA-pinned actions, and require approval for external fork workflows. Bot PR creation/approval and auto-merge are disabled.
 - Builds run read-only; fresh, minimal write-enabled jobs prepare proposal branches or draft releases. Version/data updates provide a link to open a PR manually. Release tags cannot be changed or deleted.
 - Keep secret scanning/push protection enabled and protect maintainer accounts with MFA/passkeys. Periodically review tokens, collaborators and installed apps.
