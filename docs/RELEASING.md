@@ -12,15 +12,17 @@ Release versions use stable `major.minor.patch` numbers, starting with **1.0.0**
 
 ## Run the workflow
 
-- After release approval, open **Actions → Release → Run workflow**, select **main**, and enter a version such as `1.0.0` (without the `v`). Only stable `major.minor.patch` versions are accepted. Existing tags and versions below the current package version are rejected. The current version is allowed for the initial release or a retry before tagging.
-- The workflow applies the version to `package.json`, both root versions in `package-lock.json`, and `build/config.yml`. Windows executable metadata and the NSIS version use that same version. Dependencies are not updated.
-- Linux and Windows CI check the version-updated source before packaging. The workflow then builds the executable and installer and generates SHA-256 checksums. No version commit or tag is pushed until these steps succeed.
-- If metadata changed, the workflow creates a `chore(release): v…` commit. It atomically pushes `main` and the matching annotated tag, then creates a **draft** release. If the version was already correct, it tags the checked source without an empty commit.
-- Releases are serialized. If `main` advances during the build, the atomic push fails without publishing the tag; start a fresh workflow run against the latest `main`. No force pushes are used.
-- The workflow needs `contents: write` in its packaging job, and branch/tag rules must permit the Actions bot's release commit/tag. It uses the built-in `GITHUB_TOKEN`; pushes made with that token do not trigger another CI/release workflow. CI already ran inside the release workflow.
+- After release approval, open **Actions → Release → Run workflow**, select **main**, and enter a version such as `1.0.0` (without the `v`). Only stable `major.minor.patch` versions are accepted. Existing tags and versions below the current package version are rejected.
+- If the version differs from `main`, the workflow prepares `package.json`, both root versions in `package-lock.json`, and `build/config.yml` on a `release/v…` branch. Open the PR using the link in the job summary, review it, wait for CI, and merge it. **Then run Release again with the same version.** The workflow never pushes directly to protected `main` and does not create or approve PRs.
+- If a proposed branch already exists, automation leaves it untouched and links to it. Update it through a reviewed change if necessary; no automated force pushes are used.
+- When the version already matches `main` (including the initial `1.0.0`), Linux and Windows CI run before packaging. Executable/installer versions use the checked metadata; dependencies are not updated. The workflow builds the artifacts and checksums with read-only repository permissions.
+- A fresh, minimal write-enabled runner downloads artifacts from that same run, verifies checksums, creates an annotated tag for the checked commit, and creates a **draft** release. It does not install dependencies or execute built artifacts. Before tagging, it checks that `main` has not advanced; start a fresh run if it has.
+- Releases are serialized and publishing stays manual. Intermediate artifacts expire after seven days. No bot has a branch-protection bypass; bot PR creation/approval remains disabled.
 
 ## Review and publish
 
 - Download and smoke-test the draft artifacts. Review checksums, license/notice attachments, release notes and any known limitations. Standalone downloads need the accompanying license/notice files too.
 - Replace the pre-publication README note when publishing. Publish the draft only after explicit approval and completed checks above.
-- If draft creation fails after the atomic push succeeded, the version commit/tag remain. Do not delete or move that tag. Recover by creating a draft for the existing tag and attaching artifacts from that exact commit; the normal workflow intentionally rejects duplicate tags.
+- If draft creation fails after tagging succeeded, do not delete or move the tag. Recover by creating a draft for the existing tag and attaching the `release-assets` artifact from that workflow run; the normal workflow intentionally rejects duplicate tags.
+
+See [Security maintenance](SECURITY.md) for repository policies and the remaining supply-chain risks.

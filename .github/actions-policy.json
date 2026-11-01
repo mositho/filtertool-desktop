@@ -1,0 +1,12 @@
+{
+  "github_owned_allowed": false,
+  "verified_allowed": false,
+  "patterns_allowed": [
+    "actions/checkout@*",
+    "actions/setup-node@*",
+    "actions/setup-go@*",
+    "actions/upload-artifact@*",
+    "actions/download-artifact@*",
+    "actions/dependency-review-action@*"
+  ]
+}

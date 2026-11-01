@@ -13,15 +13,19 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  update:
+  prepare:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    permissions:
-      actions: write
-      contents: write
-      pull-requests: write
+    outputs:
+      changed: ${{ steps.changes.outputs.changed }}
     steps:
+      - name: Require main
+        env:
+          UPDATE_REF: ${{ github.ref }}
+        run: test "$UPDATE_REF" = refs/heads/main
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
@@ -29,25 +33,50 @@ jobs:
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: go.mod
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - run: npm run update-basetypes
       - run: npm run check
       - run: npm run frontend:build
       - run: npm audit --audit-level=high
-      - uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
-        id: pr
+      - name: Detect changes
+        id: changes
+        shell: bash
+        run: |
+          if git diff --quiet -- internal/data/BaseTypes.csv internal/data/reference.json internal/data/weapons.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: steps.changes.outputs.changed == 'true'
         with:
-          branch: chore/update-basetypes
-          commit-message: "chore: update PoE base data"
-          title: "chore: update PoE base data"
-          body: "Updates PoE 1 base data from FilterBlade and regenerates desktop references. Checks passed; review rule behavior before merging."
-          add-paths: |
+          name: prepared-base-data
+          retention-days: 7
+          if-no-files-found: error
+          path: |
             internal/data/BaseTypes.csv
             internal/data/reference.json
             internal/data/weapons.json
-      # GITHUB_TOKEN-created pull requests do not trigger pull_request workflows.
-      - name: Run full CI on the update branch
-        if: steps.pr.outputs.pull-request-number != ''
+  propose:
+    needs: prepare
+    if: needs.prepare.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: prepared-base-data
+          path: downloaded
+      - name: Restore expected directory structure
+        run: |
+          mkdir -p prepared/internal/data
+          cp downloaded/BaseTypes.csv downloaded/reference.json downloaded/weapons.json prepared/internal/data/
+      - name: Prepare branch for manual review
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh workflow run ci.yml --ref chore/update-basetypes
+        run: bash scripts/push-prepared-branch.sh basetypes
