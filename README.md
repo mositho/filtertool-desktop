@@ -22,9 +22,11 @@ Download a stable version from [Releases](https://github.com/mositho/filtertool-
 
 Both versions keep your filters, settings and sounds in **`%APPDATA%\Filtertool`**. Replacing the executable or uninstalling does not remove them. Back up that folder to keep a copy of your work.
 
+Requires FFmpeg. The easiest way to download it is by pressing `CTRL + R`and typing  `winget install ffmpeg`. 
+Otherwise you can download it directly from [gyan.dev](https://www.gyan.dev/ffmpeg/builds/) and add `ffmpeg.exe` to your `PATH`. After installing FFmpeg or changing `PATH`, restart Filtertool.
+
 Requires 64-bit Windows 10 or 11 and Microsoft Edge WebView2. The installer installs WebView2 if needed; standalone users can get it from [Microsoft](https://developer.microsoft.com/microsoft-edge/webview2/).
 
-Generating TTS sounds also requires **FFmpeg** to be installed separately. Find Windows build options on the [official FFmpeg download page](https://ffmpeg.org/download.html#build-windows), then make sure `ffmpeg.exe` is available on your `PATH`. Filtertool does not bundle, download, or install FFmpeg. If it is not detected, Filtertool will still work, but generating TTS sounds will be unavailable. After installing FFmpeg or changing `PATH`, restart Filtertool.
 
 ## Quick guide
 
