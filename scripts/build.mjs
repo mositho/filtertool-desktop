@@ -53,7 +53,7 @@ try {
       "-buildvcs=false",
       ...(dev ? [] : ["-tags", "production", "-trimpath"]),
       "-ldflags",
-      "-s -w -H windowsgui",
+      `-s -w -H windowsgui -X main.version=${version}`,
       "-o",
       "bin/Filtertool.exe",
       ".",

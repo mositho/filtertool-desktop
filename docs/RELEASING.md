@@ -7,6 +7,7 @@ Release versions use stable `major.minor.patch` numbers, starting with **1.0.0**
 - Merge the intended changes into `main`. There is no need to bump version files or create a tag manually.
 - Run `npm ci`, `npm run check`, `npm run frontend:build`, `go vet ./...`, and `npm audit --audit-level=high`. Require successful Windows and Linux CI.
 - Test on Windows with temporary/test profiles: standalone launch, per-user install/uninstall, WebView2 setup, native file/folder dialogs, import, save/restart, preview, export, and loading the filter in PoE 1. Confirm uninstall preserves user data.
+- Smoke-test in-app updating from an older build in a writable temporary folder: download, restart, and confirm the new version and preserved test profile. Check that unsaved edits prevent restart. A major-version increase must show the migration/recreation warning and require confirmation.
 - Test without FFmpeg: startup, editing and preview work; TTS generation explains the missing dependency. Then install FFmpeg on `PATH`, restart, and test TTS generation/export. Confirm no FFmpeg executable or DLL is shipped.
 - Review third-party redistribution permissions and required license/copyright texts for all shipped code and assets, including Go/frontend dependencies, PoE data and game alert audio. A source link or attribution alone is not necessarily sufficient permission or a complete license notice. Verify the Google Translate TTS usage terms separately; availability is not guaranteed.
 
@@ -16,8 +17,15 @@ Release versions use stable `major.minor.patch` numbers, starting with **1.0.0**
 - If the version differs from `main`, the workflow prepares `package.json`, both root versions in `package-lock.json`, and `build/config.yml` on a `release/v…` branch. Open the PR using the link in the job summary, review it, wait for CI, and merge it. **Then run Release again with the same version.** The workflow never pushes directly to `main` and does not create or approve PRs. Alternatively, maintainers can update the version files directly on `main` before running Release.
 - If a proposed branch already exists, automation leaves it untouched and links to it. Update it through a reviewed change if necessary; no automated force pushes are used.
 - When the version already matches `main` (including the initial `1.0.0`), Linux and Windows CI run before packaging. Executable/installer versions use the checked metadata; dependencies are not updated. The workflow builds the artifacts and checksums with read-only repository permissions.
+
 - A fresh, minimal write-enabled runner downloads artifacts from that same run, verifies checksums, creates an annotated tag for the checked commit, and creates a **draft** release. It does not install dependencies or execute built artifacts. Before tagging, it checks that `main` has not advanced; start a fresh run if it has.
 - Releases are serialized and publishing stays manual. Intermediate artifacts expire after seven days. No bot has a branch-protection bypass; bot PR creation/approval remains disabled.
+
+## In-app update compatibility
+
+- Publish breaking filter-format or behavior changes as a **major** version. The app compares the installed and offered major versions, including skipped releases, and requires acknowledgement before downloading across that boundary. Explain what changed and how to migrate/recreate filters in the release notes before publishing; no automatic migration is supplied.
+- Published stable GitHub releases are the update source; drafts and prereleases are not offered. Keep `Filtertool.exe` and `SHA256SUMS.txt` attached. The updater selects the standalone EXE (never the setup), requires its SHA-256 checksum, and replaces only the application binary on an explicit restart.
+- Checksum verification detects corrupted downloads, but relies on GitHub/TLS for authenticity. This is not artifact signing or Windows Authenticode signing. Keep release permissions protected; stronger pinned-key signing can be added separately.
 
 ## Review and publish
 

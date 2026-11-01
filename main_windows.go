@@ -13,20 +13,38 @@ import (
 	"github.com/mositho/filtertool-desktop/internal/app"
 	"github.com/mositho/filtertool-desktop/internal/bundle"
 	"github.com/mositho/filtertool-desktop/internal/desktop"
+	"github.com/mositho/filtertool-desktop/internal/updates"
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/wailsapp/wails/v3/pkg/events"
+	"github.com/wailsapp/wails/v3/pkg/updater"
 )
 
 //go:embed all:frontend/dist branding/logo.png
 var assets embed.FS
 
+// Set by scripts/build.mjs; development sessions must never replace themselves.
+var version = "dev"
+
 type App struct {
-	store  *app.Store
-	native *application.App
-	dirty  atomic.Bool
+	store   *app.Store
+	native  *application.App
+	dirty   atomic.Bool
+	updates *updates.Manager
 }
 
 func (a *App) Dispatch(action string, input map[string]any) (any, error) {
+	switch action {
+	case "checkUpdates":
+		return a.updates.Check()
+	case "downloadUpdate":
+		version, _ := input["version"].(string)
+		return a.updates.Download(version, input["acceptMajor"] == true)
+	case "restartUpdate":
+		if a.dirty.Load() {
+			return nil, errors.New("save or discard your unsaved changes before restarting")
+		}
+		return nil, a.updates.Restart()
+	}
 	if action == "setDirty" {
 		a.dirty.Store(input["dirty"] == true)
 		return nil, nil
@@ -39,6 +57,8 @@ func (a *App) Dispatch(action string, input map[string]any) (any, error) {
 	return a.store.Dispatch(action, input)
 }
 func main() {
+	// The swap helper must not open or modify the user's profile.
+	updater.HandleHelperMode()
 	devMode := os.Getenv("FILTERTOOL_PROFILE") == "dev"
 	for _, arg := range os.Args[1:] {
 		if arg == "--dev" {
@@ -87,6 +107,15 @@ func main() {
 		}
 	}}})
 	service.native = native
+	service.updates, err = updates.New(native.Updater, version, !devMode)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if !devMode && version != "dev" {
+		if err := desktop.UpdateInstalledVersion(version); err != nil {
+			log.Printf("update installed version: %v", err)
+		}
+	}
 	window = native.Window.NewWithOptions(application.WebviewWindowOptions{Title: title, Width: 1440, Height: 960, MinWidth: 1024, MinHeight: 720, BackgroundColour: application.NewRGB(10, 10, 10), URL: "/"})
 	window.RegisterHook(events.Common.WindowClosing, func(e *application.WindowEvent) {
 		if service.dirty.Load() {

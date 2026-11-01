@@ -9,6 +9,7 @@ import Sidebar from "./components/Sidebar.vue"
 import ConfigForm from "./components/ConfigForm.vue"
 import PreviewPane from "./components/PreviewPane.vue"
 import GlobalSettings from "./components/GlobalSettings.vue"
+import AppUpdates from "./components/AppUpdates.vue"
 
 const filters = ref<FilterInfo[]>([])
 const devMode = ref(false)
@@ -22,6 +23,13 @@ const previewOpen = ref(false)
 const previewSection = ref<string | null>(null)
 const view = ref<"filter" | "global">("filter")
 const sidebarOpen = ref(false)
+const desktopMedia = window.matchMedia("(min-width: 768px)")
+const desktopLayout = ref(desktopMedia.matches)
+function onLayoutChange(event: MediaQueryListEvent) {
+  desktopLayout.value = event.matches
+}
+desktopMedia.addEventListener("change", onLayoutChange)
+onUnmounted(() => desktopMedia.removeEventListener("change", onLayoutChange))
 type FlashKind = "notice" | "create" | "duplicate" | "rename" | "delete" | "save" | "export" | "error"
 
 const FLASH_META: Record<FlashKind, { icon: string; tone: string }> = {
@@ -651,6 +659,7 @@ onUnmounted(() => {
       <div class="absolute inset-0 bg-black/60" @click="sidebarOpen = false"></div>
       <div class="absolute inset-y-0 left-0 flex w-64">
         <Sidebar
+          updates-target="mobile-updates"
           :dev-mode="devMode"
           :filters="filters"
           :selected="selected"
@@ -678,6 +687,7 @@ onUnmounted(() => {
 
     <div class="hidden shrink-0 md:flex">
       <Sidebar
+        updates-target="desktop-updates"
         :dev-mode="devMode"
         :filters="filters"
         :selected="selected"
@@ -701,6 +711,13 @@ onUnmounted(() => {
         @import="openImport"
       />
     </div>
+
+    <AppUpdates
+      v-if="!devMode"
+      :target="sidebarOpen && !desktopLayout ? '#mobile-updates' : '#desktop-updates'"
+      :unsaved="dirty || globalDirty"
+      :busy="exporting || exportingAll || globalSaving || globalExporting || importBusy"
+    />
 
     <main class="flex-1 flex flex-col min-w-0">
       <div

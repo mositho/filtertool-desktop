@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, ref, watch } from "vue"
+import { nextTick, onMounted, onUnmounted, ref, watch } from "vue"
 import type { FilterInfo } from "../api"
 import { isValidFilterName } from "@schema/filter-name"
 
@@ -12,6 +12,7 @@ const props = defineProps<{
   adding: boolean
   renaming: string | null
   devMode?: boolean
+  updatesTarget?: string
 }>()
 
 const emit = defineEmits<{
@@ -36,6 +37,22 @@ const newName = ref("")
 const template = ref("")
 const addInput = ref<HTMLInputElement | null>(null)
 const addError = ref("")
+
+function cancelAddOutside(event: Event) {
+  if (!props.adding || !(event.target instanceof Element)) return
+  // Both responsive sidebars can be mounted; interaction within either form
+  // must not be mistaken for an outside click by the other sidebar.
+  if (!event.target.closest("[data-new-filter-form], [data-new-filter-cancel]")) emit("cancel-add")
+}
+
+onMounted(() => {
+  document.addEventListener("pointerdown", cancelAddOutside)
+  document.addEventListener("focusin", cancelAddOutside)
+})
+onUnmounted(() => {
+  document.removeEventListener("pointerdown", cancelAddOutside)
+  document.removeEventListener("focusin", cancelAddOutside)
+})
 
 const renameValue = ref("")
 const renameInput = ref<HTMLInputElement | null>(null)
@@ -138,6 +155,7 @@ function confirmRename() {
         </button>
         <button
           v-else
+          data-new-filter-cancel
           @mousedown.prevent="emit('cancel-add')"
           class="rounded bg-neutral-700 hover:bg-neutral-600 w-7 h-7 text-sm leading-none"
           title="Cancel"
@@ -182,7 +200,7 @@ function confirmRename() {
         </span>
       </button>
       <p v-if="filters.length === 0" class="px-4 py-2 text-sm text-neutral-500">No filters yet.</p>
-      <div v-if="adding" class="px-4 py-2">
+      <div v-if="adding" data-new-filter-form class="px-4 py-2">
         <select
           v-model="template"
           aria-label="Starting template"
@@ -226,5 +244,6 @@ function confirmRename() {
         <polyline points="5 12 12 5 19 12"></polyline>
       </svg>
     </button>
+    <div v-if="updatesTarget" :id="updatesTarget"></div>
   </aside>
 </template>

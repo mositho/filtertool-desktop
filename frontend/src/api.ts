@@ -35,6 +35,12 @@ export type FilterConfig = {
   localStyles?: Record<string, unknown>
 }
 export type ImportResult = { imported: string[]; errors: { name: string; error: string }[] }
+export type UpdateStatus = {
+  enabled: boolean
+  version: string
+  ready: boolean
+  release?: { version: string; notes: string; major: boolean }
+}
 type ExportResult = { exported: number; total: number; errors: { name: string; error: string }[] }
 
 async function call<T>(action: string, input: Record<string, unknown> = {}): Promise<T> {
@@ -42,6 +48,9 @@ async function call<T>(action: string, input: Record<string, unknown> = {}): Pro
   return (await Call.ByName("main.App.Dispatch", action, JSON.parse(JSON.stringify(input)))) as T
 }
 export const api = {
+  checkUpdates: () => call<UpdateStatus>("checkUpdates"),
+  downloadUpdate: (version: string, acceptMajor: boolean) => call<UpdateStatus>("downloadUpdate", { version, acceptMajor }),
+  restartUpdate: () => call<void>("restartUpdate"),
   listFilters: () => call<{ filters: FilterInfo[]; devMode: boolean }>("listFilters"),
   getConfig: (name: string) => call<FilterConfig>("getConfig", { name }),
   saveConfig: (name: string, config: FilterConfig) => call<FilterConfig>("saveConfig", { name, config }),

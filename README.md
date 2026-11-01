@@ -24,6 +24,14 @@ Otherwise you can download it directly from [gyan.dev](https://www.gyan.dev/ffmp
 
 Requires 64-bit Windows 10 or 11 and Microsoft Edge WebView2. The installer installs WebView2 if needed; standalone users can get it from [Microsoft](https://developer.microsoft.com/microsoft-edge/webview2/).
 
+### Updates
+
+Filtertool checks GitHub for newer published stable releases at startup. Use **Check for updates** to check manually. Choose **Download update**, then **Restart & Apply**; save or discard unsaved edits first. No uninstall is needed. Updating requires write access to the folder containing `Filtertool.exe`.
+
+**Major updates (for example, 1.x → 2.x) may break filter compatibility.** Filtertool shows a warning and requires confirmation before downloading. Close the app and back up **`%APPDATA%\Filtertool`**, then read the release notes: filters may need migration or recreation. There is no automatic migration or automatic backup. Updates do not re-export in-game filters; use **Export** or **Export All** when ready.
+
+Older versions without the updater need one manual update: close Filtertool and run the newer setup over the same installation folder (or replace the standalone EXE). Development sessions do not self-update.
+
 ## Quick guide
 
 1. **Check your game folder.** Filtertool detects your PoE filter path. Use **Browse…** to choose another folder.
