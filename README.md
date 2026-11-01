@@ -11,7 +11,7 @@ A Windows item-filter builder for Path of Exile 1, focused on leveling.
 </div>
 
 > [!NOTE]
-> The desktop port is in development. There is no stable desktop release yet.
+> The first desktop release, **1.0.0**, is being prepared. Downloads will appear on the Releases page after publication.
 
 ## Get started
 
@@ -22,7 +22,7 @@ Download a stable version from [Releases](https://github.com/mositho/filtertool-
 
 Both versions keep your filters, settings and sounds in **`%APPDATA%\Filtertool`**. Replacing the executable or uninstalling does not remove them. Back up that folder to keep a copy of your work.
 
-Requires FFmpeg. The easiest way to download it is by pressing `CTRL + R`and typing `winget install ffmpeg`.
+**TTS sound generation requires a separate FFmpeg installation.** The easiest way to download it is by pressing `CTRL + R` and typing `winget install ffmpeg`.
 Otherwise you can download it directly from [gyan.dev](https://www.gyan.dev/ffmpeg/builds/) and add `ffmpeg.exe` to your `PATH`. After installing FFmpeg or changing `PATH`, restart Filtertool.
 
 Requires 64-bit Windows 10 or 11 and Microsoft Edge WebView2. The installer installs WebView2 if needed; standalone users can get it from [Microsoft](https://developer.microsoft.com/microsoft-edge/webview2/).

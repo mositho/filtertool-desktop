@@ -11,4 +11,8 @@ npm run build
 
 Dev **Save** edits templates/defaults/styles in `internal/data/`, not personal data. Use `npm run dev:personal` for your personal profile. Builds produce `bin/Filtertool.exe`.
 
+`npm ci` installs a pre-commit hook via Husky. It runs Prettier and `gofmt` on staged files and stages the formatting changes; lint-staged protects unstaged edits in partially staged files. Existing Prettier ignores still apply. Keep Node.js/npm and Go on your Git client's `PATH`. Run `npm run format` to format the whole project; the full test suite stays in `npm run check` and CI, not the hook. For an exceptional bypass, use `HUSKY=0 git commit …` (Git Bash/WSL syntax).
+
 Use Conventional Commits. Keep personal data out of commits and tests. Test native UI behavior on Windows before releases.
+
+See [Releasing](RELEASING.md) for the release checklist.

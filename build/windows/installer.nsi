@@ -3,7 +3,7 @@ Unicode true
 !include "LogicLib.nsh"
 
 !ifndef VERSION
-  !define VERSION "0.1.0"
+  !error "Pass /DVERSION matching package.json when building the installer"
 !endif
 Name "Filtertool"
 OutFile "..\..\bin\Filtertool-Setup.exe"

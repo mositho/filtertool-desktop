@@ -1,6 +1,6 @@
 {
   "name": "filtertool-desktop",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "author": "mositho",
   "private": true,
   "type": "module",
@@ -8,19 +8,24 @@
     "node": ">=24 <25"
   },
   "scripts": {
+    "prepare": "husky",
     "dev": "node scripts/wails.mjs dev --dev-profile -config build/config.yml -port 5173",
     "dev:personal": "node scripts/wails.mjs dev -config build/config.yml -port 5173",
     "build": "node scripts/build.mjs",
     "frontend:dev": "vite --config frontend/vite.config.ts",
     "frontend:typecheck": "vue-tsc --noEmit -p frontend/tsconfig.json",
     "frontend:build": "vite build --config frontend/vite.config.ts",
-    "check": "npm run frontend:typecheck && go test ./... && npm test && npm run format:check",
+    "check": "node scripts/check-version.mjs && npm run frontend:typecheck && go test ./... && npm test && npm run format:check",
     "test": "vitest run",
     "format": "prettier --write . && npm run format:go",
     "format:go": "go run ./cmd/gofmtcheck -w",
     "format:check": "prettier --check . && go run ./cmd/gofmtcheck",
     "update-basetypes": "go run ./cmd/update-basetypes",
     "generate-data": "go run ./cmd/generate-data"
+  },
+  "lint-staged": {
+    "*": "prettier --write --ignore-unknown",
+    "*.go": "gofmt -w"
   },
   "dependencies": {
     "@wailsio/runtime": "3.0.0",
@@ -31,7 +36,9 @@
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^24.0.0",
     "@vitejs/plugin-vue": "^6.0.8",
+    "husky": "^9.1.7",
     "jsdom": "^27.4.0",
+    "lint-staged": "^17.6.0",
     "prettier": "^3.6.2",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3",

@@ -6,6 +6,12 @@ on:
   pull_request:
   workflow_dispatch:
   workflow_call:
+    inputs:
+      release-version:
+        description: Optional version to validate before the release commit is created
+        required: false
+        type: string
+        default: ""
 
 permissions:
   contents: read
@@ -29,6 +35,12 @@ jobs:
         with:
           go-version-file: go.mod
           cache: true
+      - name: Prepare release version
+        if: inputs.release-version != ''
+        env:
+          RELEASE_VERSION: ${{ inputs.release-version }}
+        run: node scripts/set-version.mjs "$RELEASE_VERSION"
+        shell: bash
       - run: npm ci
       - run: npm run frontend:build
       - run: npm run check
