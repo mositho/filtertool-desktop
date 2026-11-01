@@ -10,6 +10,8 @@ A Windows item-filter builder for Path of Exile 1, focused on leveling.
 
 </div>
 
+![Filtertool editing the built-in Caster Template, with build preferences, weapon progression, and the output preview collapsed.](docs/images/filtertool-caster-template.png)
+
 ## Get started
 
 Download a stable version from [Releases](https://github.com/mositho/filtertool-desktop/releases):
