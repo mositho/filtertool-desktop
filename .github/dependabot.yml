@@ -4,6 +4,10 @@ updates:
     directory: /
     schedule: { interval: weekly }
     cooldown: { default-days: 7 }
+    # vue-tsc/Volar require TypeScript <7. Remove this when their tooling supports 7.
+    ignore:
+      - dependency-name: typescript
+        versions: [">=7.0.0"]
     groups:
       minor-and-patch:
         applies-to: version-updates
