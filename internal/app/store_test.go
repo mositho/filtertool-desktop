@@ -193,6 +193,15 @@ func TestSoundSyncOnlyDeletesUnusedGeneratedCache(t *testing.T) {
 		t.Fatal("stale generated audio remains")
 	}
 }
+
+func TestAudioStatusReportsMissingFFmpeg(t *testing.T) {
+	s := testStore(t)
+	result := mustCall(t, s, "audioStatus", nil).(Object)
+	if result["ffmpegAvailable"] != false {
+		t.Fatal("FFmpeg should be reported unavailable when no processor is configured", result)
+	}
+}
+
 func TestExportOfflineAndNoPartialGameWrite(t *testing.T) {
 	s := testStore(t)
 	game := t.TempDir()

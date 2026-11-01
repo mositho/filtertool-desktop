@@ -43,6 +43,7 @@ const exportingAll = ref(false)
 const exportProgress = ref("")
 
 const settings = ref<AppSettings | null>(null)
+const ffmpegAvailable = ref<boolean | null>(null)
 const showQuickstart = ref(false)
 const quickstartPath = ref("")
 
@@ -568,10 +569,16 @@ const title = computed(() => (view.value === "global" ? "Global Settings" : (sel
 
 void (async () => {
   try {
-    const [refData, defaultsData, settingsData] = await Promise.all([api.reference(), api.getDefaults(), api.getSettings()])
+    const [refData, defaultsData, settingsData, audioStatus] = await Promise.all([
+      api.reference(),
+      api.getDefaults(),
+      api.getSettings(),
+      api.audioStatus(),
+    ])
     reference.value = refData
     defaults.value = (defaultsData.defaults ?? {}) as Record<string, unknown>
     settings.value = settingsData
+    ffmpegAvailable.value = audioStatus.ffmpegAvailable
     if (!settingsData.welcomeComplete) {
       showQuickstart.value = true
       quickstartPath.value = settingsData.filterPath ?? ""
@@ -892,6 +899,14 @@ onUnmounted(() => {
       </div>
 
       <div class="flex-1 overflow-auto p-4 sm:p-6">
+        <div
+          v-if="ffmpegAvailable === false"
+          role="alert"
+          class="mb-4 rounded border border-amber-800 bg-amber-950/50 px-4 py-3 text-sm text-amber-200"
+        >
+          <strong>TTS sound generation requires FFmpeg to be installed.</strong> Refer to the README for installation help. Filtertool does
+          not download or install FFmpeg.
+        </div>
         <GlobalSettings v-show="view === 'global'" ref="globalRef" />
         <div v-if="view !== 'global' && selected && reference" class="space-y-4">
           <ConfigForm

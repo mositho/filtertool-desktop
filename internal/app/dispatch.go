@@ -30,6 +30,8 @@ func (s *Store) Dispatch(action string, input Object) (any, error) {
 		}
 	}
 	switch action {
+	case "audioStatus":
+		return Object{"ffmpegAvailable": s.AudioProcessor != nil}, nil
 	case "listFilters":
 		filters, err := s.filters()
 		return Object{"filters": filters, "devMode": s.DevMode}, err

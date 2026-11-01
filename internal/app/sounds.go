@@ -141,7 +141,7 @@ func (s *Store) generateFile(filename, text string, settings Object) error {
 		return nil
 	}
 	if s.AudioProcessor == nil {
-		return errors.New("FFmpeg is unavailable; rebuild with bundled audio tools")
+		return errors.New("TTS sound generation requires FFmpeg to be installed. Refer to the README for installation help.")
 	}
 	fetch := s.FetchAudio
 	if fetch == nil {
