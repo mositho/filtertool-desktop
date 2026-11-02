@@ -12,6 +12,7 @@
     "dev": "node scripts/wails.mjs dev --dev-profile -config build/config.yml -port 5173",
     "dev:personal": "node scripts/wails.mjs dev -config build/config.yml -port 5173",
     "build": "node scripts/build.mjs",
+    "build:linux": "node scripts/build.mjs --linux",
     "frontend:dev": "vite --config frontend/vite.config.ts",
     "frontend:typecheck": "vue-tsc --noEmit -p frontend/tsconfig.json",
     "frontend:build": "vite build --config frontend/vite.config.ts",

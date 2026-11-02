@@ -42,6 +42,12 @@ jobs:
         with:
           go-version-file: go.mod
           cache: true
+      - name: Install Linux desktop and Flatpak build dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install --yes flatpak flatpak-builder libgtk-4-dev libwebkitgtk-6.0-dev
+      - name: Add Flathub runtime source
+        if: runner.os == 'Linux'
+        run: flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
       - run: npm ci --ignore-scripts
       - run: npm run frontend:build
       - run: npm run check
@@ -57,6 +63,15 @@ jobs:
       - name: Build Windows executable
         if: runner.os == 'Windows'
         run: npm run build
+      - name: Build Linux Flatpak
+        if: runner.os == 'Linux'
+        run: |
+          npm run build:linux
+          mkdir -p bin/flatpak-stage
+          install -Dm755 bin/Filtertool bin/flatpak-stage/bin/Filtertool
+          install -Dm644 branding/logo.png bin/flatpak-stage/share/icons/hicolor/256x256/apps/io.github.mositho.filtertool-desktop.png
+          install -Dm644 flatpak/io.github.mositho.filtertool-desktop.desktop bin/flatpak-stage/share/applications/io.github.mositho.filtertool-desktop.desktop
+          flatpak-builder --user --install-deps-from=flathub --default-branch=stable --force-clean --repo=bin/flatpak-repo bin/flatpak-build flatpak.yml
       - name: Build Windows installer
         if: runner.os == 'Windows'
         run: ./scripts/package-windows.ps1

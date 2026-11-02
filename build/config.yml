@@ -23,6 +23,6 @@ dev_mode:
         tcp: "127.0.0.1:5173"
         timeout: "60s"
         interval: "200ms"
-    - cmd: ./bin/Filtertool.exe
+    - cmd: node scripts/run-app.mjs
       type: primary
       exit_policy: shutdown

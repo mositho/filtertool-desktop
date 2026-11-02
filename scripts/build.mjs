@@ -2,6 +2,7 @@ import { spawnSync } from "node:child_process"
 import { mkdir, readFile, writeFile, rm } from "node:fs/promises"
 
 const dev = process.argv.includes("--dev")
+const linux = process.argv.includes("--linux") || process.env.FILTERTOOL_TARGET === "linux"
 const run = (command, args, env = {}) => {
   const result = spawnSync(command, args, {
     stdio: "inherit",
@@ -15,6 +16,25 @@ run("node", ["scripts/generate-branding.mjs"])
 run("npm", ["run", "frontend:build"])
 await mkdir("bin", { recursive: true })
 const { version } = JSON.parse(await readFile("package.json", "utf8"))
+if (linux) {
+  run(
+    "go",
+    [
+      "build",
+      "-buildvcs=false",
+      "-tags",
+      dev ? "linuxdesktop" : "production,linuxdesktop",
+      ...(!dev ? ["-trimpath"] : []),
+      "-ldflags",
+      `-s -w -X main.version=${version}`,
+      "-o",
+      "bin/Filtertool",
+      ".",
+    ],
+    { GOOS: "linux", GOARCH: "amd64", CGO_ENABLED: "1" },
+  )
+  process.exit(0)
+}
 const info = {
   fixed: { file_version: version, product_version: version },
   info: {

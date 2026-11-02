@@ -1,6 +1,6 @@
 # Contributing
 
-Requires Go 1.26.10+ and Node.js 26 (see `.nvmrc`). Use `nvm install && nvm use`, or `fnm use --install-if-missing`, before installing dependencies. Running the desktop UI requires 64-bit Windows 10+ and WebView2; development checks and builds are not Windows-only.
+Requires Go 1.26.10+ and Node.js 26 (see `.nvmrc`). Use `nvm install && nvm use`, or `fnm use --install-if-missing`, before installing dependencies. Windows desktop builds require Windows 10+ and WebView2. Linux desktop builds use GTK 4 and WebKitGTK 6.0; on Debian or Ubuntu install `libgtk-4-dev` and `libwebkitgtk-6.0-dev` before building.
 
 ```sh
 npm ci
@@ -9,7 +9,9 @@ npm run check
 npm run build
 ```
 
-Dev **Save** edits templates/defaults/styles in `internal/data/`, not personal data. Use `npm run dev:personal` for your personal profile. Builds produce `bin/Filtertool.exe`.
+On Linux, build the native Linux executable with `npm run build:linux`; run it with `./bin/Filtertool`. `npm run dev` selects the native desktop runtime for Linux and the Windows executable in WSL.
+
+Dev **Save** edits templates/defaults/styles in `internal/data/`, not personal data. Use `npm run dev:personal` for your personal profile. Windows builds produce `bin/Filtertool.exe`; Linux builds produce `bin/Filtertool`.
 
 To build the installer locally:
 

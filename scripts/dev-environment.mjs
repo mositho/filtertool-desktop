@@ -1,8 +1,9 @@
 // Windows executables launched from WSL do not inherit Linux environment
 // variables unless WSLENV names them. Wails supplies the URL after startup.
 export function wailsEnvironment(environment, platform, osRelease) {
-  const result = { ...environment, CGO_ENABLED: "0" }
   const wsl = platform === "linux" && (environment.WSL_DISTRO_NAME || /microsoft/i.test(osRelease))
+  const result = { ...environment, CGO_ENABLED: platform === "linux" && !wsl ? "1" : "0" }
+  if (platform === "linux" && !wsl) result.FILTERTOOL_TARGET = "linux"
   if (wsl) {
     const entries = (environment.WSLENV ?? "").split(":").filter(Boolean)
     // Replace flags on this one entry: a URL must not undergo path translation.

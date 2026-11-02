@@ -1,0 +1,24 @@
+app-id: io.github.mositho.filtertool-desktop
+runtime: org.gnome.Platform
+runtime-version: "50"
+sdk: org.gnome.Sdk
+command: Filtertool
+
+finish-args:
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --socket=pulseaudio
+  - --device=dri
+  - --talk-name=org.freedesktop.portal.*
+
+modules:
+  - name: filtertool
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 bin/Filtertool /app/bin/Filtertool
+      - install -Dm644 share/applications/io.github.mositho.filtertool-desktop.desktop /app/share/applications/io.github.mositho.filtertool-desktop.desktop
+      - install -Dm644 share/icons/hicolor/256x256/apps/io.github.mositho.filtertool-desktop.png /app/share/icons/hicolor/256x256/apps/io.github.mositho.filtertool-desktop.png
+    sources:
+      - type: dir
+        path: bin/flatpak-stage

@@ -35,6 +35,10 @@ describe("WSL development launcher", () => {
   })
 
   it.each(["win32", "darwin", "linux"])("leaves non-WSL %s environments alone", (platform) => {
-    expect(wailsEnvironment({ PATH: "unchanged" }, platform, "ordinary-kernel")).toEqual({ PATH: "unchanged", CGO_ENABLED: "0" })
+    expect(wailsEnvironment({ PATH: "unchanged" }, platform, "ordinary-kernel")).toEqual({
+      PATH: "unchanged",
+      CGO_ENABLED: platform === "linux" ? "1" : "0",
+      ...(platform === "linux" ? { FILTERTOOL_TARGET: "linux" } : {}),
+    })
   })
 })

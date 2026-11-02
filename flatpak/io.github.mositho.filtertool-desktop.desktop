@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Filtertool
+Comment=Path of Exile leveling filter builder
+Exec=Filtertool
+Icon=io.github.mositho.filtertool-desktop
+Terminal=false
+Type=Application
+Categories=Utility;Game;
+StartupWMClass=io.github.mositho.filtertool-desktop
