@@ -1,0 +1,49 @@
+{
+  "tiers": [
+    { "key": "s", "title": "S Tier", "style": "currencyA", "sound": { "enabled": true, "soundId": 6 }, "baseTypes": ["Mirror of Kalandra", "Divine Orb", "Orb of Annulment"] },
+    {
+      "key": "a",
+      "title": "A Tier",
+      "style": "currencyB",
+      "sound": { "enabled": true, "soundId": 1 },
+      "baseTypes": [
+        "Exalted Orb",
+        "Ancient Orb",
+        "Gemcutter's Prism",
+        "Regal Orb",
+        "Orb of Chance",
+        "Orb of Binding",
+        "Orb of Scouring",
+        "Orb of Alchemy",
+        "Orb of Alteration",
+        "Vaal Orb",
+        "Chaos Orb",
+        "Orb of Regret"
+      ]
+    },
+    {
+      "key": "b",
+      "title": "B Tier",
+      "style": "currencyC",
+      "sound": { "enabled": true, "soundId": 2 },
+      "baseTypes": [
+        "Orb of Fusing",
+        "Jeweller's Orb",
+        "Chromatic Orb",
+        "Armourer's Scrap",
+        "Orb of Augmentation",
+        "Orb of Transmutation",
+        "Blacksmith's Whetstone"
+      ],
+      "contains": ["Essence"]
+    },
+    { "key": "leaguestart", "title": "Leaguestart", "style": "currencyLeaguestart", "sound": { "enabled": false }, "baseTypes": [] },
+    {
+      "key": "low",
+      "title": "Low-value Currency",
+      "style": "currencyLow",
+      "sound": { "enabled": false },
+      "baseTypes": ["Scroll Fragment", "Transmutation Shard", "Alteration Shard", "Alchemy Shard"]
+    }
+  ]
+}

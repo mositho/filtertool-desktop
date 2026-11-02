@@ -235,7 +235,7 @@ func (s *Store) generateAll() (Object, error) {
 		}
 		done++
 	}
-	if err = s.copySounds(settings); err != nil {
+	if _, err = s.syncSounds(); err != nil {
 		return nil, err
 	}
 	if s.Emit != nil {

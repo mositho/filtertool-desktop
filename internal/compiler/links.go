@@ -3,6 +3,7 @@ package compiler
 import (
 	"fmt"
 	"math"
+	"strings"
 )
 
 func (c *Compiler) links(p, o Object) string {
@@ -15,7 +16,27 @@ func (c *Compiler) links(p, o Object) string {
 		}
 	}
 	kinds := Strings(Val(p, "preferredArmour", c.Defaults["preferredArmour"]))
-	rules := []*rule{c.tts(newRule().set("LinkedSockets", "= 6").icon("Red", "Diamond", 2).style(Obj(c.Styles["currencyA"])), "six_link"), c.tts(newRule().set("LinkedSockets", "= 5").icon("Orange", "Diamond", 2).style(Obj(c.Styles["currencyB"])), "five_link")}
+	rules := []*rule{}
+	if c.legacyEquipmentSelections {
+		rules = append(rules,
+			c.tts(newRule().set("LinkedSockets", "= 6").icon("Red", "Diamond", 2).style(Obj(c.Styles["currencyA"])), "six_link"),
+			c.tts(newRule().set("LinkedSockets", "= 5").icon("Orange", "Diamond", 2).style(Obj(c.Styles["currencyB"])), "five_link"),
+		)
+	} else {
+		for _, link := range []struct {
+			sockets int
+			style   string
+			color   string
+			sound   string
+		}{{6, "sixLink", "Red", "six_link"}, {5, "fiveLink", "Orange", "five_link"}} {
+			for _, rarity := range []string{"Normal", "Magic", "Rare"} {
+				style := Clone(Obj(c.Styles[link.style]))
+				style["text"] = Obj(c.Styles["highlightedEquipment"+rarity])["text"]
+				r := newRule().set("LinkedSockets", fmt.Sprintf("= %d", link.sockets)).set("Rarity", "== "+rarity).icon(link.color, "Diamond", 2).style(style)
+				rules = append(rules, c.tts(r, link.sound))
+			}
+		}
+	}
 	for _, n := range []int{4, 3, 2} {
 		word := map[int]string{2: "two", 3: "three", 4: "four"}[n]
 		max := Num(cfg[word+"LinkMaxAreaLevel"], 0)
@@ -24,10 +45,10 @@ func (c *Compiler) links(p, o Object) string {
 		if n == 2 {
 			classes = []string{""}
 		}
-		ruleConfig := func(tier string) Object { return Obj(Obj(cfg["rules"])[fmt.Sprint(n)+tier]) }
-		build := func(class, kind, color, tier, style string, maximum float64) []*rule {
+		ruleConfig := func(tier string) Object { return c.ruleConfig(cfg, fmt.Sprint(n)+tier) }
+		buildBase := func(class, kind, color, tier, style string, maximum float64) []*rule {
 			rc := ruleConfig(tier)
-			if rc["enabled"] == false {
+			if rc["enabled"] == false && c.legacyEquipmentSelections {
 				return nil
 			}
 			base := func() *rule {
@@ -58,6 +79,31 @@ func (c *Compiler) links(p, o Object) string {
 			}
 			audible := c.presentation(r, rc, Obj(c.Styles[style])).number("AreaLevel", "<=", math.Min(Num(rc["soundCutoffLevel"], cutoff), maximum))
 			return []*rule{audible, silent}
+		}
+		build := func(class, kind, color, tier, style string, maximum float64) []*rule {
+			baseRules := buildBase(class, kind, color, tier, style, maximum)
+			if c.legacyEquipmentSelections {
+				return baseRules
+			}
+			result := []*rule{}
+			for _, base := range baseRules {
+				for _, rarity := range []string{"Normal", "Magic", "Rare"} {
+					r := &rule{hidden: base.hidden}
+					for _, line := range base.lines {
+						if !strings.HasPrefix(line, "SetTextColor ") {
+							r.lines = append(r.lines, line)
+						}
+					}
+					r.set("Rarity", "== "+rarity)
+					if text := Obj(c.Styles["highlightedEquipment"+rarity])["text"]; text != nil {
+						r.set("SetTextColor", rgb(Text(text)))
+					}
+					result = append(result, r)
+				}
+				// Preserve the original presentation for unique items.
+				result = append(result, base)
+			}
+			return result
 		}
 		maxFor := func(tier string) float64 { return Num(ruleConfig(tier)["maxAreaLevel"], max) }
 		for _, class := range classes {

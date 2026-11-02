@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const props = defineProps<{ shape: string; color: string; size: number }>()
+const props = defineProps<{ shape: string; color: string; size: number; inheritedLabel?: string }>()
 const emit = defineEmits<{ "update:shape": [value: string]; "update:color": [value: string]; "update:size": [value: number] }>()
 
 const COLORS = [
@@ -40,12 +40,15 @@ const SHAPES = [
 
 <template>
   <div class="space-y-2">
+    <p v-if="inheritedLabel" class="text-xs text-neutral-500">{{ inheritedLabel }}</p>
     <div class="flex flex-wrap gap-1.5">
       <button
         type="button"
         @click="emit('update:shape', '')"
         class="flex h-6 w-6 items-center justify-center rounded border-2 transition-all"
-        :class="shape === '' ? 'scale-110 border-white ring-2 ring-white/60' : 'border-neutral-700 hover:border-neutral-400'"
+        :class="
+          shape === '' && !inheritedLabel ? 'scale-110 border-white ring-2 ring-white/60' : 'border-neutral-700 hover:border-neutral-400'
+        "
         title="No Icon"
       >
         <svg viewBox="0 0 24 24" class="h-4 w-4 text-neutral-400" fill="none" stroke="currentColor" stroke-width="2">

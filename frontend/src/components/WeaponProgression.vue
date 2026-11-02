@@ -8,7 +8,7 @@ import { areaLevelRangeError } from "@schema/range-validation"
 import { copyEntity, entityClipboard, pasteEntity } from "../entityClipboard"
 
 type Phase = Record<string, unknown> & { minAreaLevel?: number; maxAreaLevel?: number }
-const props = defineProps<{ phases: Phase[]; reference: ReferenceData }>()
+const props = defineProps<{ phases: Phase[]; reference: ReferenceData; phaseTemplate?: Record<string, unknown> }>()
 const emit = defineEmits<{ "update:phases": [value: Phase[]]; "change": [] }>()
 const openPhase = ref<number | null>(null)
 const renaming = ref<number | null>(null)
@@ -24,10 +24,7 @@ function title(phase: Phase, index: number): string {
 }
 
 function describe(phase: Phase): string {
-  const classes = (phase.itemClasses as string[] | undefined) ?? []
-  const bases = (phase.baseTypes as string[] | undefined) ?? []
-  const targets = [...classes, ...bases]
-  return `${targets.length ? targets.join(", ") : "Select weapons"} · Area Level ${phase.minAreaLevel ?? 0}–${phase.maxAreaLevel ?? "∞"}`
+  return `Area Level ${phase.minAreaLevel ?? 0}–${phase.maxAreaLevel ?? "∞"}`
 }
 
 function updateAreaLevel(index: number, key: "minAreaLevel" | "maxAreaLevel", value: number | undefined) {
@@ -38,7 +35,10 @@ function updateAreaLevel(index: number, key: "minAreaLevel" | "maxAreaLevel", va
 }
 
 function addPhase() {
-  emit("update:phases", [...props.phases, emptyWeaponHighlight()])
+  const seed = props.phaseTemplate ?? emptyWeaponHighlight()
+  const phase = JSON.parse(JSON.stringify(seed)) as Phase
+  delete phase.name
+  emit("update:phases", [...props.phases, phase])
   openPhase.value = props.phases.length
 }
 
@@ -136,8 +136,8 @@ function pastePhase() {
           :aria-expanded="openPhase === index"
           @click="openPhase = openPhase === index ? null : index"
         >
-          <span class="font-semibold">{{ openPhase === index ? "▾" : "▸" }} {{ title(phase, index) }}</span>
-          <span class="ml-2 text-neutral-400">{{ describe(phase) }}</span>
+          <span class="min-w-0 truncate font-semibold">{{ openPhase === index ? "▾" : "▸" }} {{ title(phase, index) }}</span>
+          <span class="ml-2 shrink-0 text-neutral-400">{{ describe(phase) }}</span>
         </button>
         <span class="ml-auto flex shrink-0 items-center gap-1">
           <button

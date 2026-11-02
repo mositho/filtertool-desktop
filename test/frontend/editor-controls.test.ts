@@ -50,6 +50,26 @@ const reference = {
 } satisfies ReferenceData
 
 describe("editor view controls", () => {
+  it("orders editor sections without changing configuration", () => {
+    const modelValue = { buildProfile: {}, buildSpecificOptions: {} }
+    const root = mount(ConfigForm, { modelValue, reference, filterName: "ordered" })
+    const headings = [...root.querySelectorAll(":scope > div > section > button > span:first-child")].map((heading) =>
+      heading.textContent?.trim(),
+    )
+    expect(headings).toEqual([
+      "Build profile",
+      "Weapon Phases",
+      "Early",
+      "Links",
+      "Equipment",
+      "Currency",
+      "Gems",
+      "League Mechanic",
+      "Highlights",
+    ])
+    expect(modelValue).toEqual({ buildProfile: {}, buildSpecificOptions: {} })
+  })
+
   it.each([
     { name: "highlight", component: HighlightEditor, entries: { highlights: [{}] } },
     { name: "weapon phase", component: WeaponProgression, entries: { phases: [{}] } },
@@ -67,7 +87,7 @@ describe("editor view controls", () => {
     expect(header.getAttribute("aria-expanded")).toBe("false")
   })
 
-  it("defaults only Build Profile to collapsed and remembers each filter's view", async () => {
+  it("opens Build Profile and Weapon Phases initially and remembers each filter's view", async () => {
     const props = {
       modelValue: { buildProfile: {}, buildSpecificOptions: {} },
       reference,
@@ -77,18 +97,24 @@ describe("editor view controls", () => {
     const section = (title: string) =>
       [...root.querySelectorAll<HTMLButtonElement>("button")].find((button) => button.textContent?.includes(title))!
 
-    expect(section("Build profile").getAttribute("aria-expanded")).toBe("false")
-    expect(section("Weapon progression").getAttribute("aria-expanded")).toBe("true")
-    section("Weapon progression").click()
+    expect(section("Build profile").getAttribute("aria-expanded")).toBe("true")
+    expect(section("Weapon Phases").getAttribute("aria-expanded")).toBe("true")
+    for (const title of ["Early", "Links", "Equipment", "Currency", "Gems", "League Mechanic", "Highlights"]) {
+      const top = [...root.querySelectorAll<HTMLButtonElement>("section > button")].find(
+        (button) => button.querySelector("span")?.textContent === title,
+      )!
+      expect(top.getAttribute("aria-expanded")).toBe("false")
+    }
+    section("Weapon Phases").click()
     await nextTick()
-    expect(localStorage.getItem("filtertool:collapsed:leveling")).toContain('"weaponProgression":true')
+    expect(localStorage.getItem("filtertool:collapsed:leveling")).toContain('"weaponPhases":true')
 
     app!.unmount()
     app = undefined
     root.remove()
     container = undefined
     root = mount(ConfigForm, props)
-    expect(section("Weapon progression").getAttribute("aria-expanded")).toBe("false")
+    expect(section("Weapon Phases").getAttribute("aria-expanded")).toBe("false")
 
     app!.unmount()
     app = undefined
@@ -96,7 +122,7 @@ describe("editor view controls", () => {
     container = undefined
     mount(ConfigForm, { ...props, filterName: "another-filter" })
     const otherSection = [...container!.querySelectorAll<HTMLButtonElement>("button")].find((button) =>
-      button.textContent?.includes("Weapon progression"),
+      button.textContent?.includes("Weapon Phases"),
     )!
     expect(otherSection.getAttribute("aria-expanded")).toBe("true")
   })

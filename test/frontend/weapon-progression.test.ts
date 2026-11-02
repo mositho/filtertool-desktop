@@ -16,6 +16,67 @@ afterEach(() => {
 })
 
 describe("weapon phase area level inputs", () => {
+  it("seeds a new weapon phase from the global template without sharing nested state", async () => {
+    const phases = ref<Array<Record<string, unknown>>>([])
+    const phaseTemplate = {
+      perRarityCustomization: true,
+      modules: ["minAps", "sound"],
+      minAps: 1.4,
+      maxAreaLevel: 30,
+      rare: { soundId: 5 },
+    }
+    container = document.createElement("div")
+    document.body.append(container)
+    app = createApp(
+      defineComponent({
+        setup: () => () =>
+          h(WeaponProgression, {
+            "phases": phases.value,
+            phaseTemplate,
+            "reference": {} as ReferenceData,
+            "onUpdate:phases": (value: typeof phases.value) => (phases.value = value),
+          }),
+      }),
+    )
+    app.mount(container)
+    container.querySelector<HTMLButtonElement>("button")!.click()
+    await nextTick()
+    expect(phases.value[0]).toEqual(phaseTemplate)
+    expect(phases.value[0]).not.toHaveProperty("name")
+    ;(phases.value[0].rare as Record<string, unknown>).soundId = 1
+    expect(phaseTemplate.rare.soundId).toBe(5)
+  })
+
+  it("keeps collapsed phase summaries compact by showing only the name and area-level range", () => {
+    const phases = ref<Array<Record<string, unknown>>>([
+      {
+        name: "Leveling",
+        itemClasses: ["One Hand Axes", "Two Hand Axes"],
+        baseTypes: [TEST_BASE_TYPE, TEST_BASE_TYPE_TWO],
+        minAreaLevel: 12,
+        maxAreaLevel: 28,
+      },
+    ])
+    container = document.createElement("div")
+    document.body.append(container)
+    app = createApp(
+      defineComponent({
+        setup: () => () =>
+          h(WeaponProgression, {
+            "phases": phases.value,
+            "reference": {} as ReferenceData,
+            "onUpdate:phases": (value: typeof phases.value) => (phases.value = value),
+          }),
+      }),
+    )
+    app.mount(container)
+    const summary = container.querySelector<HTMLButtonElement>("button[aria-expanded]")!
+    expect(summary.textContent).toContain("Leveling")
+    expect(summary.textContent).toContain("Area Level 12–28")
+    expect(summary.textContent).not.toContain("One Hand Axes")
+    expect(summary.textContent).not.toContain(TEST_BASE_TYPE)
+  })
+
   it("lets a user type a valid two-digit Max Area Level without prepending the Min Area Level", async () => {
     const phases = ref<Array<{ minAreaLevel: number; maxAreaLevel?: number; baseTypes: string[] }>>([
       { minAreaLevel: 12, baseTypes: [TEST_BASE_TYPE] },

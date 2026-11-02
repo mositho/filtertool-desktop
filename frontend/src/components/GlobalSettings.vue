@@ -1,21 +1,38 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from "vue"
 import { api, type AppSettings, type ReferenceData } from "../api"
-import { DEFAULTS_SCHEMA, type FieldGroup, type FieldSubsection, type SchemaField } from "@schema/form-schema"
+import {
+  DEFAULTS_SCHEMA,
+  filterEditorGroup,
+  editorSectionRank,
+  type FieldGroup,
+  type FieldSubsection,
+  type SchemaField,
+} from "@schema/form-schema"
 import { getPath, setPath, deletePath, pruneEmpty, stableStringify } from "../path"
 import FieldInput from "./FieldInput.vue"
 import NumberField from "./NumberField.vue"
-import RuleAdvanced from "./RuleAdvanced.vue"
-import { fieldDefault, defaultSource, ruleEnabledField, setStyleSize } from "../fieldDefaults"
+import { fieldDefault, defaultSource } from "../fieldDefaults"
 import RuleHeader from "./RuleHeader.vue"
 import { DEFAULT_STYLE_SETTINGS, MIN_STYLE_SIZE } from "../../../src/style-defaults"
+import CurrencyEditor from "./CurrencyEditor.vue"
+import { layoutFields } from "../formLayout"
+import { useCollapsedState } from "../viewState"
+import WeaponPhaseTemplateEditor from "./WeaponPhaseTemplateEditor.vue"
+import { emptyWeaponHighlight } from "@schema/form-schema"
+
+const props = defineProps<{ devMode?: boolean }>()
+
+const isItemDefaultsGroup = (group: FieldGroup) => group.key === "currency" || group.key === "leagueMechanic"
+const defaultGroups = [...DEFAULTS_SCHEMA.map((group) => (isItemDefaultsGroup(group) ? filterEditorGroup(group) : group))].sort(
+  (a, b) => editorSectionRank(a.key) - editorSectionRank(b.key),
+)
 
 const settings = ref<AppSettings>({ filterPath: "", soundsFolder: "", tts: { locale: "en-US", speed: 1.6 } })
 const saving = ref(false)
 const exporting = ref(false)
 
 const generating = ref(false)
-const syncing = ref(false)
 const soundProgress = ref("")
 
 const userDefaults = ref<Record<string, unknown>>({})
@@ -32,6 +49,14 @@ const defaultsReference = computed(() =>
       }
     : undefined,
 )
+const weaponPhaseTemplate = computed(
+  () => (getPath(userDefaults.value, "weaponPhaseTemplate") as Record<string, unknown> | undefined) ?? emptyWeaponHighlight(),
+)
+
+function setWeaponPhaseTemplate(value: Record<string, unknown>) {
+  if (stableStringify(value) === stableStringify(emptyWeaponHighlight())) deletePath(userDefaults.value, "weaponPhaseTemplate")
+  else setPath(userDefaults.value, "weaponPhaseTemplate", value)
+}
 
 const DEFAULT_SIZE = DEFAULT_STYLE_SETTINGS.size
 const DEFAULT_OPACITY = DEFAULT_STYLE_SETTINGS.backgroundOpacity
@@ -92,25 +117,16 @@ async function onGenerateSounds() {
   }
 }
 
-async function onSyncSounds() {
-  syncing.value = true
-  try {
-    await api.saveSettings(settings.value)
-    const { removed } = await api.syncSounds()
-    soundProgress.value = removed > 0 ? `Synced (removed ${removed} stale file${removed === 1 ? "" : "s"}).` : "Sounds synced."
-  } catch (e) {
-    soundProgress.value = `Failed: ${(e as Error).message}`
-  } finally {
-    syncing.value = false
-  }
-}
-
 type Feedback = { message: string; kind: "notice" | "error" }
 
 async function saveAll(): Promise<Feedback> {
   saving.value = true
   try {
     await Promise.all([api.saveSettings(settings.value), api.saveDefaults(userDefaults.value), api.saveStyles(userStyles.value)])
+    if (props.devMode) {
+      await load()
+      return { message: "Saved", kind: "notice" }
+    }
     savedSnapshot.value = snapshot()
     lastSnapshot = savedSnapshot.value
     lastRecordTime = 0
@@ -127,7 +143,7 @@ async function saveAllAndExport(): Promise<Feedback> {
   if (saveResult.kind === "error") return saveResult
   exporting.value = true
   try {
-    soundProgress.value = "Preparing export…"
+    soundProgress.value = "Preparing export"
     const result = await api.exportAllFilters((done, total, name) => {
       soundProgress.value = `Exporting ${done}/${total}: ${name}`
     })
@@ -234,17 +250,13 @@ function defaultsValue(field: SchemaField): unknown {
 }
 
 function setDefaultsValue(field: SchemaField, value: unknown) {
-  if (field.path.endsWith(".style.size")) {
-    setStyleSize(userDefaults.value, field.path, value, baseDefaults.value)
-    return
-  }
-  const base = getPath(baseDefaults.value, field.path)
+  const base = fieldDefault(field, userDefaults.value, baseDefaults.value, defaultsReference.value?.styles)
   const isBase = value === undefined || (!field.defaultFrom && base !== undefined && stableStringify(value) === stableStringify(base))
   if (isBase) deletePath(userDefaults.value, field.path)
   else setPath(userDefaults.value, field.path, value)
 }
 
-function setRuleEnabled(field: SchemaField, value: boolean) {
+function setDefaultVisibility(field: SchemaField, value: string) {
   const inherited = fieldDefault(field, userDefaults.value, baseDefaults.value)
   setDefaultsValue(field, value === inherited ? undefined : value)
 }
@@ -285,7 +297,7 @@ function visibleDefaultsFields(fields: SchemaField[]): SchemaField[] {
 type DefaultsSubsectionEntry = {
   key: string
   subsection: FieldSubsection
-  enabledField?: SchemaField
+  visibilityField?: SchemaField
   depth: number
   hasSiblingAbove: boolean
 }
@@ -298,7 +310,7 @@ function defaultsSubsectionEntries(group: FieldGroup): DefaultsSubsectionEntry[]
       entries.push({
         key: `${depth}-${subsection.key}`,
         subsection,
-        enabledField: subsection.collapsed ? ruleEnabledField(subsection) : undefined,
+        visibilityField: subsection.headerVisibility ? subsection.fields.find((field) => field.path.endsWith(".visibility")) : undefined,
         depth,
         hasSiblingAbove: index > 0,
       })
@@ -309,9 +321,12 @@ function defaultsSubsectionEntries(group: FieldGroup): DefaultsSubsectionEntry[]
   return entries
 }
 
-const defaultSections = ref<Record<string, boolean>>({})
+const defaultSections = useCollapsedState(
+  computed(() => "filtertool:global-default-subsections"),
+  () => ({}),
+)
 function defaultSubsectionCollapsed(group: string, section: FieldSubsection): boolean {
-  return defaultSections.value[`${group}:${section.key}`] ?? section.collapsed ?? false
+  return defaultSections.value[`${group}:${section.key}`] ?? section.collapsed ?? true
 }
 function toggleDefaultSubsection(group: string, section: FieldSubsection) {
   defaultSections.value[`${group}:${section.key}`] = !defaultSubsectionCollapsed(group, section)
@@ -360,12 +375,27 @@ function swatchFrom(style: Record<string, unknown>): Record<string, string> {
   }
 }
 
-function swatchStyle(key: string): Record<string, string> {
-  return swatchFrom(effectiveStyle(key))
+const LINK_RARITIES = ["Normal", "Magic", "Rare"]
+
+function usesRarityText(key: string): boolean {
+  return /^(?:(?:good|selected)?(?:Two|Three|Four)|two|three|four|five|six)Link$/.test(key)
+}
+
+function stylePreviews(key: string): string[] {
+  return usesRarityText(key) ? LINK_RARITIES : [key]
+}
+
+function swatchStyle(key: string, rarity: string): Record<string, string> {
+  const style = effectiveStyle(key)
+  return swatchFrom(usesRarityText(key) ? { ...style, text: effectiveStyle(`highlightedEquipment${rarity}`).text } : style)
 }
 
 const STYLE_SECTIONS: { title: string; keys: string[] }[] = [
-  { title: "Currency", keys: ["currencyA", "currencyB", "currencyC", "gold", "goldHighStack"] },
+  {
+    title: "Currency",
+    keys: ["currencyA", "currencyB", "currencyC", "currencyLeaguestart", "currencyLow", "gold", "goldHighStack", "wisdom", "portal"],
+  },
+  { title: "League Mechanic", keys: ["leagueMechanic"] },
   {
     title: "Links",
     keys: [
@@ -379,6 +409,8 @@ const STYLE_SECTIONS: { title: string; keys: string[] }[] = [
       "goodFourLink",
       "selectedFourLink",
       "sixSocket",
+      "fiveLink",
+      "sixLink",
     ],
   },
   { title: "Shields", keys: ["earlyShieldLink", "earlyShieldBase"] },
@@ -386,7 +418,7 @@ const STYLE_SECTIONS: { title: string; keys: string[] }[] = [
     title: "Flasks & Tinctures",
     keys: ["lifeFlask", "magicLifeFlask", "manaFlask", "magicManaFlask", "utilityFlask", "tincture"],
   },
-  { title: "Jewellery", keys: ["jewellery", "magicJewellery", "rareJewellery", "rareArmour", "chromatic"] },
+  { title: "Jewellery", keys: ["jewellery", "magicJewellery", "rareJewellery", "rareArmour"] },
   {
     title: "Highlights",
     keys: ["highlightedEquipmentRare", "highlightedEquipmentMagic", "highlightedEquipmentNormal"],
@@ -399,8 +431,9 @@ const styleSections = computed(() => {
   return [...STYLE_SECTIONS, { title: "Other", keys: other }]
 })
 
-const collapsed = ref<Record<string, boolean>>(
-  Object.fromEntries([...STYLE_SECTIONS.map((section) => section.title), "Other"].map((key) => [key, true])),
+const collapsed = useCollapsedState(
+  computed(() => "filtertool:global-styles"),
+  () => Object.fromEntries([...STYLE_SECTIONS.map((section) => section.title), "Other"].map((key) => [key, true])),
 )
 
 const STYLE_GRID_TEMPLATE = "minmax(7rem, 1fr) 2.75rem 2.75rem 2.75rem 3.5rem 4rem 5rem minmax(10rem, 2fr)"
@@ -409,7 +442,10 @@ function toggleSection(title: string) {
   collapsed.value[title] = !collapsed.value[title]
 }
 
-const defaultsCollapsed = ref<Record<string, boolean>>(Object.fromEntries(DEFAULTS_SCHEMA.map((group) => [group.key, true])))
+const defaultsCollapsed = useCollapsedState(
+  computed(() => "filtertool:global-defaults"),
+  () => Object.fromEntries(DEFAULTS_SCHEMA.map((group) => [group.key, true])),
+)
 
 function isDefaultsCollapsed(key: string): boolean {
   return !!defaultsCollapsed.value[key]
@@ -429,7 +465,16 @@ function expandAllDefaults() {
   defaultsCollapsed.value = Object.fromEntries(DEFAULTS_SCHEMA.map((group) => [group.key, false]))
 }
 
-const settingsCollapsed = ref(false)
+const settingsView = useCollapsedState(
+  computed(() => "filtertool:global-settings"),
+  () => ({ settings: true }),
+)
+const settingsCollapsed = computed({
+  get: () => settingsView.value.settings,
+  set: (value) => {
+    settingsView.value.settings = value
+  },
+})
 
 function toggleSettings() {
   settingsCollapsed.value = !settingsCollapsed.value
@@ -442,7 +487,7 @@ function collapseAllStyles() {
 }
 
 function expandAllStyles() {
-  collapsed.value = {}
+  collapsed.value = Object.fromEntries(styleSections.value.map((section) => [section.title, false]))
 }
 
 type StyleSnapshot = { name: string; style: Record<string, unknown> }
@@ -525,7 +570,7 @@ function removeSaved(name: string) {
                 class="w-full rounded border border-neutral-700 bg-neutral-900 px-2 py-1.5 text-sm"
                 placeholder="Choose your Path of Exile filter folder"
               /><button @click="browseFilterPath" class="rounded border border-neutral-700 px-3 text-sm hover:bg-neutral-800">
-                Browse…
+                Browse
               </button>
             </div>
           </div>
@@ -574,23 +619,15 @@ function removeSaved(name: string) {
               />
             </div>
           </div>
-          <p class="mt-2 text-xs text-neutral-500">Regenerate or sync the TTS sound pack. Generation uses your current TTS settings.</p>
+          <p class="mt-2 text-xs text-neutral-500">Update TTS sounds, clean the local cache, and copy sounds to your PoE folder.</p>
           <div class="mt-2 flex flex-wrap items-center gap-2">
             <button
               type="button"
               @click="onGenerateSounds"
-              :disabled="generating || syncing"
+              :disabled="generating"
               class="rounded bg-blue-700 px-3 py-1.5 text-sm text-white hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {{ generating ? "Generating…" : "Generate sounds" }}
-            </button>
-            <button
-              type="button"
-              @click="onSyncSounds"
-              :disabled="generating || syncing"
-              class="rounded bg-neutral-800 px-3 py-1.5 text-sm text-neutral-300 hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {{ syncing ? "Syncing…" : "Sync sounds" }}
+              {{ generating ? "Generating & Syncing" : "Generate & Sync" }}
             </button>
           </div>
           <p v-if="soundProgress" class="mt-2 text-xs text-neutral-400">{{ soundProgress }}</p>
@@ -622,20 +659,40 @@ function removeSaved(name: string) {
         <div class="px-4 pb-4">
           <p class="mb-2 text-xs text-neutral-500">Used when a filter leaves a field unset.</p>
 
-          <div v-for="group in DEFAULTS_SCHEMA" :key="group.key" class="mb-4">
+          <div v-for="group in defaultGroups" :key="group.key" :data-defaults-group="group.key" class="mb-4">
             <button
               type="button"
               @click="toggleDefaultsGroup(group.key)"
               :aria-expanded="!isDefaultsCollapsed(group.key)"
               class="mb-1 flex w-full items-center justify-between gap-2 rounded py-3 text-left hover:bg-neutral-900/40"
             >
-              <span class="text-sm font-semibold uppercase tracking-wide text-neutral-400">{{ group.title }}</span>
+              <span class="text-base font-semibold uppercase tracking-wide text-neutral-400">{{ group.title }}</span>
               <span class="text-sm text-neutral-500">{{ isDefaultsCollapsed(group.key) ? "▸" : "▾" }}</span>
             </button>
             <div v-show="!isDefaultsCollapsed(group.key)">
-              <div v-if="group.fields.length > 0" class="grid grid-cols-1 gap-3">
-                <div v-for="field in visibleDefaultsFields(group.fields)" :key="field.path">
+              <p v-if="isItemDefaultsGroup(group) && group.description" class="mb-3 text-xs text-neutral-500">{{ group.description }}</p>
+              <CurrencyEditor
+                v-if="group.key === 'currency' && defaultsReference"
+                :root="userDefaults"
+                :reference="defaultsReference"
+                :defaults="baseDefaults"
+                filter-name="@global-defaults"
+                defaults-editor
+              />
+              <WeaponPhaseTemplateEditor
+                v-if="group.key === 'weaponPhaseTemplate' && defaultsReference"
+                :model-value="weaponPhaseTemplate"
+                :reference="defaultsReference"
+                @update:model-value="setWeaponPhaseTemplate"
+              />
+              <div v-if="group.fields.length > 0" class="grid grid-cols-1 items-end gap-3 sm:grid-cols-2">
+                <div
+                  v-for="{ field, fullWidth } in layoutFields(visibleDefaultsFields(group.fields))"
+                  :key="field.path"
+                  :class="['min-w-0', fullWidth ? 'sm:col-span-2' : '']"
+                >
                   <FieldInput
+                    defaults-editor
                     :field="field"
                     :reference="defaultsReference"
                     :default-source="defaultSource(field, baseDefaults)"
@@ -651,6 +708,7 @@ function removeSaved(name: string) {
               <div
                 v-for="sub in defaultsSubsectionEntries(group)"
                 :key="sub.key"
+                :data-editor-subsection="sub.subsection.key"
                 :class="
                   sub.subsection.layout === 'cutoff-size'
                     ? 'mt-1'
@@ -660,28 +718,35 @@ function removeSaved(name: string) {
                         ? 'mt-4 border-t border-neutral-800/60 pt-3'
                         : 'mt-3'
                 "
-                :style="{ marginLeft: `${sub.depth}rem` }"
               >
+                <div v-if="sub.visibilityField" class="mb-3 flex items-center justify-between gap-2">
+                  <RuleHeader
+                    class="min-w-0 flex-1"
+                    :title="sub.subsection.title"
+                    :heading="sub.depth === 0"
+                    compact
+                    :expanded="!defaultSubsectionCollapsed(group.key, sub.subsection)"
+                    @toggle="toggleDefaultSubsection(group.key, sub.subsection)"
+                  />
+                  <select
+                    :aria-label="`${sub.subsection.title} visibility`"
+                    :data-field-path="sub.visibilityField.path"
+                    :value="defaultsValue(sub.visibilityField)"
+                    class="rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-xs"
+                    @change="setDefaultVisibility(sub.visibilityField, ($event.target as HTMLSelectElement).value)"
+                  >
+                    <option value="Show">Show</option>
+                    <option value="Hide">Hide</option>
+                  </select>
+                </div>
                 <RuleHeader
-                  v-if="sub.subsection.collapsed"
+                  v-else
                   :title="sub.subsection.title"
                   :heading="sub.depth === 0"
                   :compact="sub.subsection.layout === 'cutoff-size'"
                   :expanded="!defaultSubsectionCollapsed(group.key, sub.subsection)"
-                  :field="sub.enabledField"
-                  :enabled="sub.enabledField && defaultsValue(sub.enabledField)"
-                  :defaulted="!sub.enabledField || getPath(userDefaults, sub.enabledField.path) === undefined"
                   @toggle="toggleDefaultSubsection(group.key, sub.subsection)"
-                  @change="sub.enabledField && setRuleEnabled(sub.enabledField, $event)"
-                  @reset="sub.enabledField && setDefaultsValue(sub.enabledField, undefined)"
                 />
-                <h5
-                  v-else
-                  class="mb-1 font-semibold uppercase tracking-wide"
-                  :class="sub.depth > 0 ? 'text-xs text-neutral-500' : 'text-sm text-neutral-400'"
-                >
-                  {{ sub.subsection.title }}
-                </h5>
                 <p
                   v-if="sub.subsection.description && !defaultSubsectionCollapsed(group.key, sub.subsection)"
                   class="mb-2 text-xs text-neutral-500"
@@ -690,15 +755,17 @@ function removeSaved(name: string) {
                 </p>
                 <div
                   v-show="!defaultSubsectionCollapsed(group.key, sub.subsection)"
-                  class="grid grid-cols-1 gap-3"
-                  :class="sub.subsection.layout === 'cutoff-size' ? 'items-end sm:grid-cols-2' : ''"
+                  class="grid grid-cols-1 items-end gap-3 sm:grid-cols-2"
                 >
                   <div
-                    v-for="field in visibleDefaultsFields(sub.subsection.fields).filter((field) => field !== sub.enabledField)"
+                    v-for="{ field, fullWidth } in layoutFields(
+                      visibleDefaultsFields(sub.subsection.fields).filter((field) => field !== sub.visibilityField),
+                    )"
                     :key="field.path"
-                    class="min-w-0"
+                    :class="['min-w-0', fullWidth ? 'sm:col-span-2' : '']"
                   >
                     <FieldInput
+                      defaults-editor
                       :field="field"
                       :reference="defaultsReference"
                       :default-source="defaultSource(field, baseDefaults)"
@@ -711,24 +778,6 @@ function removeSaved(name: string) {
                     />
                   </div>
                 </div>
-                <RuleAdvanced
-                  v-if="!defaultSubsectionCollapsed(group.key, sub.subsection)"
-                  :modules="(sub.subsection.subsections ?? []).filter((child) => child.module)"
-                >
-                  <template #default="{ field }">
-                    <FieldInput
-                      :field="field"
-                      :reference="defaultsReference"
-                      :default-source="defaultSource(field, baseDefaults)"
-                      :defaulted="getPath(userDefaults, field.path) === undefined"
-                      :can-reset="getPath(userDefaults, field.path) !== undefined"
-                      @reset="setDefaultsValue(field, undefined)"
-                      :value="defaultsValue(field)"
-                      :options="defaultsOptions(field)"
-                      @update:value="setDefaultsValue(field, $event)"
-                    />
-                  </template>
-                </RuleAdvanced>
               </div>
             </div>
           </div>
@@ -778,15 +827,19 @@ function removeSaved(name: string) {
                 ><span title="1 = fully opaque, 0 = transparent">Opacity</span><span></span><span class="text-right">Preview</span>
               </div>
 
-              <div v-for="key in section.keys" :key="key" class="py-2">
+              <div v-for="key in section.keys" :key="key" class="py-2" :data-style-key="key">
                 <div class="hidden items-center gap-3 @min-[48rem]:grid" :style="{ gridTemplateColumns: STYLE_GRID_TEMPLATE }">
                   <span class="min-w-0 truncate text-xs text-neutral-300" :title="key">{{ key }}</span>
                   <input
+                    v-if="!usesRarityText(key)"
                     type="color"
                     :value="styleColor(effectiveStyle(key), 'text')"
                     @input="setStyleProp(key, 'text', ($event.target as HTMLInputElement).value)"
                     class="h-7 w-full cursor-pointer rounded border border-neutral-700 bg-transparent"
                   />
+                  <span v-else class="text-[10px] text-neutral-400" title="Text colors are inherited from Highlights by item rarity"
+                    >Rarity</span
+                  >
                   <input
                     type="color"
                     :value="styleColor(effectiveStyle(key), 'background')"
@@ -857,6 +910,7 @@ function removeSaved(name: string) {
                     <button
                       type="button"
                       :disabled="!userStyles[key]"
+                      :class="devMode && !userStyles[key] ? 'invisible' : ''"
                       @click="resetStyle(key)"
                       class="flex h-6 w-6 items-center justify-center rounded text-neutral-400 hover:bg-neutral-700 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
                       title="Reset style"
@@ -875,11 +929,16 @@ function removeSaved(name: string) {
                       </svg>
                     </button>
                   </div>
-                  <div
-                    class="flex w-full items-center justify-center justify-self-end overflow-hidden rounded border px-1 text-center"
-                    :style="{ ...swatchStyle(key), borderWidth: '1px', borderStyle: 'solid' }"
-                  >
-                    <span class="truncate">{{ key }}</span>
+                  <div class="flex min-w-0 flex-wrap justify-end gap-1">
+                    <div
+                      v-for="preview in stylePreviews(key)"
+                      :key="preview"
+                      :data-rarity-preview="usesRarityText(key) ? preview : undefined"
+                      class="flex min-w-0 flex-1 items-center justify-center overflow-hidden rounded border px-1 text-center"
+                      :style="{ ...swatchStyle(key, preview), borderWidth: '1px', borderStyle: 'solid' }"
+                    >
+                      <span class="truncate">{{ preview }}</span>
+                    </div>
                   </div>
                 </div>
 
@@ -929,6 +988,7 @@ function removeSaved(name: string) {
                       <button
                         type="button"
                         :disabled="!userStyles[key]"
+                        :class="devMode && !userStyles[key] ? 'invisible' : ''"
                         @click="resetStyle(key)"
                         class="flex h-6 w-6 items-center justify-center rounded text-neutral-400 hover:bg-neutral-700 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
                         title="Reset style"
@@ -952,11 +1012,13 @@ function removeSaved(name: string) {
                     <label class="flex flex-col gap-1">
                       <span class="text-[10px] uppercase text-neutral-500">Text</span>
                       <input
+                        v-if="!usesRarityText(key)"
                         type="color"
                         :value="styleColor(effectiveStyle(key), 'text')"
                         @input="setStyleProp(key, 'text', ($event.target as HTMLInputElement).value)"
                         class="h-8 w-full cursor-pointer rounded border border-neutral-700 bg-transparent"
                       />
+                      <span v-else class="text-xs text-neutral-400">From Highlights by rarity</span>
                     </label>
                     <label class="flex flex-col gap-1">
                       <span class="text-[10px] uppercase text-neutral-500">Bg</span>
@@ -1000,11 +1062,16 @@ function removeSaved(name: string) {
                       />
                     </label>
                   </div>
-                  <div
-                    class="mt-2 flex items-center justify-center overflow-hidden rounded border"
-                    :style="{ ...swatchStyle(key), borderWidth: '1px', borderStyle: 'solid' }"
-                  >
-                    <span class="truncate text-xs">{{ key }}</span>
+                  <div class="mt-2 flex gap-1">
+                    <div
+                      v-for="preview in stylePreviews(key)"
+                      :key="preview"
+                      :data-rarity-preview="usesRarityText(key) ? preview : undefined"
+                      class="flex min-w-0 flex-1 items-center justify-center overflow-hidden rounded border"
+                      :style="{ ...swatchStyle(key, preview), borderWidth: '1px', borderStyle: 'solid' }"
+                    >
+                      <span class="truncate text-xs">{{ preview }}</span>
+                    </div>
                   </div>
                 </div>
               </div>

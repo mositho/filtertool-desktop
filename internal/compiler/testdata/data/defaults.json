@@ -1,0 +1,29 @@
+{
+  "early": { "earlyBootsMaxAreaLevel": 23, "earlyMaxAreaLevel": 12, "rules": {}, "twoSocketMaxAreaLevel": 7 },
+  "flasks": { "utilityFlasks": ["Jade", "Quartz", "Quicksilver", "Silver", "Granite"] },
+  "jewellery": {
+    "amuletMaxAreaLevel": 24,
+    "amulets": ["Amber", "Jade", "Lapis", "Turquoise", "Citrine", "Agate", "Onyx"],
+    "basicRingMaxAreaLevel": 16,
+    "beltMaxAreaLevel": 24,
+    "elementalRingMaxAreaLevel": 33
+  },
+  "links": {
+    "fourLinkMaxAreaLevel": 61,
+    "fourLinkTtsCutoffLevel": 50,
+    "genericFourLinksEnabled": false,
+    "genericThreeLinksEnabled": false,
+    "rules": {},
+    "threeLinkMaxAreaLevel": 33,
+    "threeLinkTtsCutoffLevel": 23,
+    "twoLinkMaxAreaLevel": 9
+  },
+  "magicItems": { "bigMaxAreaLevel": 9, "rules": {}, "smallMaxAreaLevel": 24 },
+  "misc": { "showRusticSash": true, "whetstoneRecipe": true },
+  "normalItems": { "maxAreaLevel": 4, "rules": {} },
+  "preferredArmour": [],
+  "preferredColors": ["R", "G", "B"],
+  "rareItems": { "rules": {} },
+  "shieldProgression": "early",
+  "tinctures": { "baseTypes": [] }
+}

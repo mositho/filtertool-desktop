@@ -1,4 +1,6 @@
-import { EQUIPMENT_FOOTPRINTS, EQUIPMENT_RARITY_TEXT } from "../filters/shared/equipment-rules"
+import { EQUIPMENT_FOOTPRINTS } from "../filters/shared/equipment-rules"
+import { CURRENCY_TIERS, LEAGUE_RULES } from "./currency"
+import flaskProgression from "../../internal/data/flask-progression.json"
 
 type BuildProfile = Record<string, unknown>
 type BuildSpecificOptions = Record<string, unknown>
@@ -18,6 +20,8 @@ export type SchemaControl =
   | "icon"
 
 export type SchemaField = {
+  /** Editable in Global Settings, not in individual filter forms. */
+  sharedOnly?: boolean
   fullWidth?: boolean
   path: string
   label: string
@@ -27,10 +31,16 @@ export type SchemaField = {
   defaultValue?: unknown
   defaultFrom?: { path: string; label: string; value?: unknown }
   options?: string[]
+  /** Keep all multiselect choices visible as Show/Hide toggles. */
+  visibilityMode?: boolean
   min?: number
   max?: number
   step?: number
   integer?: boolean
+  /** Clearing this number explicitly removes its cutoff instead of inheriting it. */
+  emptyMeansUncapped?: boolean
+  /** Global rule size follows its shared style preset until explicitly set. */
+  sizePreset?: string
   /** Hide the empty "—" option in a select (for fields that always have a value). */
   noEmptyOption?: boolean
   /** Only render this field when another field's value matches. */
@@ -43,13 +53,20 @@ export type SchemaField = {
   placeholderWhen?: { path: string; equals?: unknown; notEquals?: unknown; defaultValue?: unknown; value: string }
   /** Output filter section this field edits, used to scroll the preview. */
   previewSection?: string
+  /** Label for an inherited rule callout instead of the generic slot label. */
+  defaultSoundLabel?: string
+  defaultIconLabel?: string
 }
 
 export type FieldSubsection = {
+  sharedOnly?: boolean
+  /** Compact Show/Hide selector beside the subsection title. */
+  headerVisibility?: boolean
   /** Primary cutoff and size controls share a row on wider screens. */
   layout?: "cutoff-size"
   /** Presentation card inside the shared Advanced disclosure. */
   module?: boolean
+  /** Initial view state, not whether the subsection supports collapsing. */
   collapsed?: boolean
   key: string
   title: string
@@ -71,6 +88,22 @@ export type FieldGroup = {
   subsections?: FieldSubsection[]
   /** Output filter section this group edits, used to scroll the preview. */
   previewSection?: string
+}
+
+export function editorSectionRank(key: string): number {
+  const order = [
+    "buildProfile",
+    "weaponPhases",
+    "early",
+    "links",
+    "equipment",
+    "currency",
+    "gems",
+    "leagueMechanic",
+    "highlightedEquipment",
+  ]
+  const index = order.indexOf(key === "weaponPhaseTemplate" ? "weaponPhases" : key)
+  return index < 0 ? order.length : index
 }
 
 // Note: must stay in sync with `HIGHLIGHTABLE_RARITIES` in sections/options.ts.
@@ -311,16 +344,16 @@ export const BUILD_PROFILE_SCHEMA: FieldGroup[] = [
     previewSection: "Links",
     fields: buildProfileMain,
     subsections: [
-      { key: "shieldProgression", title: "Shield progression", previewSection: "Early", fields: buildEarlyShield },
-      { key: "misc", title: "Misc", fields: buildProfileMisc },
+      { key: "shieldProgression", title: "Shield progression", collapsed: true, previewSection: "Early", fields: buildEarlyShield },
+      { key: "misc", title: "Misc", collapsed: true, fields: buildProfileMisc },
     ],
   },
   {
-    key: "weaponProgression",
-    title: "Weapon progression",
+    key: "weaponPhases",
+    title: "Weapon Phases",
     description: "Choose weapons by Area Level; more-specific ranges take priority.",
-    previewSection: "Weapon Progression",
-    fields: [{ path: "weaponPhases", label: "Weapon phases", control: "weapon-phases" }],
+    previewSection: "Weapon Phases",
+    fields: [{ path: "weaponPhases", label: "Weapon Phase", control: "weapon-phases" }],
   },
 ]
 
@@ -341,8 +374,7 @@ const linksAreaLevels: SchemaField[] = [
     min: 0,
     integer: true,
     defaultValue: 33,
-    tooltip:
-      "Area level up to which three-link items matching your socket colors or armour are shown. Enabling generic three-links extends them to this level too.",
+    tooltip: "Area level up to which three-link items are shown.",
   },
   {
     path: "links.fourLinkMaxAreaLevel",
@@ -363,8 +395,7 @@ const linksSoundCutoffs: SchemaField[] = [
     min: 0,
     integer: true,
     defaultValue: 23,
-    tooltip:
-      "Up to this Area Level, three-links play a sound; beyond it they're silent. Sound never extends visibility. Generic three-links stop at their early cutoff unless extended.",
+    tooltip: "Up to this area level, three-links play a sound; beyond it they're silent.",
   },
   {
     path: "links.fourLinkTtsCutoffLevel",
@@ -457,7 +488,7 @@ const equipmentJewelleryAmulets: SchemaField[] = [
     control: "multiselect",
     options: [],
     defaultValue: ["Amber", "Jade", "Lapis", "Turquoise", "Citrine", "Agate", "Onyx"],
-    tooltip: "Amulet base types to highlight during leveling. Each plays its own drop sound.",
+    tooltip: "Show selected amulets with TTS callouts.",
   },
 ]
 
@@ -470,7 +501,7 @@ const equipmentJewelleryCutoffs: SchemaField[] = [
     integer: true,
     defaultValue: 24,
     previewSection: "Jewellery",
-    tooltip: "Area level up to which normal and magic amulets are highlighted.",
+    tooltip: "Area level up to which normal and magic amulets are shown.",
   },
   {
     path: "jewellery.basicRingMaxAreaLevel",
@@ -480,7 +511,7 @@ const equipmentJewelleryCutoffs: SchemaField[] = [
     integer: true,
     defaultValue: 16,
     previewSection: "Jewellery",
-    tooltip: "Area level up to which basic rings (Iron, Coral) are highlighted (Magic and Normal).",
+    tooltip: "Area level up to which normal and magic basic rings (Iron, Coral) are shown.",
   },
   {
     path: "jewellery.elementalRingMaxAreaLevel",
@@ -490,7 +521,7 @@ const equipmentJewelleryCutoffs: SchemaField[] = [
     integer: true,
     defaultValue: 33,
     previewSection: "Jewellery",
-    tooltip: "Area level up to which elemental rings (Ruby, Sapphire, Topaz, Two-Stone) are highlighted (Magic and Normal).",
+    tooltip: "Area level up to which normal and magic elemental rings (Ruby, Sapphire, Topaz, Two-Stone) are shown.",
   },
   {
     path: "jewellery.beltMaxAreaLevel",
@@ -500,7 +531,7 @@ const equipmentJewelleryCutoffs: SchemaField[] = [
     integer: true,
     defaultValue: 24,
     previewSection: "Jewellery",
-    tooltip: "Area level up to which belts are highlighted (Magic and Normal).",
+    tooltip: "Area level up to which normal and magic belts are shown.",
   },
 ]
 
@@ -511,7 +542,7 @@ const equipmentTinctures: SchemaField[] = [
     control: "multiselect",
     options: [],
     defaultValue: ["Prismatic Tincture"],
-    tooltip: "Tincture base types to highlight.",
+    tooltip: "Show selected tinctures with TTS callouts; hide the rest.",
   },
 ]
 
@@ -541,33 +572,42 @@ const equipmentFlasks: SchemaField[] = [
       "Iron",
     ],
     defaultValue: ["Jade", "Quartz", "Quicksilver", "Silver", "Granite"],
-    tooltip: "Utility flask base types that receive a dedicated callout; other utility flasks keep the generic style.",
+    tooltip: "Show selected utility flasks with TTS callouts; hide the rest.",
   },
 ]
 
-function ruleSection(
-  path: string,
-  title: string,
-  style: Record<string, unknown>,
-  maximum?: SchemaField["defaultFrom"],
-  soundCutoff?: SchemaField["defaultFrom"],
-  inlineSize = false,
-): FieldSubsection {
-  const styleField: SchemaField = { path: `${path}.style`, label: "Style", control: "style", defaultValue: style }
+const flaskProgressionSections: FieldSubsection[] = (["life", "mana"] as const).map((kind) => ({
+  key: `${kind}Flasks`,
+  collapsed: true,
+  title: `${kind === "life" ? "Life" : "Mana"} Flasks`,
+  previewSection: "Flasks",
+  fields: flaskProgression[kind].map((flask) => ({
+    path: `flasks.${kind}MaxAreaLevels.${flask.key}`,
+    label: flask.name,
+    control: "number",
+    min: 0,
+    integer: true,
+    emptyMeansUncapped: true,
+    placeholder: "No cutoff",
+    defaultValue: flask.maxAreaLevel,
+    tooltip: "Show normal and magic flasks through this area level. Empty: no cutoff. 0: hide.",
+  })),
+}))
+
+function ruleSection(path: string, title: string, style: Record<string, unknown>, maximum?: SchemaField["defaultFrom"]): FieldSubsection {
   return {
     key: path,
     title,
     collapsed: true,
-    ...(inlineSize ? { layout: "cutoff-size" as const } : {}),
+    layout: "cutoff-size",
     fields: [
-      { path: `${path}.enabled`, label: "Rule enabled", control: "boolean", defaultValue: true },
       ...(maximum
         ? [
             {
               path: `${path}.maxAreaLevel`,
               label: "Max Area Level",
               control: "number" as const,
-              fullWidth: !inlineSize,
+              fullWidth: false,
               min: 0,
               integer: true,
               defaultFrom: maximum,
@@ -575,55 +615,15 @@ function ruleSection(
             },
           ]
         : []),
-      ...(inlineSize
-        ? [
-            {
-              path: `${path}.style.size`,
-              label: "Size",
-              control: "number" as const,
-              min: 20,
-              max: 45,
-              integer: true,
-              defaultValue: style.size ?? 45,
-            },
-          ]
-        : []),
-    ],
-    subsections: [
-      { key: `${path}.style`, title: "Style", module: true, fields: [styleField] },
       {
-        key: `${path}.icon`,
-        title: "Icon",
-        module: true,
-        fields: [{ path: `${path}.icon`, label: "Minimap icon", control: "icon", defaultValue: { enabled: false } }],
-      },
-      {
-        key: `${path}.sound`,
-        title: "Sound",
-        module: true,
-        fields: [
-          ...(soundCutoff
-            ? [
-                {
-                  path: `${path}.soundCutoffLevel`,
-                  label: "Sound · Max Area Level",
-                  control: "number" as const,
-                  min: 0,
-                  integer: true,
-                  defaultFrom: soundCutoff,
-                },
-              ]
-            : []),
-          {
-            path: `${path}.sound`,
-            label: "Sound",
-            control: "rule-sound",
-            defaultValue: { enabled: !!soundCutoff },
-            tooltip: soundCutoff
-              ? "Uses the existing per-slot callout by default. Custom sounds stop at the sound cutoff too."
-              : "Silent by default.",
-          },
-        ],
+        path: `${path}.size`,
+        label: "Size",
+        control: "number",
+        min: 20,
+        max: 45,
+        integer: true,
+        defaultValue: style.size ?? 45,
+        sizePreset: typeof style.preset === "string" ? style.preset : undefined,
       },
     ],
   }
@@ -639,8 +639,6 @@ const socketRules = [2, 3].map((count) =>
       label: `${count === 2 ? "Two" : "Three"} Sockets`,
       value: count === 2 ? 7 : undefined,
     },
-    undefined,
-    true,
   ),
 )
 
@@ -653,10 +651,6 @@ const linkRules = [2, 3, 4].flatMap((count) =>
       `${count} Links · ${tier === "selected" ? "Colours + Armour" : tier === "good" ? "Colours or Armour" : "Generic"}`,
       { preset },
       { path: `links.${word}LinkMaxAreaLevel`, label: `${count} Links`, value: count === 2 ? 9 : count === 3 ? 33 : 61 },
-      count === 2
-        ? undefined
-        : { path: `links.${word}LinkTtsCutoffLevel`, label: `${count} Links sound cutoff`, value: count === 3 ? 23 : 50 },
-      true,
     )
   }),
 )
@@ -694,7 +688,7 @@ const genericEquipment: FieldSubsection[] = [
         ruleSection(
           `${rarity}Items.rules.${key}`,
           `${width}×${height} · ${width * height} inventory ${width * height === 1 ? "slot" : "slots"}`,
-          { size, text: EQUIPMENT_RARITY_TEXT[rarity] },
+          { size },
           rarity === "rare"
             ? { path: "rareItems.maxAreaLevel", label: "Rare Items" }
             : {
@@ -702,15 +696,180 @@ const genericEquipment: FieldSubsection[] = [
                 label: `${height <= 2 ? "Small" : "Big"} Magic Items`,
                 value: height <= 2 ? 24 : 9,
               },
-          undefined,
-          true,
         ),
       ),
     ],
   })),
 ]
 
+function currencyRule(path: string, title: string, preset?: string): FieldSubsection {
+  return {
+    key: path,
+    title,
+    collapsed: true,
+    fields: [
+      {
+        path: `${path}.visibility`,
+        label: "Visibility",
+        control: "select",
+        options: ["Show", "Hide"],
+        noEmptyOption: true,
+        defaultValue: "Show",
+      },
+    ],
+    subsections: [
+      {
+        key: `${path}.style`,
+        title: "Style",
+        module: true,
+        fields: [
+          {
+            path: `${path}.style`,
+            label: "Style",
+            control: "style",
+            defaultValue: preset ? { preset } : {},
+            sharedOnly: path.startsWith("currency."),
+          },
+        ],
+      },
+      {
+        key: `${path}.icon`,
+        title: "Icon",
+        module: true,
+        fields: [
+          {
+            path: `${path}.icon`,
+            label: "Minimap icon",
+            control: "icon",
+            tooltip: "Unset preserves the existing item-specific icon. Reset to restore it.",
+            defaultIconLabel:
+              path.startsWith("currency.tiers.") || path.startsWith("currency.scrolls.") ? "Existing per-item icon" : undefined,
+            defaultValue: {},
+          },
+        ],
+      },
+      {
+        key: `${path}.sound`,
+        title: "Sound",
+        module: true,
+        fields: [
+          {
+            path: `${path}.sound`,
+            label: "Sound",
+            control: "rule-sound",
+            tooltip: "Unset preserves the existing item-specific callout. Reset to restore it.",
+            defaultSoundLabel: "Existing per-item callout",
+            defaultValue: { enabled: path.startsWith("currency.tiers.") || path.startsWith("currency.scrolls.") },
+          },
+        ],
+      },
+    ],
+  }
+}
+
+const goldRule = currencyRule("currency.gold", "Gold", "gold")
+goldRule.fields = []
+goldRule.subsections?.forEach((module) => {
+  module.sharedOnly = true
+})
+goldRule.fields.push(
+  {
+    path: "currency.gold.minStackSize",
+    label: "Minimum Stack Size",
+    control: "number",
+    min: 0,
+    integer: true,
+    defaultValue: 0,
+    tooltip: "Smaller stacks are hidden.",
+  },
+  { path: "currency.gold.highStackSize", label: "High Stack Threshold", control: "number", min: 0, integer: true, defaultValue: 50 },
+  {
+    path: "currency.gold.highStack.style",
+    label: "High Stack Style",
+    control: "style",
+    defaultValue: { preset: "goldHighStack" },
+    sharedOnly: true,
+  },
+)
+
 export const BUILD_SPECIFIC_SCHEMA: FieldGroup[] = [
+  {
+    key: "currency",
+    title: "Currency",
+    previewSection: "Currency",
+    fields: [],
+    subsections: [
+      ...CURRENCY_TIERS.map((tier) => ({
+        ...currencyRule(`currency.tiers.${tier.key}`, tier.title, tier.style),
+        sharedOnly: true,
+      })),
+      goldRule,
+      ...[
+        { key: "wisdom", title: "Scroll of Wisdom" },
+        { key: "portal", title: "Portal Scroll" },
+      ].map(({ key, title }) => {
+        const rule = currencyRule(`currency.scrolls.${key}`, title, key)
+        rule.fields = []
+        rule.subsections?.forEach((module) => {
+          module.sharedOnly = true
+        })
+        rule.previewSection = "Scrolls"
+        rule.fields.push({
+          path: `currency.scrolls.${key}.soundCutoffLevel`,
+          label: "Sound · Max Area Level",
+          control: "number",
+          min: 0,
+          integer: true,
+          defaultValue: 38,
+        })
+        return rule
+      }),
+    ],
+  },
+  {
+    key: "leagueMechanic",
+    title: "League Mechanic",
+    description: "Curse of the Allflame",
+    previewSection: "League Mechanic",
+    fields: [
+      {
+        path: "leagueMechanic.style",
+        label: "Shared League Mechanic Style",
+        control: "style",
+        defaultValue: { preset: "leagueMechanic" },
+        sharedOnly: true,
+      },
+    ],
+    subsections: LEAGUE_RULES.map((definition) => {
+      const rule = currencyRule(`leagueMechanic.rules.${definition.key}`, definition.title, "leagueMechanic")
+      rule.collapsed = true
+      rule.fields = [
+        {
+          path: `leagueMechanic.rules.${definition.key}.baseTypes`,
+          label: definition.title,
+          control: "multiselect",
+          visibilityMode: true,
+          options: definition.baseTypes,
+          defaultValue: definition.baseTypes,
+        },
+      ]
+      rule.subsections![0].fields[0].defaultFrom = { path: "leagueMechanic.style", label: "Shared League Mechanic Style" }
+      rule.subsections?.forEach((module) => {
+        module.sharedOnly = true
+      })
+      if (definition.stack)
+        rule.fields.push({
+          path: `leagueMechanic.rules.${definition.key}.minStackSize`,
+          label: "Minimum Stack Size",
+          control: "number",
+          min: 0,
+          integer: true,
+          defaultValue: 0,
+          tooltip: "Smaller stacks are hidden.",
+        })
+      return rule
+    }),
+  },
   {
     key: "early",
     title: "Early",
@@ -718,11 +877,12 @@ export const BUILD_SPECIFIC_SCHEMA: FieldGroup[] = [
     previewSection: "Early",
     fields: [],
     subsections: [
-      { key: "generic", title: "Area level cutoffs", previewSection: "Early", fields: buildEarlyGeneric },
-      { key: "rusticSash", title: "Rustic Sash", root: "buildProfile", previewSection: "Early", fields: earlyRusticSash },
+      { key: "generic", title: "Area level cutoffs", collapsed: true, previewSection: "Early", fields: buildEarlyGeneric },
+      { key: "rusticSash", title: "Rustic Sash", collapsed: true, root: "buildProfile", previewSection: "Early", fields: earlyRusticSash },
       {
         key: "socketRules",
-        title: "Socket Rules",
+        sharedOnly: true,
+        title: "Advanced Rules",
         collapsed: true,
         previewSection: "Early Sockets",
         fields: [],
@@ -737,14 +897,15 @@ export const BUILD_SPECIFIC_SCHEMA: FieldGroup[] = [
     previewSection: "Links",
     fields: [],
     subsections: [
-      { key: "areaLevels", title: "Area level cutoffs", fields: linksAreaLevels },
-      { key: "soundCutoffs", title: "Sound cutoffs", fields: linksSoundCutoffs },
+      { key: "areaLevels", title: "Area level cutoffs", collapsed: true, fields: linksAreaLevels },
+      { key: "soundCutoffs", title: "Sound cutoffs", collapsed: true, fields: linksSoundCutoffs },
       {
         key: "generic",
         title: "Generic links",
+        collapsed: true,
         fields: linksGeneric,
       },
-      { key: "linkRules", title: "Link Rules", collapsed: true, fields: [], subsections: linkRules },
+      { key: "linkRules", title: "Advanced Rules", sharedOnly: true, collapsed: true, fields: [], subsections: linkRules },
     ],
   },
   {
@@ -753,16 +914,24 @@ export const BUILD_SPECIFIC_SCHEMA: FieldGroup[] = [
     description: "Rarity thresholds, jewellery and tinctures.",
     fields: [],
     subsections: [
-      { key: "rarityItems", title: "Max Area Level", fields: [...equipmentRarityItems, ...equipmentJewelleryCutoffs] },
+      { key: "rarityItems", title: "Max Area Level", collapsed: true, fields: [...equipmentRarityItems, ...equipmentJewelleryCutoffs] },
       {
         key: "jewellery",
         title: "Jewellery",
+        collapsed: true,
         previewSection: "Jewellery",
         fields: equipmentJewelleryAmulets,
       },
-      { key: "flasks", title: "Flasks", previewSection: "Flasks", fields: equipmentFlasks },
-      { key: "tinctures", title: "Tinctures", previewSection: "Tinctures", fields: equipmentTinctures },
-      { key: "genericEquipment", title: "Equipment Rules", collapsed: true, fields: [], subsections: genericEquipment },
+      {
+        key: "flasks",
+        title: "Flasks",
+        collapsed: true,
+        previewSection: "Flasks",
+        fields: equipmentFlasks,
+        subsections: flaskProgressionSections,
+      },
+      { key: "tinctures", title: "Tinctures", collapsed: true, previewSection: "Tinctures", fields: equipmentTinctures },
+      { key: "genericEquipment", title: "Advanced Rules", sharedOnly: true, collapsed: true, fields: [], subsections: genericEquipment },
     ],
   },
   {
@@ -811,6 +980,20 @@ export const FILTER_FORM_SCHEMA = {
   buildSpecificOptions: BUILD_SPECIFIC_SCHEMA,
 }
 
+/** Keep global-only controls out of filter forms, including empty modules. */
+export function filterEditorGroup(group: FieldGroup): FieldGroup {
+  const filterSections = (sections: FieldSubsection[]): FieldSubsection[] =>
+    sections
+      .filter((section) => !section.sharedOnly)
+      .map((section) => ({
+        ...section,
+        fields: section.fields.filter((field) => !field.sharedOnly),
+        subsections: filterSections(section.subsections ?? []),
+      }))
+      .filter((section) => section.fields.length > 0 || section.subsections.length > 0)
+  return { ...group, fields: group.fields.filter((field) => !field.sharedOnly), subsections: filterSections(group.subsections ?? []) }
+}
+
 /**
  * The full set of config leaf paths the UI form can edit. Special controls are
  * expanded into their constituent leaves so this can be diffed against the
@@ -855,7 +1038,7 @@ export function schemaLeafPaths(): string[] {
 
 /** A fresh highlight used as the seed for a newly added highlight row. */
 export function emptyHighlight(): HighlightedBaseTypeConfig {
-  return {}
+  return { perRarityCustomization: true }
 }
 
 /**
@@ -913,4 +1096,12 @@ function stripHighlights(groups: FieldGroup[]): FieldGroup[] {
  * fields, minus highlights); values come from `baseFilterDefaults` (served as
  * `baseDefaults`).
  */
-export const DEFAULTS_SCHEMA: FieldGroup[] = stripHighlights([...BUILD_PROFILE_SCHEMA, ...BUILD_SPECIFIC_SCHEMA])
+export const DEFAULTS_SCHEMA: FieldGroup[] = [
+  ...stripHighlights([...BUILD_PROFILE_SCHEMA, ...BUILD_SPECIFIC_SCHEMA]),
+  {
+    key: "weaponPhaseTemplate",
+    title: "Weapon Phase",
+    description: "New weapon phases start with these modules and settings. Existing phases are not changed.",
+    fields: [],
+  },
+]

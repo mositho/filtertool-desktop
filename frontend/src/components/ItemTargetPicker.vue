@@ -8,35 +8,140 @@ const search = ref("")
 const classSearch = ref("")
 const selectedClass = ref("")
 
-const classes = computed(() => (props.weaponOnly ? [...props.reference.weaponClasses, "Shields"] : props.reference.itemClasses))
+const classes = computed(() =>
+  props.weaponOnly ? [...(props.reference.weaponClasses ?? []), "Shields"] : (props.reference.itemClasses ?? []),
+)
 const filteredClasses = computed(() => {
   const query = classSearch.value.trim().toLowerCase()
   return query ? classes.value.filter((itemClass) => itemClass.toLowerCase().includes(query)) : classes.value
+})
+function dropLevel(base: string): number | undefined {
+  const value = props.reference.dropLevelsByBaseType?.[base]
+  return typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : undefined
+}
+function compareBases(a: string, b: string): number {
+  return (dropLevel(a) ?? Infinity) - (dropLevel(b) ?? Infinity) || a.localeCompare(b)
+}
+const selectedBaseNames = computed(() => new Set(props.bases))
+function classBases(itemClass: string): string[] {
+  return [...new Set(props.reference.baseTypesByClass[itemClass] ?? [])]
+}
+function classForBase(base: string): string | undefined {
+  return classes.value.find((itemClass) => classBases(itemClass).includes(base))
+}
+function baseSelected(base: string): boolean {
+  const itemClass = classForBase(base)
+  return selectedBaseNames.value.has(base) || Boolean(props.weaponOnly && itemClass && props.classes.includes(itemClass))
+}
+function baseIsCovered(base: string): boolean {
+  const itemClass = classForBase(base)
+  return Boolean(props.weaponOnly && itemClass && props.classes.includes(itemClass))
+}
+const selectedBases = computed(() => [...props.bases].filter((base) => !baseIsCovered(base)).sort(compareBases))
+function classFullySelected(itemClass: string): boolean {
+  const itemBases = classBases(itemClass)
+  return (
+    props.classes.includes(itemClass) ||
+    Boolean(props.weaponOnly && itemBases.length > 0 && itemBases.every((base) => selectedBaseNames.value.has(base)))
+  )
+}
+const visibleSelectionState = computed(() => {
+  if (!bases.value.length) return "none"
+  const count = bases.value.filter(baseSelected).length
+  return count === 0 ? "none" : count === bases.value.length ? "all" : "some"
 })
 const bases = computed(() => {
   const candidates = selectedClass.value
     ? (props.reference.baseTypesByClass[selectedClass.value] ?? [])
     : classes.value.flatMap((itemClass) => props.reference.baseTypesByClass[itemClass] ?? [])
   const query = search.value.trim().toLowerCase()
-  return query ? candidates.filter((base) => base.toLowerCase().includes(query)) : candidates
+  return [...new Set(query ? candidates.filter((base) => base.toLowerCase().includes(query)) : candidates)].sort(compareBases)
 })
+const allBasesSelected = computed(() => !bases.value.length || visibleSelectionState.value === "all")
+const noBasesSelected = computed(() => !bases.value.length || visibleSelectionState.value === "none")
+function normalizeWeaponSelections(selectedClasses: string[], selectedBases: string[]) {
+  if (!props.weaponOnly) return { classes: selectedClasses, bases: selectedBases }
+  const classesResult = [...selectedClasses]
+  const basesResult = new Set(selectedBases)
+  for (const itemClass of classes.value) {
+    const itemBases = classBases(itemClass)
+    if (itemBases.length && itemBases.every((base) => basesResult.has(base))) {
+      classesResult.push(itemClass)
+      for (const base of itemBases) basesResult.delete(base)
+    }
+  }
+  return { classes: [...new Set(classesResult)], bases: [...basesResult] }
+}
+function setVisibleBases(selected: boolean) {
+  const classesToExpand = new Set<string>()
+  if (!selected) {
+    for (const base of bases.value) {
+      const itemClass = classForBase(base)
+      if (props.weaponOnly && itemClass && props.classes.includes(itemClass)) classesToExpand.add(itemClass)
+    }
+  }
+
+  let nextClasses = [...props.classes]
+  let nextBases = [...props.bases]
+  for (const itemClass of classesToExpand) {
+    nextClasses = nextClasses.filter((entry) => entry !== itemClass)
+    nextBases = [...new Set([...nextBases, ...classBases(itemClass)])]
+  }
+
+  const visible = new Set(bases.value)
+  nextBases = selected ? [...new Set([...nextBases, ...bases.value])] : nextBases.filter((base) => !visible.has(base))
+  const normalized = selected ? normalizeWeaponSelections(nextClasses, nextBases) : { classes: nextClasses, bases: nextBases }
+  emit("update:classes", normalized.classes)
+  emit("update:bases", normalized.bases)
+}
 
 function toggleClass(itemClass: string) {
+  if (!props.weaponOnly) {
+    emit(
+      "update:classes",
+      props.classes.includes(itemClass) ? props.classes.filter((entry) => entry !== itemClass) : [...props.classes, itemClass],
+    )
+    return
+  }
+  if (classFullySelected(itemClass)) {
+    emit(
+      "update:classes",
+      props.classes.filter((entry) => entry !== itemClass),
+    )
+    emit(
+      "update:bases",
+      props.bases.filter((base) => !classBases(itemClass).includes(base)),
+    )
+    return
+  }
+  emit("update:classes", [...props.classes, itemClass])
   emit(
-    "update:classes",
-    props.classes.includes(itemClass) ? props.classes.filter((entry) => entry !== itemClass) : [...props.classes, itemClass],
+    "update:bases",
+    props.bases.filter((base) => !classBases(itemClass).includes(base)),
   )
 }
 
 function toggleBase(base: string) {
-  emit("update:bases", props.bases.includes(base) ? props.bases.filter((entry) => entry !== base) : [...props.bases, base])
+  const itemClass = classForBase(base)
+  if (baseIsCovered(base) && itemClass) {
+    emit(
+      "update:classes",
+      props.classes.filter((entry) => entry !== itemClass),
+    )
+    emit("update:bases", [...new Set([...props.bases, ...classBases(itemClass).filter((entry) => entry !== base)])])
+    return
+  }
+  const nextBases = props.bases.includes(base) ? props.bases.filter((entry) => entry !== base) : [...props.bases, base]
+  const normalized = normalizeWeaponSelections(props.classes, nextBases)
+  emit("update:classes", normalized.classes)
+  emit("update:bases", normalized.bases)
 }
 </script>
 
 <template>
   <div class="space-y-2 rounded border border-neutral-800 p-2">
     <p class="text-xs text-neutral-500">Select {{ weaponOnly ? "weapon" : "item" }} classes, individual bases, or both.</p>
-    <div v-if="props.classes.length || props.bases.length" class="flex flex-wrap gap-1">
+    <div v-if="props.classes.length || props.bases.length" class="flex max-h-40 flex-wrap gap-1 overflow-y-auto">
       <button
         v-for="itemClass in props.classes"
         :key="`class-${itemClass}`"
@@ -48,14 +153,14 @@ function toggleBase(base: string) {
         {{ itemClass }} ×
       </button>
       <button
-        v-for="base in props.bases"
+        v-for="base in selectedBases"
         :key="`base-${base}`"
         type="button"
         class="rounded bg-neutral-800 px-2 py-1 text-xs text-neutral-200 hover:bg-neutral-700"
         :aria-label="`Remove base type ${base}`"
         @click="toggleBase(base)"
       >
-        {{ base }} ×
+        {{ base }} <span class="ml-1 whitespace-nowrap text-neutral-400">Lvl {{ dropLevel(base) ?? "—" }}</span> ×
       </button>
     </div>
     <details class="rounded border border-neutral-700">
@@ -65,12 +170,19 @@ function toggleBase(base: string) {
           v-model="classSearch"
           type="search"
           aria-label="Search item classes"
-          :placeholder="`Search ${weaponOnly ? 'weapon' : 'item'} classes…`"
+          :placeholder="`Search ${weaponOnly ? 'weapon' : 'item'} classes`"
           class="w-full rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-xs"
         />
         <div class="grid max-h-36 grid-cols-1 gap-1 overflow-y-auto sm:grid-cols-2">
           <label v-for="itemClass in filteredClasses" :key="itemClass" class="flex items-center gap-2 text-xs text-neutral-300">
-            <input type="checkbox" :checked="props.classes.includes(itemClass)" @change="toggleClass(itemClass)" />
+            <input
+              type="checkbox"
+              :checked="classFullySelected(itemClass)"
+              :indeterminate="
+                weaponOnly && !classFullySelected(itemClass) && classBases(itemClass).some((base) => selectedBaseNames.has(base))
+              "
+              @change="toggleClass(itemClass)"
+            />
             {{ itemClass }}
           </label>
           <span v-if="!filteredClasses.length" class="text-xs text-neutral-500">No matching classes</span>
@@ -93,14 +205,33 @@ function toggleBase(base: string) {
             v-model="search"
             type="search"
             aria-label="Search base types"
-            placeholder="Search bases…"
+            placeholder="Search bases"
             class="min-w-0 flex-1 rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-xs"
           />
         </div>
+        <div class="flex items-center justify-end gap-3 text-xs">
+          <button
+            type="button"
+            :disabled="allBasesSelected"
+            class="text-neutral-300 hover:text-white disabled:opacity-40"
+            @click="setVisibleBases(true)"
+          >
+            {{ search.trim() || selectedClass ? "Select results" : "Select all" }}
+          </button>
+          <button
+            type="button"
+            :disabled="noBasesSelected"
+            class="text-neutral-300 hover:text-white disabled:opacity-40"
+            @click="setVisibleBases(false)"
+          >
+            {{ search.trim() || selectedClass ? "Deselect results" : "Deselect all" }}
+          </button>
+        </div>
         <div class="grid max-h-40 grid-cols-1 gap-1 overflow-y-auto sm:grid-cols-2">
           <label v-for="base in bases" :key="base" class="flex items-center gap-2 text-xs text-neutral-300">
-            <input type="checkbox" :checked="props.bases.includes(base)" @change="toggleBase(base)" />
-            {{ base }}
+            <input type="checkbox" :checked="baseSelected(base)" @change="toggleBase(base)" />
+            <span>{{ base }}</span
+            ><span class="whitespace-nowrap text-neutral-500">Lvl {{ dropLevel(base) ?? "—" }}</span>
           </label>
           <span v-if="!bases.length" class="text-xs text-neutral-500">No matching bases</span>
         </div>

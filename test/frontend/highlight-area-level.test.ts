@@ -46,7 +46,7 @@ describe("highlight level inputs", () => {
     classFilter.dispatchEvent(new Event("change", { bubbles: true }))
     await nextTick()
     const baseLabel = Array.from(container.querySelectorAll<HTMLLabelElement>("label")).find(
-      (label) => label.textContent?.trim() === TEST_BASE_TYPE,
+      (label) => label.querySelector("span")?.textContent?.trim() === TEST_BASE_TYPE,
     )!
     baseLabel.querySelector<HTMLInputElement>("input")!.click()
     await nextTick()

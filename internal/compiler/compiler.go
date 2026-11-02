@@ -15,21 +15,24 @@ type Weapon struct {
 	APS       float64 `json:"aps"`
 }
 type Compiler struct {
-	Defaults, Styles Object
-	SoundFolder      string
-	templates        Object
-	weapons          []Weapon
-	manifest         map[string]string
-	starterSupports  []string
-	rarityDefaults   Object
+	Defaults, Styles          Object
+	SoundFolder               string
+	templates                 Object
+	weapons                   []Weapon
+	manifest                  map[string]string
+	starterSupports           []string
+	rarityDefaults            Object
+	legacyCurrency            bool // Only used by the frozen web parity tests.
+	legacyEquipmentSelections bool // Only used by the frozen web parity tests.
 }
 
 func New(defaults, styles Object, folder string) *Compiler {
 	if folder == "" {
 		folder = "poeft-sounds-v2"
 	}
-	c := &Compiler{Defaults: Merge(data.Load[Object]("defaults.json"), defaults), Styles: Merge(data.Load[Object]("styles.json"), styles), SoundFolder: folder, templates: data.Load[Object]("rules.json"), weapons: data.Load[[]Weapon]("weapons.json"), manifest: map[string]string{}}
+	c := &Compiler{Defaults: MergeDefaults(data.Load[Object]("defaults.json"), defaults), Styles: Merge(data.Load[Object]("styles.json"), styles), SoundFolder: folder, templates: data.Load[Object]("rules.json"), weapons: data.Load[[]Weapon]("weapons.json"), manifest: map[string]string{}}
 	c.starterSupports = data.Load[[]string]("starter-supports.json")
+	c.Defaults = CleanRuleDefaults(c.Defaults)
 	c.rarityDefaults = data.Load[Object]("highlight-defaults.json")
 	for _, s := range data.Load[[]Object]("manifest.json") {
 		c.manifest[Text(s["id"])] = Text(s["text"])
@@ -76,6 +79,15 @@ func (c *Compiler) fixed(key string) string {
 }
 func (c *Compiler) section(options Object, name string) Object {
 	base, override := Obj(c.Defaults[name]), Obj(options[name])
+	if !c.legacyEquipmentSelections {
+		for _, section := range globalRuleSections {
+			if name == section {
+				override = Clone(override)
+				delete(override, "rules")
+				return Merge(base, override)
+			}
+		}
+	}
 	out := Merge(base, override)
 	rules := Clone(Obj(base["rules"]))
 	for key, value := range Obj(override["rules"]) {
@@ -89,12 +101,21 @@ func (c *Compiler) section(options Object, name string) Object {
 	return out
 }
 func (c *Compiler) Compile(config Object) (string, error) {
+	if !c.legacyEquipmentSelections {
+		config = Clone(config)
+		DiscardFilterRuleOverrides(config)
+	}
 	if err := Validate(config); err != nil {
 		return "", err
 	}
 	p := Obj(config["buildProfile"])
 	o := Obj(config["buildSpecificOptions"])
 	sections := []string{c.fixed("currency"), c.fixed("scrolls"), c.gems(Obj(o["gemCallouts"])), c.links(p, o), c.highlights(Obj(o["highlightedEquipment"])), c.phases(List(p["weaponPhases"])), c.fixed("sixSockets"), c.jewellery(c.section(o, "jewellery")), c.early(p, c.section(o, "early")), c.earlySockets(c.section(o, "early")), c.flasks(c.section(o, "flasks")), c.tinctures(c.section(o, "tinctures")), c.fixed("chromaticItems"), c.fixed("uniques"), c.equipment("Rare", c.section(o, "rareItems")), c.equipment("Magic", c.section(o, "magicItems")), c.whetstone(p), c.normal(c.section(o, "normalItems")), c.fixed("questItems"), c.fixed("divinationCards"), c.fixed("misc"), c.fixed("twilightStrand"), c.fixed("hideEquipment"), c.fixed("showUnknownItems")}
+	if !c.legacyCurrency {
+		currency := mergeCurrencySettings(Obj(c.Defaults["currency"]), Obj(o["currency"]))
+		sections[0] = c.leagueMechanic(Obj(o["leagueMechanic"])) + "\n\n" + c.currency(currency)
+		sections[1] = c.scrolls(Obj(currency["scrolls"]))
+	}
 	result := []string{}
 	for _, s := range sections {
 		if s = strings.TrimSpace(s); s != "" {
@@ -160,18 +181,35 @@ func (c *Compiler) flasks(cfg Object) string {
 	rules := c.template(Text(c.templates["flasks"]))
 	last := rules[len(rules)-1]
 	rules = rules[:len(rules)-1]
+	if !c.legacyEquipmentSelections {
+		rules = c.flaskProgression(cfg)
+	}
 	// Preserve the canonical utility-flask order, independent of picker order.
 	for _, name := range []string{"Quicksilver", "Bismuth", "Stibnite", "Amethyst", "Ruby", "Sapphire", "Topaz", "Silver", "Aquamarine", "Granite", "Jade", "Quartz", "Diamond", "Gold", "Corundum", "Iron"} {
 		if contains(Strings(cfg["utilityFlasks"]), name) {
 			rules = append(rules, c.template(Text(Obj(c.templates["utilityFlasks"])[name]))...)
 		}
 	}
+	if !c.legacyEquipmentSelections {
+		for _, name := range []string{"Sulphur", "Basalt"} {
+			if contains(Strings(cfg["utilityFlasks"]), name) {
+				rules = append(rules, c.tts(newRule().quoted("Class", true, "Utility Flasks").quoted("BaseType", true, name+" Flask").icon("Green", "Raindrop", 2).style(Obj(c.Styles["utilityFlask"])), strings.ToLower(name)+"_flask"))
+			}
+		}
+		last = newRule().quoted("Class", true, "Utility Flasks").hide()
+	}
 	return heading("Flasks", append(rules, last)...)
 }
 func (c *Compiler) tinctures(cfg Object) string {
 	rules := []*rule{}
 	for _, base := range Strings(cfg["baseTypes"]) {
-		rules = append(rules, newRule().quoted("BaseType", true, base).icon("Red", "Raindrop", 2).style(Obj(c.Styles["tincture"])).set("PlayAlertSound", "6 240"))
+		r := newRule().quoted("BaseType", true, base).icon("Red", "Raindrop", 2).style(Obj(c.Styles["tincture"]))
+		if c.legacyEquipmentSelections {
+			r.set("PlayAlertSound", "6 240")
+		} else {
+			c.tts(r, strings.ReplaceAll(strings.ToLower(base), " ", "_"))
+		}
+		rules = append(rules, r)
 	}
 	return heading("Tinctures", append(rules, newRule().quoted("Class", false, "Tinctures").hide())...)
 }
@@ -207,8 +245,8 @@ func (c *Compiler) earlySockets(cfg Object) string {
 	rules := []*rule{}
 	for i, count := range []int{2, 3} {
 		key := fmt.Sprintf("armour%d", count)
-		rc := Obj(Obj(cfg["rules"])[key])
-		if rc["enabled"] == false {
+		rc := c.ruleConfig(cfg, key)
+		if rc["enabled"] == false && c.legacyEquipmentSelections {
 			continue
 		}
 		cut := cfg["twoSocketMaxAreaLevel"]
@@ -216,7 +254,11 @@ func (c *Compiler) earlySockets(cfg Object) string {
 			cut = Val(cfg, "threeSocketMaxAreaLevel", cfg["earlyMaxAreaLevel"])
 		}
 		r := newRule().number("Sockets", "==", count).quoted("Class", false, armour...).number("AreaLevel", "<=", Val(rc, "maxAreaLevel", cut))
-		rules = append(rules, c.presentation(r, rc, Object{"size": float64(40 + i*5)}))
+		if rc["enabled"] == false {
+			rules = append(rules, r.hide())
+		} else {
+			rules = append(rules, c.presentation(r, rc, Object{"size": float64(40 + i*5)}))
+		}
 	}
 	return heading("Early Sockets", rules...)
 }
@@ -226,7 +268,7 @@ func (c *Compiler) equipment(rarity string, cfg Object) string {
 		key        string
 		w, h, size int
 	}{{"1x1", 1, 1, 45}, {"1x2", 1, 2, 43}, {"2x1", 2, 1, 43}, {"1x3", 1, 3, 40}, {"1x4", 1, 4, 37}, {"2x2", 2, 2, 37}, {"2x3", 2, 3, 33}, {"2x4", 2, 4, 30}} {
-		rc := Obj(Obj(cfg["rules"])[shape.key])
+		rc := c.ruleConfig(cfg, shape.key)
 		r := newRule().set("Rarity", "== "+rarity).number("Width", "==", shape.w).number("Height", "==", shape.h)
 		var maximum any
 		var color string
@@ -265,8 +307,8 @@ func (c *Compiler) whetstone(p Object) string {
 func (c *Compiler) normal(cfg Object) string {
 	rules := []*rule{}
 	for _, key := range []string{"equipment", "belts"} {
-		rc := Obj(Obj(cfg["rules"])[key])
-		if rc["enabled"] == false {
+		rc := c.ruleConfig(cfg, key)
+		if rc["enabled"] == false && c.legacyEquipmentSelections {
 			continue
 		}
 		var r *rule
@@ -279,7 +321,11 @@ func (c *Compiler) normal(cfg Object) string {
 			style = Obj(c.Styles["jewellery"])
 		}
 		r.number("AreaLevel", "<=", Val(rc, "maxAreaLevel", cfg["maxAreaLevel"]))
-		rules = append(rules, c.presentation(r, rc, style))
+		if rc["enabled"] == false {
+			rules = append(rules, r.hide())
+		} else {
+			rules = append(rules, c.presentation(r, rc, style))
+		}
 	}
 	return heading("Normal Items", rules...)
 }

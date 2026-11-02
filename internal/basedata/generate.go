@@ -54,6 +54,24 @@ func ValidateCSV(b []byte) error {
 	}
 	return nil
 }
+
+func minimumDropLevels(records []map[string]string) map[string]int {
+	levels := map[string]int{}
+	for _, row := range records {
+		if row["Class"] == "" || row["BaseType"] == "" {
+			continue
+		}
+		level, err := strconv.Atoi(row["DropLevel"])
+		if err != nil || level < 0 {
+			continue
+		}
+		base := row["BaseType"]
+		if previous, exists := levels[base]; !exists || level < previous {
+			levels[base] = level
+		}
+	}
+	return levels
+}
 func write(path string, value any) error {
 	b, err := json.MarshalIndent(value, "", "  ")
 	if err != nil {
@@ -125,6 +143,7 @@ func Generate() error {
 	// Keep source CSV order: it determines the stable order of weapon cutoff groups.
 	ref["itemClasses"] = names
 	ref["baseTypesByClass"] = classes
+	ref["dropLevelsByBaseType"] = minimumDropLevels(records)
 	ref["skillGems"] = classes["Skill Gems"]
 	ref["supportGems"] = classes["Support Gems"]
 	ref["weaponClasses"] = weaponClasses

@@ -7,20 +7,18 @@ import { isValidFilterName } from "@schema/filter-name"
 import { pruneEmpty, stableStringify } from "./path"
 import Sidebar from "./components/Sidebar.vue"
 import ConfigForm from "./components/ConfigForm.vue"
-import PreviewPane from "./components/PreviewPane.vue"
+import { forgetFilterViewState, renameFilterViewState } from "./viewState"
 import GlobalSettings from "./components/GlobalSettings.vue"
 import AppUpdates from "./components/AppUpdates.vue"
 
 const filters = ref<FilterInfo[]>([])
+const templates = ref<string[]>([])
 const devMode = ref(false)
 const selected = ref<string | null>(null)
 const config = ref<FilterConfig>(clone(EMPTY_FILTER_CONFIG))
 const savedConfig = ref<FilterConfig>(clone(EMPTY_FILTER_CONFIG))
 const reference = ref<ReferenceData | null>(null)
 const defaults = ref<Record<string, unknown>>({})
-const preview = ref("")
-const previewOpen = ref(false)
-const previewSection = ref<string | null>(null)
 const view = ref<"filter" | "global">("filter")
 const sidebarOpen = ref(false)
 const desktopMedia = window.matchMedia("(min-width: 768px)")
@@ -145,7 +143,8 @@ function discardChanges() {
 }
 
 async function refreshFilters(selectName?: string) {
-  const { filters: list, devMode: dev } = await api.listFilters()
+  const { filters: list, devMode: dev, templates: choices } = await api.listFilters()
+  templates.value = choices ?? []
   devMode.value = dev
   filters.value = list
   if (selectName && list.some((f) => f.name === selectName)) {
@@ -159,7 +158,6 @@ async function loadConfig() {
   if (!selected.value) {
     config.value = clone(EMPTY_FILTER_CONFIG)
     savedConfig.value = clone(EMPTY_FILTER_CONFIG)
-    preview.value = ""
     resetHistory()
     return
   }
@@ -171,33 +169,9 @@ async function loadConfig() {
   defaults.value = defaultsData.defaults
   savedConfig.value = clone(config.value)
   resetHistory()
-  void refreshPreview()
 }
 
 watch(selected, () => void loadConfig())
-
-async function refreshPreview() {
-  if (!selected.value) {
-    preview.value = ""
-    return
-  }
-  try {
-    const { output } = await api.preview(selected.value, config.value)
-    preview.value = output
-  } catch {
-    /* preview is best-effort */
-  }
-}
-
-let debounce: ReturnType<typeof setTimeout> | undefined
-watch(
-  config,
-  () => {
-    clearTimeout(debounce)
-    debounce = setTimeout(() => void refreshPreview(), 400)
-  },
-  { deep: true },
-)
 
 async function saveOnly() {
   if (!selected.value) return
@@ -211,7 +185,14 @@ async function onSave() {
   if (!selected.value) return
   try {
     await saveOnly()
-    flash(devMode.value ? "Saved to repository" : "Saved", "save")
+    flash(
+      devMode.value
+        ? filters.value.find((filter) => filter.name === selected.value)?.devTest
+          ? "Saved to dev profile"
+          : "Saved to repository"
+        : "Saved",
+      "save",
+    )
   } catch (e) {
     flash((e as Error).message, "error")
   }
@@ -269,7 +250,7 @@ async function onSaveAndExport() {
 async function onExportAll() {
   if (devMode.value) return
   exportingAll.value = true
-  exportProgress.value = "Preparing export…"
+  exportProgress.value = "Preparing export"
   try {
     if (selected.value && dirty.value) {
       const [error] = filterRangeErrors(config.value)
@@ -431,6 +412,7 @@ async function browseHomePath() {
 async function onCreate(name: string, template?: string) {
   try {
     await api.createFilter(name.trim(), template)
+    forgetFilterViewState(name.trim())
     await refreshFilters(name.trim())
     flash(`Created filter "${name}"`, "create")
   } catch (e) {
@@ -536,6 +518,7 @@ async function onDuplicate(name: string) {
   const newName = `${name} copy`
   try {
     await api.duplicateFilter(name, newName)
+    forgetFilterViewState(newName)
     await refreshFilters(newName)
     renaming.value = newName
     flash(`Duplicated "${name}"`, "duplicate")
@@ -547,6 +530,7 @@ async function onDuplicate(name: string) {
 async function onRename(name: string, newName: string) {
   try {
     await api.renameFilter(name, newName.trim())
+    renameFilterViewState(name, newName.trim())
     await refreshFilters(newName.trim())
     flash(`Renamed to "${newName}"`, "rename")
   } catch (e) {
@@ -566,6 +550,7 @@ async function confirmDelete(deleteGameFile: boolean) {
   if (!name) return
   try {
     await api.deleteFilter(name, deleteGameFile)
+    forgetFilterViewState(name)
     await refreshFilters()
     flash(`Deleted "${name}"`, "delete")
   } catch (e) {
@@ -649,7 +634,6 @@ onUnmounted(() => {
   window.removeEventListener("beforeunload", onBeforeUnload)
   window.removeEventListener("keydown", onKeyDown)
   clearTimeout(toastTimer)
-  clearTimeout(debounce)
 })
 </script>
 
@@ -661,6 +645,7 @@ onUnmounted(() => {
         <Sidebar
           updates-target="mobile-updates"
           :dev-mode="devMode"
+          :templates="templates"
           :filters="filters"
           :selected="selected"
           :view="view"
@@ -689,6 +674,7 @@ onUnmounted(() => {
       <Sidebar
         updates-target="desktop-updates"
         :dev-mode="devMode"
+        :templates="templates"
         :filters="filters"
         :selected="selected"
         :view="view"
@@ -724,7 +710,10 @@ onUnmounted(() => {
         v-if="devMode"
         class="flex flex-wrap items-center justify-between gap-3 border-b border-amber-800 bg-amber-950/40 px-4 py-2 text-xs text-amber-200"
       >
-        <span>Dev Editor — Save writes templates and global defaults/styles directly to the repository. Personal data stays separate.</span>
+        <span
+          >Dev Editor — Names ending in Template save to the repository; other new filters save to the dev profile. Global defaults/styles
+          save to the repository. Personal data stays separate.</span
+        >
       </div>
       <header class="flex h-14 items-center justify-between gap-2 border-b border-neutral-800 px-3 sm:px-6">
         <div class="flex min-w-0 items-center gap-2">
@@ -826,14 +815,7 @@ onUnmounted(() => {
               class="rounded bg-green-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500 disabled:opacity-50"
               :title="devMode ? 'Export is disabled in Dev Editor' : 'Save and export to Path of Exile (Ctrl+Shift+S)'"
             >
-              {{ exporting ? "Exporting…" : "Export" }}
-            </button>
-            <button
-              @click="previewOpen = true"
-              class="rounded bg-neutral-800 px-3 py-1.5 text-sm hover:bg-neutral-700 md:hidden"
-              title="Show output preview"
-            >
-              Preview
+              {{ exporting ? "Exporting" : "Export" }}
             </button>
           </template>
           <template v-else-if="view === 'global'">
@@ -892,7 +874,7 @@ onUnmounted(() => {
               class="rounded bg-neutral-800 px-3 py-1.5 text-sm hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-50"
               title="Save settings, defaults and styles (Ctrl+S)"
             >
-              {{ globalSaving ? "Saving…" : "Save" }}
+              {{ globalSaving ? "Saving" : "Save" }}
             </button>
             <button
               @click="onGlobalExport"
@@ -900,7 +882,7 @@ onUnmounted(() => {
               class="rounded bg-green-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500 disabled:opacity-50"
               :title="devMode ? 'Export is disabled in Dev Editor' : 'Save settings and export all filters (Ctrl+Shift+S)'"
             >
-              {{ globalExporting ? "Exporting…" : "Export" }}
+              {{ globalExporting ? "Exporting" : "Export" }}
             </button>
           </template>
         </div>
@@ -924,16 +906,9 @@ onUnmounted(() => {
           <strong>TTS sound generation requires FFmpeg to be installed.</strong> Refer to the README for installation help. Filtertool does
           not download or install FFmpeg.
         </div>
-        <GlobalSettings v-show="view === 'global'" ref="globalRef" />
+        <GlobalSettings v-show="view === 'global'" ref="globalRef" :dev-mode="devMode" />
         <div v-if="view !== 'global' && selected && reference" class="space-y-4">
-          <ConfigForm
-            :key="selected"
-            v-model="config"
-            :reference="reference"
-            :filter-name="selected"
-            :defaults="defaults"
-            @preview-section="previewSection = $event"
-          />
+          <ConfigForm :key="selected" v-model="config" :reference="reference" :filter-name="selected" :defaults="defaults" />
         </div>
         <div v-else-if="view !== 'global' && !selected" class="flex h-full items-center justify-center">
           <div class="w-full max-w-md rounded border border-neutral-800 bg-neutral-900/40 p-10 text-center">
@@ -949,7 +924,7 @@ onUnmounted(() => {
                   placeholder="Choose your filter folder"
                   class="min-w-0 flex-1 rounded border border-neutral-700 bg-neutral-950 px-2 py-2 text-xs"
                 />
-                <button @click="browseHomePath" class="rounded border border-neutral-700 px-3 text-sm hover:bg-neutral-800">Browse…</button>
+                <button @click="browseHomePath" class="rounded border border-neutral-700 px-3 text-sm hover:bg-neutral-800">Browse</button>
               </div>
             </div>
             <div v-if="!devMode" class="flex flex-col items-stretch gap-3">
@@ -977,30 +952,24 @@ onUnmounted(() => {
             </div>
           </div>
         </div>
-        <p v-else-if="view !== 'global'" class="text-neutral-500">Loading…</p>
+        <p v-else-if="view !== 'global'" class="text-neutral-500">Loading</p>
       </div>
     </main>
-
-    <aside
-      v-if="view === 'filter' && selected"
-      class="hidden shrink-0 flex-col border-l border-neutral-800 bg-neutral-950 md:flex"
-      :class="previewOpen ? 'w-96' : 'w-10'"
-    >
-      <PreviewPane :preview="preview" v-model:open="previewOpen" :section="previewSection" />
-    </aside>
-
-    <div v-if="view === 'filter' && selected && previewOpen" class="fixed inset-0 z-40 flex flex-col bg-neutral-950 md:hidden">
-      <PreviewPane :preview="preview" v-model:open="previewOpen" :section="previewSection" />
-    </div>
 
     <div v-if="deleteTarget" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60" @click.self="deleteTarget = null">
       <div class="w-96 max-w-[calc(100vw-2rem)] rounded border border-neutral-700 bg-neutral-900 p-5">
         <h2 class="mb-4 text-lg font-semibold">Delete "{{ deleteTarget }}"</h2>
         <div class="flex flex-col gap-2">
           <button @click="confirmDelete(false)" class="rounded bg-neutral-700 px-3 py-2 text-sm hover:bg-neutral-600">
-            Delete local filter only
+            {{
+              devMode
+                ? filters.find((filter) => filter.name === deleteTarget)?.devTest
+                  ? "Delete test filter"
+                  : "Delete repository entry"
+                : "Delete local filter only"
+            }}
           </button>
-          <button @click="confirmDelete(true)" class="rounded bg-red-700 px-3 py-2 text-sm hover:bg-red-600">
+          <button v-if="!devMode" @click="confirmDelete(true)" class="rounded bg-red-700 px-3 py-2 text-sm hover:bg-red-600">
             Delete local + exported .filter
           </button>
           <button @click="deleteTarget = null" class="rounded border border-neutral-700 px-3 py-2 text-sm hover:bg-neutral-800">
@@ -1057,7 +1026,7 @@ onUnmounted(() => {
               class="w-full rounded border border-neutral-700 bg-neutral-950 px-2 py-1.5 text-sm"
               placeholder="Choose your Path of Exile filter folder"
               @keydown.enter.prevent="confirmQuickstart"
-            /><button @click="browseQuickstart" class="rounded border border-neutral-700 px-3 text-sm hover:bg-neutral-800">Browse…</button>
+            /><button @click="browseQuickstart" class="rounded border border-neutral-700 px-3 text-sm hover:bg-neutral-800">Browse</button>
           </div>
         </div>
         <div class="flex justify-end gap-2">
@@ -1105,7 +1074,7 @@ onUnmounted(() => {
             :disabled="!shareText"
             class="rounded border border-neutral-700 px-3 py-2 text-sm disabled:opacity-50"
           >
-            Save JSON…
+            Save JSON
           </button>
           <button @click="copyShare" :disabled="!shareText" class="rounded bg-green-700 px-3 py-2 text-sm disabled:opacity-50">Copy</button>
         </div>
@@ -1121,14 +1090,14 @@ onUnmounted(() => {
             :disabled="importBusy"
             class="rounded border border-neutral-700 px-3 py-2 text-sm disabled:opacity-50"
           >
-            JSON files…
+            JSON files
           </button>
           <button
             @click="importFromPicker(true)"
             :disabled="importBusy"
             class="rounded border border-neutral-700 px-3 py-2 text-sm disabled:opacity-50"
           >
-            Web App folder…
+            Web App folder
           </button>
         </div>
         <div class="mb-4">

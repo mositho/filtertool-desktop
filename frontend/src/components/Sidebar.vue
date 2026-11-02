@@ -12,6 +12,7 @@ const props = defineProps<{
   adding: boolean
   renaming: string | null
   devMode?: boolean
+  templates?: string[]
   updatesTarget?: string
 }>()
 
@@ -123,9 +124,9 @@ function confirmRename() {
   <aside class="flex w-64 shrink-0 flex-col border-r border-neutral-800 bg-neutral-950">
     <div class="flex h-14 items-center justify-between px-4 border-b border-neutral-800">
       <button type="button" @click="emit('home')" class="font-semibold hover:text-neutral-300" title="Show welcome screen">Filters</button>
-      <div v-if="!devMode" class="flex items-center gap-1">
+      <div class="flex items-center gap-1">
         <button
-          v-if="!adding"
+          v-if="!devMode && !adding"
           type="button"
           @click="emit('import')"
           class="rounded bg-neutral-800 hover:bg-neutral-700 w-7 h-7 text-sm leading-none"
@@ -192,10 +193,30 @@ function confirmRename() {
           :class="renameError ? 'border-red-500' : 'border-neutral-700'"
           :title="renameError || undefined"
         />
-        <span v-else class="truncate" @dblclick.stop="!devMode && emit('start-rename', filter.name)">{{ filter.name }}</span>
-        <span v-if="!devMode && renaming !== filter.name" class="hidden group-hover:flex gap-1">
-          <button title="Duplicate" @click.stop="emit('duplicate', filter.name)" class="px-1 text-neutral-400 hover:text-white">⧉</button>
-          <button title="Rename" @click.stop="emit('start-rename', filter.name)" class="px-1 text-neutral-400 hover:text-white">✎</button>
+        <span
+          v-else
+          class="truncate"
+          :title="filter.devTest ? 'Test filter · saved in the dev profile' : undefined"
+          @dblclick.stop="!devMode && emit('start-rename', filter.name)"
+          >{{ filter.name }}</span
+        >
+        <span v-if="renaming !== filter.name" class="hidden group-hover:flex gap-1">
+          <button
+            v-if="!devMode"
+            title="Duplicate"
+            @click.stop="emit('duplicate', filter.name)"
+            class="px-1 text-neutral-400 hover:text-white"
+          >
+            ⧉
+          </button>
+          <button
+            v-if="!devMode"
+            title="Rename"
+            @click.stop="emit('start-rename', filter.name)"
+            class="px-1 text-neutral-400 hover:text-white"
+          >
+            ✎
+          </button>
           <button title="Delete" @click.stop="emit('delete', filter.name)" class="px-1 text-neutral-400 hover:text-red-400">✕</button>
         </span>
       </button>
@@ -207,8 +228,7 @@ function confirmRename() {
           class="mb-2 w-full rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-sm"
         >
           <option value="">Blank filter</option>
-          <option value="Caster Template">Caster Template</option>
-          <option value="Attack Template">Attack Template</option>
+          <option v-for="name in templates ?? []" :key="name" :value="name">{{ name }}</option>
         </select>
         <input
           ref="addInput"
@@ -230,7 +250,7 @@ function confirmRename() {
       :title="devMode ? 'Export is disabled in Dev Editor' : undefined"
       class="flex items-center justify-center gap-2 border-t border-neutral-800 bg-green-700 px-4 py-3 text-sm font-medium text-white hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500 disabled:opacity-50"
     >
-      <span>{{ exporting ? exportProgress || "Exporting…" : "Export All" }}</span>
+      <span>{{ exporting ? exportProgress || "Exporting" : "Export All" }}</span>
       <svg
         class="h-4 w-4"
         viewBox="0 0 24 24"

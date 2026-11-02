@@ -1,11 +1,39 @@
 {
   "early": {
-    "earlyBootsMaxAreaLevel": 23,
+    "earlyBootsMaxAreaLevel": 21,
     "earlyMaxAreaLevel": 12,
     "rules": {},
     "twoSocketMaxAreaLevel": 7
   },
   "flasks": {
+    "lifeMaxAreaLevels": {
+      "small": 12,
+      "medium": 20,
+      "large": 24,
+      "greater": 28,
+      "grand": 32,
+      "giant": 35,
+      "colossal": 40,
+      "sacred": 0,
+      "hallowed": 60,
+      "sanctified": 0,
+      "divine": null,
+      "eternal": 0
+    },
+    "manaMaxAreaLevels": {
+      "small": 12,
+      "medium": 20,
+      "large": 24,
+      "greater": 28,
+      "grand": 32,
+      "giant": 36,
+      "colossal": 40,
+      "sacred": 46,
+      "hallowed": 52,
+      "sanctified": 60,
+      "divine": null,
+      "eternal": null
+    },
     "utilityFlasks": [
       "Jade",
       "Quartz",
@@ -15,7 +43,7 @@
     ]
   },
   "jewellery": {
-    "amuletMaxAreaLevel": 24,
+    "amuletMaxAreaLevel": 23,
     "amulets": [
       "Amber",
       "Jade",
@@ -26,23 +54,27 @@
       "Onyx"
     ],
     "basicRingMaxAreaLevel": 16,
-    "beltMaxAreaLevel": 24,
+    "beltMaxAreaLevel": 23,
     "elementalRingMaxAreaLevel": 33
   },
   "links": {
-    "fourLinkMaxAreaLevel": 61,
-    "fourLinkTtsCutoffLevel": 50,
-    "genericFourLinksEnabled": false,
-    "genericThreeLinksEnabled": false,
-    "rules": {},
-    "threeLinkMaxAreaLevel": 33,
+    "fourLinkMaxAreaLevel": 60,
+    "fourLinkTtsCutoffLevel": 40,
+    "genericFourLinksEnabled": true,
+    "genericThreeLinksEnabled": true,
+    "rules": {
+      "4generic": {
+        "maxAreaLevel": 61
+      }
+    },
+    "threeLinkMaxAreaLevel": 23,
     "threeLinkTtsCutoffLevel": 23,
     "twoLinkMaxAreaLevel": 9
   },
   "magicItems": {
     "bigMaxAreaLevel": 9,
     "rules": {},
-    "smallMaxAreaLevel": 24
+    "smallMaxAreaLevel": 23
   },
   "misc": {
     "showRusticSash": true,
@@ -64,5 +96,46 @@
   "shieldProgression": "early",
   "tinctures": {
     "baseTypes": []
+  },
+  "currency": {
+    "assignments": {
+      "Fracturing Orb": "s",
+      "Hinekora's Lock": "s",
+      "Orb of Annulment": "a",
+      "Mirror Shard": "s"
+    },
+    "items": {
+      "Fracturing Orb": {
+        "sound": {
+          "enabled": true,
+          "soundId": 6
+        }
+      },
+      "Hinekora's Lock": {
+        "sound": {
+          "enabled": true,
+          "soundId": 6
+        }
+      },
+      "Mirror Shard": {
+        "sound": {
+          "enabled": true,
+          "soundId": 6
+        }
+      }
+    },
+    "scrolls": {
+      "portal": {
+        "soundCutoffLevel": 39
+      },
+      "wisdom": {
+        "soundCutoffLevel": 39
+      }
+    }
+  },
+  "leagueMechanic": {
+    "rules": {
+      "sulphur": {}
+    }
   }
 }

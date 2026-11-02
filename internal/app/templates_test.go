@@ -1,6 +1,7 @@
 package app
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -42,6 +43,151 @@ func devSource(t *testing.T) string {
 	return source
 }
 
+func TestDevWorkspaceCanCreateIsolatedTestFilters(t *testing.T) {
+	root, source := t.TempDir(), devSource(t)
+	before, err := os.ReadFile(filepath.Join(source, "templates.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	s, err := OpenDev(root, source)
+	if err != nil {
+		t.Fatal(err)
+	}
+	mustCall(t, s, "createFilter", Object{"name": "Test Filter"})
+	cfg := mustCall(t, s, "getConfig", Object{"name": "Test Filter"}).(Object)
+	if len(c.Obj(cfg["buildProfile"])) != 0 || len(c.Obj(cfg["buildSpecificOptions"])) != 0 {
+		t.Fatal("new test filter is not blank", cfg)
+	}
+	c.Obj(cfg["buildProfile"])["preferredColors"] = []any{"R"}
+	mustCall(t, s, "saveConfig", Object{"name": "Test Filter", "config": cfg})
+	list := mustCall(t, s, "listFilters", nil).(Object)["filters"].([]Object)
+	if len(list) != 3 {
+		t.Fatal("test filters missing from dev list", list)
+	}
+	found := false
+	for _, filter := range list {
+		if filter["name"] == "Test Filter" {
+			found = filter["devTest"] == true
+		}
+	}
+	if !found {
+		t.Fatal("test filter must be identified separately from templates")
+	}
+	reopened, err := OpenDev(root, source)
+	if err != nil {
+		t.Fatal(err)
+	}
+	loaded := mustCall(t, reopened, "getConfig", Object{"name": "Test Filter"}).(Object)
+	if !reflect.DeepEqual(c.Strings(c.Obj(loaded["buildProfile"])["preferredColors"]), []string{"R"}) {
+		t.Fatal("test filter did not survive restart")
+	}
+	after, _ := os.ReadFile(filepath.Join(source, "templates.json"))
+	if string(after) != string(before) {
+		t.Fatal("creating/saving test filter changed repository templates")
+	}
+	if _, err := os.Stat(filepath.Join(root, "filters", "Test Filter.json")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatal("test filter touched personal profile")
+	}
+	if _, err := s.Dispatch("createFilter", Object{"name": "Caster Template"}); err == nil {
+		t.Fatal("test filter creation replaced a bundled template")
+	}
+	if _, err := s.Dispatch("exportFilter", Object{"name": "Test Filter"}); err == nil {
+		t.Fatal("dev test filter export must stay disabled")
+	}
+}
+
+func TestDevWorkspaceAddsAndDeletesTemplatesAndTestFilters(t *testing.T) {
+	s, err := OpenDev(t.TempDir(), devSource(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	mustCall(t, s, "createFilter", Object{"name": "Leveling Template"})
+	mustCall(t, s, "createFilter", Object{"name": "Temporary Run"})
+	source, err := s.source("templates")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := source["Leveling Template"]; !ok {
+		t.Fatal("new template was not added to repository source")
+	}
+	if _, ok := source["Temporary Run"]; ok {
+		t.Fatal("test filter leaked into repository templates")
+	}
+	// Even an old non-template source entry must not appear as a starting template.
+	source["Scratch"] = Object{"buildProfile": Object{}, "buildSpecificOptions": Object{}}
+	if err := s.writeSource("templates", source); err != nil {
+		t.Fatal(err)
+	}
+	list := mustCall(t, s, "listFilters", nil).(Object)
+	choices := list["templates"].([]string)
+	if len(choices) != 3 || !contains(choices, "Leveling Template") || contains(choices, "Scratch") || contains(choices, "Temporary Run") {
+		t.Fatal("incorrect starting-template choices", choices)
+	}
+	if _, err := s.Dispatch("createFilter", Object{"name": "From Scratch", "template": "Scratch"}); err == nil {
+		t.Fatal("non-template accepted as starting template")
+	}
+	mustCall(t, s, "createFilter", Object{"name": "From Template", "template": "Leveling Template"})
+	// A previously hidden profile copy must not resurrect a deleted template.
+	copyPath, _ := s.filterPath("Leveling Template")
+	if err := writeJSON(copyPath, Object{"buildProfile": Object{}, "buildSpecificOptions": Object{}}); err != nil {
+		t.Fatal(err)
+	}
+	game := t.TempDir()
+	gameFile := filepath.Join(game, exportName("Temporary Run"))
+	if err := os.WriteFile(gameFile, []byte("untouched"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	settings, _ := s.settings()
+	settings["filterPath"] = game
+	mustCall(t, s, "saveSettings", Object{"settings": settings})
+	for _, name := range []string{"Leveling Template", "Temporary Run", "Scratch", "From Template"} {
+		mustCall(t, s, "deleteFilter", Object{"name": name, "deleteGameFile": true})
+		if _, err := s.Dispatch("getConfig", Object{"name": name}); !errors.Is(err, os.ErrNotExist) {
+			t.Fatal("deleted entry is still accessible", name, err)
+		}
+	}
+	if _, err := os.Stat(gameFile); err != nil {
+		t.Fatal("dev deletion touched game exports", err)
+	}
+	list = mustCall(t, s, "listFilters", nil).(Object)
+	if len(list["filters"].([]Object)) != 2 || len(list["templates"].([]string)) != 2 {
+		t.Fatal("deleted entries remained in list", list)
+	}
+}
+
+func TestDevWorkspaceDoesNotDuplicateTemplatesFromOldProfileCopies(t *testing.T) {
+	s, err := OpenDev(t.TempDir(), devSource(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, name := range []string{"Caster Template", "attack template", "Caster-Template"} {
+		path, err := s.filterPath(name)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := writeJSON(path, Object{"buildProfile": Object{"preferredColors": []any{"R"}}, "buildSpecificOptions": Object{}}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	mustCall(t, s, "createFilter", Object{"name": "My Test Filter"})
+	list := mustCall(t, s, "listFilters", nil).(Object)["filters"].([]Object)
+	if len(list) != 3 {
+		t.Fatal("repository templates duplicated by profile copies", list)
+	}
+	for _, item := range list {
+		if item["name"] != "My Test Filter" && item["devTest"] == true {
+			t.Fatal("template copy listed as a test filter", item)
+		}
+	}
+	path, _ := s.filterPath("Caster Template")
+	if _, err := os.Stat(path); err != nil {
+		t.Fatal("listing must not delete old profile data", err)
+	}
+	if _, err := s.Dispatch("createFilter", Object{"name": "caster-template"}); err == nil {
+		t.Fatal("test creation must not collide with template names")
+	}
+}
+
 func TestDevWorkspaceIsolationAndDirectSourceSave(t *testing.T) {
 	root := t.TempDir()
 	source := devSource(t)
@@ -71,7 +217,7 @@ func TestDevWorkspaceIsolationAndDirectSourceSave(t *testing.T) {
 	if settings["filterPath"] != "" || settings["welcomeComplete"] != true {
 		t.Fatal("template workspace should not target the personal game folder", settings)
 	}
-	for _, action := range []string{"createFilter", "duplicateFilter", "renameFilter", "deleteFilter", "importJSON", "importFiles", "importFolder", "exportFilter", "exportAllFilters"} {
+	for _, action := range []string{"duplicateFilter", "renameFilter", "importJSON", "importFiles", "importFolder", "exportFilter", "exportAllFilters"} {
 		if _, err := dev.Dispatch(action, Object{"name": "Caster Template"}); err == nil {
 			t.Fatalf("template workspace allowed %s", action)
 		}
@@ -141,18 +287,29 @@ func TestDevSourceResetAndLiveReads(t *testing.T) {
 	}
 	mustCall(t, dev, "saveDefaults", Object{"defaults": Object{"preferredColors": []any{"B"}}})
 	loaded := mustCall(t, dev, "getDefaults", nil).(Object)
-	if !reflect.DeepEqual(c.Strings(c.Obj(loaded["userDefaults"])["preferredColors"]), []string{"B"}) {
-		t.Fatal("saved source changes must remain editable", loaded)
+	if len(c.Obj(loaded["userDefaults"])) != 0 || !reflect.DeepEqual(c.Strings(c.Obj(loaded["baseDefaults"])["preferredColors"]), []string{"B"}) {
+		t.Fatal("saved source changes must become the new baseline", loaded)
 	}
 	mustCall(t, dev, "saveDefaults", Object{"defaults": Object{}})
 	saved, _ := readObject(filepath.Join(source, "defaults.json"))
-	if !reflect.DeepEqual(saved, baseline) {
-		t.Fatal("resetting an override should restore the baseline in the repository")
+	if !reflect.DeepEqual(c.Strings(saved["preferredColors"]), []string{"B"}) {
+		t.Fatal("an empty save must not restore the launch-time baseline")
 	}
 	mustCall(t, dev, "saveDefaults", Object{"defaults": Object{"preferredColors": []any{}}})
 	saved, _ = readObject(filepath.Join(source, "defaults.json"))
 	if len(c.List(saved["preferredColors"])) != 0 || saved["preferredColors"] == nil {
 		t.Fatal("an explicit empty selection was lost")
+	}
+	mustCall(t, dev, "saveStyles", Object{"styles": Object{"lifeFlask": Object{"text": "#123456"}}})
+	loadedStyles := mustCall(t, dev, "getStyles", nil).(Object)
+	if len(c.Obj(loadedStyles["userStyles"])) != 0 || c.Obj(c.Obj(loadedStyles["baseStyles"])["lifeFlask"])["text"] != "#123456" {
+		t.Fatal("saved styles did not become the new baseline", loadedStyles)
+	}
+	mustCall(t, dev, "saveStyles", Object{"styles": Object{"lifeFlask": Object{"border": "#abcdef"}}})
+	loadedStyles = mustCall(t, dev, "getStyles", nil).(Object)
+	style := c.Obj(c.Obj(loadedStyles["baseStyles"])["lifeFlask"])
+	if style["text"] != "#123456" || style["border"] != "#abcdef" || len(c.Obj(loadedStyles["userStyles"])) != 0 {
+		t.Fatal("a later style save restored the launch-time values", loadedStyles)
 	}
 	templates, _ := readObject(filepath.Join(source, "templates.json"))
 	c.Obj(c.Obj(templates["Caster Template"])["buildProfile"])["preferredColors"] = []any{"G"}

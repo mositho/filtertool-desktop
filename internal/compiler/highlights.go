@@ -242,5 +242,9 @@ func (c *Compiler) phases(phases []any) string {
 	if len(rules) == 0 {
 		return ""
 	}
-	return heading("Weapon Progression", rules...)
+	section := "Weapon Phases"
+	if c.legacyEquipmentSelections {
+		section = "Weapon Progression"
+	}
+	return heading(section, rules...)
 }

@@ -92,7 +92,7 @@ onMounted(() => void check())
         {{ status.release.major ? " · Major update: breaking changes possible" : "" }}
       </span>
       <span v-else>
-        {{ checking ? "Checking for updates…" : "Check for updates" }}
+        {{ checking ? "Checking for updates" : "Check for updates" }}
       </span>
     </button>
   </Teleport>
@@ -105,7 +105,7 @@ onMounted(() => void check())
       class="max-h-[85vh] w-full max-w-xl overflow-y-auto rounded-lg border border-neutral-700 bg-neutral-900 p-6 shadow-xl"
     >
       <h2 id="update-title" class="mb-3 text-lg font-semibold">Filtertool updates</h2>
-      <p v-if="checking" role="status" class="mb-3 text-sm text-neutral-300">Checking for updates…</p>
+      <p v-if="checking" role="status" class="mb-3 text-sm text-neutral-300">Checking for updates</p>
       <p v-if="status.version" class="mb-3 text-sm text-neutral-400">
         Installed: {{ status.version }}<template v-if="status.release"> → Available: {{ status.release.version }}</template>
       </p>
@@ -133,7 +133,7 @@ onMounted(() => void check())
           I have backed up my data and understand that my filters may need migration or recreation.
         </label>
         <p v-if="downloading" role="status" class="mb-3 text-sm text-blue-300">
-          Downloading and verifying update… You can return to editing, but keep Filtertool open.
+          Downloading and verifying update. You can return to editing, but keep Filtertool open.
         </p>
         <p v-if="status.ready" class="mb-3 text-sm text-green-300">Update downloaded and verified. Restart to apply it.</p>
         <p v-if="status.ready && (unsaved || busy)" role="status" class="mb-3 text-sm text-amber-200">
@@ -167,7 +167,7 @@ onMounted(() => void check())
           :disabled="working || (status.release.major && !acceptedMajor)"
           @click="download"
         >
-          {{ downloading ? "Downloading…" : "Download update" }}
+          {{ downloading ? "Downloading" : "Download update" }}
         </button>
         <button
           v-else
@@ -176,7 +176,7 @@ onMounted(() => void check())
           :disabled="working || unsaved || busy"
           @click="restart"
         >
-          {{ restarting ? "Restarting…" : "Restart & Apply" }}
+          {{ restarting ? "Restarting" : "Restart & Apply" }}
         </button>
       </div>
     </section>

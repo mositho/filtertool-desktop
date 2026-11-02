@@ -1,9 +1,10 @@
 import { Call, Events } from "@wailsio/runtime"
 
-export type FilterInfo = { name: string; hasConfigJson: boolean }
+export type FilterInfo = { name: string; hasConfigJson: boolean; devTest?: boolean }
 export type ReferenceData = {
   itemClasses: string[]
   baseTypesByClass: Record<string, string[]>
+  dropLevelsByBaseType?: Record<string, number>
   skillGems: string[]
   supportGems: string[]
   rarities: string[]
@@ -20,6 +21,8 @@ export type ReferenceData = {
   ttsLocales: string[]
   ttsSpeed: { min: number; max: number }
   sounds: { id: string; name: string; hasFile?: boolean }[]
+  currencySounds?: Record<string, Record<string, unknown>>
+  currencyIcons?: Record<string, Record<string, unknown>>
 }
 export type AppSettings = {
   filterPath?: string
@@ -51,7 +54,7 @@ export const api = {
   checkUpdates: () => call<UpdateStatus>("checkUpdates"),
   downloadUpdate: (version: string, acceptMajor: boolean) => call<UpdateStatus>("downloadUpdate", { version, acceptMajor }),
   restartUpdate: () => call<void>("restartUpdate"),
-  listFilters: () => call<{ filters: FilterInfo[]; devMode: boolean }>("listFilters"),
+  listFilters: () => call<{ filters: FilterInfo[]; devMode: boolean; templates: string[] }>("listFilters"),
   getConfig: (name: string) => call<FilterConfig>("getConfig", { name }),
   saveConfig: (name: string, config: FilterConfig) => call<FilterConfig>("saveConfig", { name, config }),
   createFilter: (name: string, template?: string) => call<{ name: string }>("createFilter", { name, template }),
@@ -60,7 +63,6 @@ export const api = {
   deleteFilter: (name: string, deleteGameFile: boolean) => call<{ ok: boolean }>("deleteFilter", { name, deleteGameFile }),
   reference: (name?: string) => call<ReferenceData>("reference", { name }),
   filterDefaults: (name: string) => call<{ defaults: Record<string, unknown> }>("filterDefaults", { name }),
-  preview: (name: string, config?: FilterConfig) => call<{ output: string }>("preview", { name, config }),
   exportFilter: (name: string, config?: FilterConfig) =>
     call<{ fileName: string; filterPath: string; soundFolder: string }>("exportFilter", { name, config }),
   exportAllFilters: (onProgress?: (done: number, total: number, name: string) => void) => {

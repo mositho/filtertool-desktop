@@ -4,6 +4,7 @@ import FieldLabel from "./FieldLabel.vue"
 import NumberField from "./NumberField.vue"
 import Toggle from "./Toggle.vue"
 import MultiSelect from "./MultiSelect.vue"
+import ItemVisibilityList from "./ItemVisibilityList.vue"
 import SocketColorSelect from "./SocketColorSelect.vue"
 import StyleEditor from "./StyleEditor.vue"
 import SoundSelector from "./SoundSelector.vue"
@@ -17,6 +18,7 @@ const props = defineProps<{
   options: string[]
   placeholder?: string
   defaulted?: boolean
+  defaultsEditor?: boolean
   canReset?: boolean
   defaultSource?: string
   reference?: ReferenceData
@@ -38,8 +40,8 @@ function updateIcon(key: string, value: unknown) {
   <div class="min-w-0 space-y-1" :data-field-path="field.path">
     <div class="flex min-h-5 flex-wrap items-center justify-between gap-x-2 gap-y-1">
       <FieldLabel class="min-w-0" :label="field.label" :tooltip="field.tooltip" />
-      <div class="flex min-w-0 flex-wrap items-center justify-end gap-1">
-        <span v-if="defaulted" class="text-[10px] italic text-neutral-500"
+      <div class="flex min-w-0 flex-wrap items-center justify-end gap-1" :class="defaultsEditor ? 'h-5 w-5 shrink-0' : ''">
+        <span v-if="defaulted && !defaultsEditor" class="text-[10px] italic text-neutral-500"
           >using default<span v-if="defaultSource"> · {{ defaultSource }}</span></span
         >
         <button
@@ -86,7 +88,9 @@ function updateIcon(key: string, value: unknown) {
         <SoundSelector
           :model-value="(value ?? {}) as Record<string, unknown>"
           :sounds="reference?.sounds ?? []"
-          :default-label="(field.defaultValue as Record<string, unknown>)?.enabled ? 'Default per-slot callout' : undefined"
+          :default-label="
+            (field.defaultValue as Record<string, unknown>)?.enabled ? (field.defaultSoundLabel ?? 'Default per-slot callout') : undefined
+          "
           @update:model-value="
             emit('update:value', {
               ...$event,
@@ -100,9 +104,21 @@ function updateIcon(key: string, value: unknown) {
         :shape="(value as Record<string, unknown>)?.enabled === false ? '' : String((value as Record<string, unknown>)?.iconShape ?? '')"
         :color="String((value as Record<string, unknown>)?.iconColor ?? 'Cyan')"
         :size="Number((value as Record<string, unknown>)?.iconSize ?? 2)"
+        :inherited-label="
+          !(value as Record<string, unknown>)?.iconShape && (value as Record<string, unknown>)?.enabled !== false
+            ? field.defaultIconLabel
+            : undefined
+        "
         @update:shape="updateIcon('iconShape', $event)"
         @update:color="updateIcon('iconColor', $event)"
         @update:size="updateIcon('iconSize', $event)"
+      />
+      <ItemVisibilityList
+        v-else-if="field.control === 'multiselect' && field.visibilityMode"
+        :model-value="(value as string[]) ?? []"
+        :options="options"
+        :label="field.label"
+        @update:model-value="emit('update:value', $event)"
       />
       <MultiSelect
         v-else-if="field.control === 'multiselect'"
@@ -112,13 +128,13 @@ function updateIcon(key: string, value: unknown) {
       />
       <NumberField
         v-else-if="field.control === 'number'"
-        :model-value="value as number"
+        :model-value="(value ?? undefined) as number | undefined"
         :min="field.min"
         :max="field.max"
         :step="field.step"
         :integer="field.integer"
         :placeholder="placeholder ?? field.placeholder"
-        @update:model-value="emit('update:value', $event)"
+        @update:model-value="emit('update:value', $event === undefined && field.emptyMeansUncapped ? null : $event)"
       />
       <select
         v-else-if="field.control === 'select'"

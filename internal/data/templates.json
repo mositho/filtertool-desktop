@@ -16,14 +16,17 @@
             "Two Hand Axes",
             "Two Hand Swords"
           ],
-          "minAps": 1.3
+          "minAps": 1.3,
+          "name": "Generic"
         },
         {
           "itemClasses": [
             "Two Hand Maces"
           ],
           "maxAreaLevel": 12,
-          "perRarityCustomization": true
+          "perRarityCustomization": true,
+          "baseTypes": [],
+          "name": "Early"
         }
       ]
     },
@@ -37,6 +40,17 @@
           "Agate",
           "Onyx"
         ]
+      },
+      "currency": {
+        "assignments": {
+          "Orb of Annulment": "a"
+        }
+      },
+      "flasks": {
+        "lifeMaxAreaLevels": {},
+        "manaMaxAreaLevels": {
+          "eternal": null
+        }
       }
     }
   },
@@ -58,7 +72,8 @@
           "itemClasses": [
             "Wands",
             "Sceptres"
-          ]
+          ],
+          "name": "Generic"
         }
       ]
     },
@@ -72,6 +87,19 @@
           "Agate",
           "Onyx"
         ]
+      },
+      "leagueMechanic": {
+        "rules": {
+          "crystals": {
+            "baseTypes": [
+              "Karui Enshrouding Crystal",
+              "Vaal Enshrouding Crystal",
+              "Templar Enshrouding Crystal",
+              "Maraketh Enshrouding Crystal",
+              "Imperial Enshrouding Crystal"
+            ]
+          }
+        }
       }
     }
   }

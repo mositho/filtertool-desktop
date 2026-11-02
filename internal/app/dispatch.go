@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	c "github.com/mositho/filtertool-desktop/internal/compiler"
@@ -25,7 +26,7 @@ func (s *Store) Dispatch(action string, input Object) (any, error) {
 		switch action {
 		case "exportFilter", "exportAllFilters":
 			return nil, errors.New("game export is disabled in dev mode")
-		case "createFilter", "duplicateFilter", "renameFilter", "deleteFilter", "importJSON", "importFiles", "importFolder":
+		case "duplicateFilter", "renameFilter", "importJSON", "importFiles", "importFolder":
 			return nil, errors.New("the dev workspace only edits bundled templates and global defaults/styles")
 		}
 	}
@@ -34,7 +35,16 @@ func (s *Store) Dispatch(action string, input Object) (any, error) {
 		return Object{"ffmpegAvailable": s.AudioProcessor != nil}, nil
 	case "listFilters":
 		filters, err := s.filters()
-		return Object{"filters": filters, "devMode": s.DevMode}, err
+		if err != nil {
+			return nil, err
+		}
+		templates, err := s.templates()
+		names := []string{}
+		for name := range templates {
+			names = append(names, name)
+		}
+		sort.Strings(names)
+		return Object{"filters": filters, "devMode": s.DevMode, "templates": names}, err
 	case "getConfig":
 		return s.readFilter(name)
 	case "saveConfig":
@@ -52,7 +62,11 @@ func (s *Store) Dispatch(action string, input Object) (any, error) {
 		}
 		cfg := Object{"buildProfile": Object{}, "buildSpecificOptions": Object{}}
 		if template := c.Text(input["template"]); template != "" {
-			value, ok := data.Load[Object]("templates.json")[template]
+			templates, err := s.templates()
+			if err != nil {
+				return nil, err
+			}
+			value, ok := templates[template]
 			if !ok {
 				return nil, errors.New("unknown template")
 			}
@@ -103,6 +117,9 @@ func (s *Store) Dispatch(action string, input Object) (any, error) {
 		}
 		return Object{"name": newName}, nil
 	case "deleteFilter":
+		if s.DevMode {
+			return Object{"ok": true}, s.deleteDevFilter(name)
+		}
 		path, err := s.filterPath(name)
 		if err != nil {
 			return nil, err
@@ -151,15 +168,14 @@ func (s *Store) Dispatch(action string, input Object) (any, error) {
 		}
 		if action == "getDefaults" {
 			if s.DevMode {
-				base := s.devBase("defaults")
-				return Object{"defaults": d, "baseDefaults": base, "userDefaults": c.Difference(d, base)}, nil
+				return Object{"defaults": d, "baseDefaults": c.Clone(d), "userDefaults": Object{}}, nil
 			}
 			u, err := s.optional("defaults.json")
+			u = c.CleanRuleDefaults(u)
 			return Object{"defaults": d, "baseDefaults": data.Load[Object]("defaults.json"), "userDefaults": u}, err
 		}
 		if s.DevMode {
-			base := s.devBase("styles")
-			return Object{"styles": st, "baseStyles": base, "userStyles": c.Difference(st, base)}, nil
+			return Object{"styles": st, "baseStyles": c.Clone(st), "userStyles": Object{}}, nil
 		}
 		u, err := s.optional("styles.json")
 		return Object{"styles": st, "baseStyles": data.Load[Object]("styles.json"), "userStyles": u}, err
@@ -169,11 +185,22 @@ func (s *Store) Dispatch(action string, input Object) (any, error) {
 			key = "styles"
 		}
 		value := c.Obj(input[key])
+		if key == "defaults" {
+			value = c.CleanRuleDefaults(value)
+		}
 		if err := validateOverrides(key, value); err != nil {
 			return nil, err
 		}
 		if s.DevMode {
-			value = c.Merge(s.devBase(key), value)
+			base, err := s.source(key)
+			if err != nil {
+				return nil, err
+			}
+			if key == "defaults" {
+				value = c.CleanRuleDefaults(c.MergeDefaults(base, value))
+			} else {
+				value = c.Merge(base, value)
+			}
 			return Object{"ok": true}, s.writeSource(key, value)
 		}
 		return Object{"ok": true}, s.write(key+".json", value)
@@ -191,7 +218,15 @@ func (s *Store) Dispatch(action string, input Object) (any, error) {
 			styles = c.Merge(styles, c.Obj(cfg["localStyles"]))
 		}
 		ref["styles"] = styles
+		styleNames := make([]string, 0, len(styles))
+		for key := range styles {
+			styleNames = append(styleNames, key)
+		}
+		sort.Strings(styleNames)
+		ref["styleNames"] = styleNames
 		ref["sounds"] = s.sounds()
+		ref["currencySounds"] = c.New(nil, nil, "").CurrencySoundDefaults()
+		ref["currencyIcons"] = c.New(nil, nil, "").CurrencyIconDefaults()
 		return ref, nil
 	case "filterDefaults":
 		cfg, err := s.readFilter(name)
@@ -199,7 +234,7 @@ func (s *Store) Dispatch(action string, input Object) (any, error) {
 			return nil, err
 		}
 		d, _, err := s.globals()
-		return Object{"defaults": c.Merge(d, c.Obj(cfg["localDefaults"]))}, err
+		return Object{"defaults": c.MergeDefaults(d, c.Obj(cfg["localDefaults"]))}, err
 	case "preview":
 		cfg, err := s.configOrSaved(input)
 		if err != nil {

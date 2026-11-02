@@ -116,7 +116,7 @@ function onKeydown(event: KeyboardEvent) {
         v-model="query"
         type="search"
         aria-label="Search options"
-        placeholder="Search…"
+        placeholder="Search"
         class="w-full border-b border-neutral-700 bg-transparent px-2 py-1.5 text-sm outline-none"
         @keydown="onKeydown"
       />

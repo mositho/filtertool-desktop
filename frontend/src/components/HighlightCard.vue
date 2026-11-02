@@ -114,14 +114,16 @@ watch(
 
 const hasWeaponClass = computed(() => {
   const classes = (fieldValue("itemClasses") as string[] | undefined) ?? []
-  return classes.some((itemClass) => props.reference.weaponClasses.includes(itemClass))
+  return classes.some((itemClass) => (props.reference.weaponClasses ?? []).includes(itemClass))
 })
 
 const weaponCutoffAvailable = computed(() => {
   const bases = (fieldValue("baseTypes") as string[] | undefined) ?? []
   return (
     hasWeaponClass.value ||
-    props.reference.weaponClasses.some((itemClass) => bases.some((base) => props.reference.baseTypesByClass[itemClass]?.includes(base)))
+    (props.reference.weaponClasses ?? []).some((itemClass) =>
+      bases.some((base) => props.reference.baseTypesByClass[itemClass]?.includes(base)),
+    )
   )
 })
 

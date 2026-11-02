@@ -3,6 +3,7 @@ import vue from "@vitejs/plugin-vue"
 import { fileURLToPath, URL } from "node:url"
 
 export default defineConfig({
+  publicDir: fileURLToPath(new URL("./frontend/public", import.meta.url)),
   plugins: [vue()],
   resolve: { alias: { "@schema": fileURLToPath(new URL("./src/config", import.meta.url)) } },
   // Reuse jsdom across two workers while keeping each test file in its own VM context.

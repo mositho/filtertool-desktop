@@ -70,7 +70,7 @@ func Merge(base, override Object) Object {
 func Difference(value, base Object) Object {
 	out := Object{}
 	for k, v := range value {
-		if reflect.DeepEqual(v, base[k]) {
+		if inherited, exists := base[k]; exists && reflect.DeepEqual(v, inherited) {
 			continue
 		}
 		if _, ok := v.(map[string]any); ok {
@@ -117,6 +117,61 @@ func Validate(config Object) error {
 	walk = func(v any, path string) error {
 		switch x := v.(type) {
 		case map[string]any:
+			for _, key := range []string{"lifeMaxAreaLevels", "manaMaxAreaLevels"} {
+				if value, exists := x[key]; exists {
+					limits, ok := value.(map[string]any)
+					if !ok {
+						return fmt.Errorf("%s.%s must be an object", path, key)
+					}
+					for base, limit := range limits {
+						if limit != nil {
+							if _, ok := limit.(float64); !ok {
+								return fmt.Errorf("%s.%s.%s must be a number or null", path, key, base)
+							}
+						}
+					}
+				}
+			}
+			for _, suffix := range []string{".currency.tiers", ".currency.items", ".currency.scrolls", ".leagueMechanic.rules"} {
+				if !strings.HasSuffix(path, suffix) {
+					continue
+				}
+				for key, value := range x {
+					if _, ok := value.(map[string]any); !ok {
+						return fmt.Errorf("%s.%s must be an object", path, key)
+					}
+				}
+			}
+			if strings.HasSuffix(path, ".assignments") {
+				for name, value := range x {
+					valid := false
+					for _, tier := range currencyTiers {
+						if value == tier.Key {
+							valid = true
+						}
+					}
+					if !valid {
+						return fmt.Errorf("%s.%s must be a known currency tier", path, name)
+					}
+				}
+			}
+			for _, key := range []string{"currency", "leagueMechanic", "tiers", "assignments", "items", "gold", "scrolls", "highStack"} {
+				if value, ok := x[key]; ok && value != nil {
+					if _, ok := value.(map[string]any); !ok {
+						return fmt.Errorf("%s.%s must be an object", path, key)
+					}
+				}
+			}
+			if value, ok := x["visibility"]; ok && value != "Show" && value != "Hide" {
+				return fmt.Errorf("%s.visibility must be Show or Hide", path)
+			}
+			for _, key := range []string{"minStackSize", "highStackSize", "soundCutoffLevel"} {
+				if value, ok := x[key]; ok {
+					if _, valid := value.(float64); !valid {
+						return fmt.Errorf("%s.%s must be a number", path, key)
+					}
+				}
+			}
 			for _, key := range []string{"buildProfile", "buildSpecificOptions", "localDefaults", "localStyles", "style", "icon", "sound", "normal", "magic", "rare", "misc", "links", "jewellery", "flasks", "rareItems", "magicItems", "normalItems", "tinctures", "highlightedEquipment", "gemCallouts", "early", "rules"} {
 				if value, ok := x[key]; ok && value != nil {
 					if _, ok := value.(map[string]any); !ok {

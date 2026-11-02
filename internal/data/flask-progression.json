@@ -1,0 +1,30 @@
+{
+  "life": [
+    { "key": "small", "name": "Small", "maxAreaLevel": 12, "sound": "life" },
+    { "key": "medium", "name": "Medium", "maxAreaLevel": 20, "sound": "medium_life" },
+    { "key": "large", "name": "Large", "maxAreaLevel": 24, "sound": "large_life" },
+    { "key": "greater", "name": "Greater", "maxAreaLevel": 28, "sound": "greater_life" },
+    { "key": "grand", "name": "Grand", "maxAreaLevel": 32, "sound": "grand_life" },
+    { "key": "giant", "name": "Giant", "maxAreaLevel": 35, "sound": "giant_life" },
+    { "key": "colossal", "name": "Colossal", "maxAreaLevel": 40, "sound": "colossal_life" },
+    { "key": "sacred", "name": "Sacred", "maxAreaLevel": 0, "sound": "sacred_life" },
+    { "key": "hallowed", "name": "Hallowed", "maxAreaLevel": 60, "sound": "hallowed_life" },
+    { "key": "sanctified", "name": "Sanctified", "maxAreaLevel": 0, "sound": "sanctified_life" },
+    { "key": "divine", "name": "Divine", "maxAreaLevel": null, "sound": "divine_life" },
+    { "key": "eternal", "name": "Eternal", "maxAreaLevel": 0, "sound": "eternal_life" }
+  ],
+  "mana": [
+    { "key": "small", "name": "Small", "maxAreaLevel": 12, "sound": "mana" },
+    { "key": "medium", "name": "Medium", "maxAreaLevel": 20, "sound": "medium_mana" },
+    { "key": "large", "name": "Large", "maxAreaLevel": 24, "sound": "large_mana" },
+    { "key": "greater", "name": "Greater", "maxAreaLevel": 28, "sound": "greater_mana" },
+    { "key": "grand", "name": "Grand", "maxAreaLevel": 32, "sound": "grand_mana" },
+    { "key": "giant", "name": "Giant", "maxAreaLevel": 36, "sound": "giant_mana" },
+    { "key": "colossal", "name": "Colossal", "maxAreaLevel": 40, "sound": "colossal_mana" },
+    { "key": "sacred", "name": "Sacred", "maxAreaLevel": 46, "sound": "sacred_mana" },
+    { "key": "hallowed", "name": "Hallowed", "maxAreaLevel": 52, "sound": "hallowed_mana" },
+    { "key": "sanctified", "name": "Sanctified", "maxAreaLevel": 60, "sound": "sanctified_mana" },
+    { "key": "divine", "name": "Divine", "maxAreaLevel": null, "sound": "mana" },
+    { "key": "eternal", "name": "Eternal", "maxAreaLevel": null, "sound": "mana" }
+  ]
+}

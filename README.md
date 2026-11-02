@@ -4,49 +4,50 @@
 
 # Filtertool
 
-A Windows item-filter builder for Path of Exile 1, focused on leveling.
+A desktop item-filter builder for Path of Exile 1, focused on leveling.
 
 [Get started](#get-started) · [Quick guide](#quick-guide) · [Releases](https://github.com/mositho/filtertool-desktop/releases) · [Filter terminology](docs/GLOSSARY.md)
 
 </div>
 
-![Filtertool editing the built-in Caster Template, with build preferences, weapon progression, and the output preview collapsed.](docs/images/filtertool-caster-template.png)
+![Filtertool editing the built-in Caster Template, with build preferences and weapon phases.](docs/images/filtertool-caster-template.png)
 
 ## Get started
 
-Download a stable version from [Releases](https://github.com/mositho/filtertool-desktop/releases):
+Download a stable version for your platform from [Releases](https://github.com/mositho/filtertool-desktop/releases).
 
-- **Filtertool-Setup.exe** — install Filtertool for your Windows account.
-- **Filtertool.exe** — run without installing. You can put the executable anywhere.
+Your filters, settings and sounds are kept in Filtertool's application data folder. Back it up to keep a copy of your work.
 
-Both versions keep your filters, settings and sounds in **`%APPDATA%\Filtertool`**. Replacing the executable or uninstalling does not remove them. Back up that folder to keep a copy of your work.
+### Windows setup
 
-**TTS sound generation requires a separate FFmpeg installation.** The easiest way to download it is by pressing `CTRL + R` and typing `winget install ffmpeg`.
-Otherwise you can download it directly from [gyan.dev](https://www.gyan.dev/ffmpeg/builds/) and add `ffmpeg.exe` to your `PATH`. After installing FFmpeg or changing `PATH`, restart Filtertool.
+- **Filtertool-Setup.exe** installs Filtertool for your Windows account.
+- **Filtertool.exe** runs without installation.
 
 Requires 64-bit Windows 10 or 11 and Microsoft Edge WebView2. The installer installs WebView2 if needed; standalone users can get it from [Microsoft](https://developer.microsoft.com/microsoft-edge/webview2/).
 
+TTS sound generation requires a separate FFmpeg installation. Press `Windows + R` and run `winget install ffmpeg`, or download FFmpeg from [gyan.dev](https://www.gyan.dev/ffmpeg/builds/) and add `ffmpeg.exe` to your `PATH`. Restart Filtertool after installing or changing `PATH`.
+
+On Windows, user data is stored in **`%APPDATA%\Filtertool`**.
+
 ### Updates
 
-Filtertool checks GitHub for newer published stable releases at startup. Use **Check for updates** to check manually. Choose **Download update**, then **Restart & Apply**; save or discard unsaved edits first. No uninstall is needed. Updating requires write access to the folder containing `Filtertool.exe`.
+Filtertool checks GitHub for newer published stable releases at startup. Use **Check for updates** to check manually. Choose **Download update**, then **Restart & Apply**; save or discard unsaved edits first. No uninstall is needed. Updating requires write access to the application folder.
 
-**Major updates (for example, 1.x → 2.x) may break filter compatibility.** Filtertool shows a warning and requires confirmation before downloading. Close the app and back up **`%APPDATA%\Filtertool`**, then read the release notes: filters may need migration or recreation. There is no automatic migration or automatic backup. Updates do not re-export in-game filters; use **Export** or **Export All** when ready.
+**Major updates (for example, 1.x → 2.x) may break filter compatibility.** Filtertool shows a warning and requires confirmation before downloading. Back up Filtertool's application data folder, then read the release notes: filters may need migration or recreation. There is no automatic migration or automatic backup. Updates do not re-export in-game filters; use **Export** or **Export All** when ready.
 
 Older versions without the updater need one manual update: close Filtertool and run the newer setup over the same installation folder (or replace the standalone EXE). Development sessions do not self-update.
 
 ## Quick guide
 
-1. **Check your game folder.** Filtertool detects your PoE filter path. Use **Browse…** to choose another folder.
+1. **Check your game folder.** Filtertool detects your PoE filter path. Use **Browse** to choose another folder.
 2. **Create a filter** in the sidebar. Choose **Caster Template**, **Attack Template**, or a blank starting template, then enter your own filter name and click **Create**.
 3. **Save** keeps your configuration locally. It does not update the in-game filter.
-4. **Export** saves your configuration and writes the `.filter` file and sound pack to your game folder. **Export All** updates every saved filter. Generating TTS sounds needs FFmpeg (see above) and an internet connection.
+4. **Export** saves your configuration and writes the `.filter` file and sound pack to your game folder. **Export All** updates every saved filter. Generating TTS sounds needs FFmpeg and an internet connection.
 5. **Select it in PoE.** Choose the exported filter in the game's item-filter settings. After changes, export again and reload it in-game.
-
-Use **Output Preview** to inspect the generated filter text.
 
 | Want to…                       | Use                                                                    |
 | :----------------------------- | :--------------------------------------------------------------------- |
-| Bring filters from the web app | **Import → JSON files…** or **Web App folder…**                        |
+| Bring filters from the web app | **Import → JSON files** or **Web App folder**                          |
 | Share a filter                 | **Share**, then copy or save the compact JSON                          |
 | Include your defaults/styles   | Enable the option in **Share**; imports keep them local to that filter |
 | Change defaults or styles      | **Global Settings**                                                    |

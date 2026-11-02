@@ -21,8 +21,6 @@ type Store struct {
 	Root            string
 	DevMode         bool
 	SourceDir       string
-	devDefaults     Object
-	devStyles       Object
 	mu              sync.Mutex
 	ChooseFolder    func(string) (string, error)
 	ChooseFiles     func() ([]string, error)
@@ -55,7 +53,6 @@ func OpenDev(root, sourceDir string) (*Store, error) {
 	if !filepath.IsAbs(sourceDir) {
 		return nil, errors.New("dev mode requires an absolute repository data directory; launch with npm run dev")
 	}
-	base := map[string]Object{}
 	for _, kind := range []string{"templates", "defaults", "styles"} {
 		value, err := readObject(filepath.Join(sourceDir, kind+".json"))
 		if err != nil {
@@ -73,13 +70,11 @@ func OpenDev(root, sourceDir string) (*Store, error) {
 		} else if err = validateOverrides(kind, value); err != nil {
 			return nil, err
 		}
-		base[kind] = value
 	}
 	s, err := open(filepath.Join(root, "profiles", "dev"), sourceDir)
 	if err != nil {
 		return nil, err
 	}
-	s.devDefaults, s.devStyles = base["defaults"], base["styles"]
 	return s, nil
 }
 
@@ -151,13 +146,6 @@ func writeJSON(path string, v any) error {
 
 func (s *Store) source(kind string) (Object, error) {
 	return readObject(filepath.Join(s.SourceDir, kind+".json"))
-}
-
-func (s *Store) devBase(kind string) Object {
-	if kind == "styles" {
-		return c.Clone(s.devStyles)
-	}
-	return c.Clone(s.devDefaults)
 }
 
 func (s *Store) writeSource(kind string, value Object) error {
@@ -363,17 +351,23 @@ func (s *Store) readFilter(name string) (Object, error) {
 			return nil, err
 		}
 		if value, ok := templates[name]; ok {
-			return c.Obj(value), nil
+			cfg := c.Obj(value)
+			c.DiscardFilterRuleOverrides(cfg)
+			return cfg, nil
 		}
-		return nil, fmt.Errorf("template %q not found: %w", name, os.ErrNotExist)
 	}
 	p, err := s.filterPath(name)
 	if err != nil {
 		return nil, err
 	}
-	return readObject(p)
+	cfg, err := readObject(p)
+	if err == nil {
+		c.DiscardFilterRuleOverrides(cfg)
+	}
+	return cfg, err
 }
 func (s *Store) writeFilter(name string, cfg Object) error {
+	c.DiscardFilterRuleOverrides(cfg)
 	if err := c.Validate(cfg); err != nil {
 		return err
 	}
@@ -382,11 +376,10 @@ func (s *Store) writeFilter(name string, cfg Object) error {
 		if err != nil {
 			return err
 		}
-		if _, ok := templates[name]; !ok {
-			return errors.New("not a bundled template")
+		if _, ok := templates[name]; ok || isTemplateName(name) {
+			templates[name] = cfg
+			return s.writeSource("templates", templates)
 		}
-		templates[name] = cfg
-		return s.writeSource("templates", templates)
 	}
 	p, err := s.filterPath(name)
 	if err != nil {
@@ -399,30 +392,30 @@ func (s *Store) writeFilter(name string, cfg Object) error {
 	return writeAtomic(p, append(b, '\n'))
 }
 func (s *Store) filters() ([]Object, error) {
+	out := []Object{}
+	templateNames := map[string]bool{}
 	if s.DevMode {
 		templates, err := s.source("templates")
 		if err != nil {
 			return nil, err
 		}
-		out := []Object{}
 		for name := range templates {
 			out = append(out, Object{"name": name, "hasConfigJson": true})
+			templateNames[strings.ToLower(exportName(name))] = true
 		}
-		sort.Slice(out, func(i, j int) bool {
-			return strings.ToLower(c.Text(out[i]["name"])) < strings.ToLower(c.Text(out[j]["name"]))
-		})
-		return out, nil
 	}
 	entries, err := os.ReadDir(filepath.Join(s.Root, "filters"))
 	if err != nil {
 		return nil, err
 	}
-	out := []Object{}
 	for _, e := range entries {
 		if e.Type().IsRegular() && strings.HasSuffix(e.Name(), ".json") {
 			name := strings.TrimSuffix(e.Name(), ".json")
+			if s.DevMode && templateNames[strings.ToLower(exportName(name))] {
+				continue
+			}
 			if checkName(name) == nil {
-				out = append(out, Object{"name": name, "hasConfigJson": true})
+				out = append(out, Object{"name": name, "hasConfigJson": true, "devTest": s.DevMode})
 			}
 		}
 	}
@@ -430,6 +423,62 @@ func (s *Store) filters() ([]Object, error) {
 		return strings.ToLower(c.Text(out[i]["name"])) < strings.ToLower(c.Text(out[j]["name"]))
 	})
 	return out, nil
+}
+
+func isTemplateName(name string) bool {
+	return strings.HasSuffix(strings.ToLower(name), "template")
+}
+
+func (s *Store) templates() (Object, error) {
+	all := data.Load[Object]("templates.json")
+	if s.DevMode {
+		var err error
+		all, err = s.source("templates")
+		if err != nil {
+			return nil, err
+		}
+	}
+	out := Object{}
+	for name, cfg := range all {
+		if isTemplateName(name) {
+			out[name] = cfg
+		}
+	}
+	return out, nil
+}
+
+func (s *Store) deleteDevFilter(name string) error {
+	if _, err := s.readFilter(name); err != nil {
+		return err
+	}
+	templates, err := s.source("templates")
+	if err != nil {
+		return err
+	}
+	if _, exists := templates[name]; exists {
+		delete(templates, name)
+		if err := s.writeSource("templates", templates); err != nil {
+			return err
+		}
+	}
+	// Remove matching old dev-profile copies too, so a deleted source template
+	// cannot reappear in the list. Never touch personal data or game exports.
+	entries, err := os.ReadDir(filepath.Join(s.Root, "filters"))
+	if err != nil {
+		return err
+	}
+	for _, entry := range entries {
+		if !entry.Type().IsRegular() || !strings.HasSuffix(entry.Name(), ".json") {
+			continue
+		}
+		other := strings.TrimSuffix(entry.Name(), ".json")
+		if strings.EqualFold(exportName(other), exportName(name)) {
+			if err := os.Remove(filepath.Join(s.Root, "filters", entry.Name())); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 func exportName(name string) string {
 	words := regexp.MustCompile(`[^a-z0-9]+`).Split(strings.ToLower(name), -1)
@@ -470,7 +519,7 @@ func (s *Store) globals() (Object, Object, error) {
 			return nil, nil, err
 		}
 		st, err := s.source("styles")
-		return d, st, err
+		return c.CleanRuleDefaults(d), st, err
 	}
 	d, err := s.optional("defaults.json")
 	if err != nil {
@@ -480,9 +529,10 @@ func (s *Store) globals() (Object, Object, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	return c.Merge(data.Load[Object]("defaults.json"), d), c.Merge(data.Load[Object]("styles.json"), st), nil
+	return c.CleanRuleDefaults(c.MergeDefaults(data.Load[Object]("defaults.json"), d)), c.Merge(data.Load[Object]("styles.json"), st), nil
 }
 func (s *Store) compiler(cfg Object) (*c.Compiler, error) {
+	c.DiscardFilterRuleOverrides(cfg)
 	d, st, err := s.globals()
 	if err != nil {
 		return nil, err
@@ -491,7 +541,7 @@ func (s *Store) compiler(cfg Object) (*c.Compiler, error) {
 	if err != nil {
 		return nil, err
 	}
-	return c.New(c.Merge(d, c.Obj(cfg["localDefaults"])), c.Merge(st, c.Obj(cfg["localStyles"])), soundFolder(settings)), nil
+	return c.New(c.MergeDefaults(d, c.Obj(cfg["localDefaults"])), c.Merge(st, c.Obj(cfg["localStyles"])), soundFolder(settings)), nil
 }
 func soundFolder(settings Object) string {
 	folder := c.Text(settings["soundsFolder"])

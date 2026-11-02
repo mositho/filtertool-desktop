@@ -1,0 +1,52 @@
+[
+  {
+    "key": "charts",
+    "title": "Charts",
+    "baseTypes": ["Sandy Seabed Chart", "Coral Forest Chart", "Coral Reef Chart"],
+    "itemClass": "Chart"
+  },
+  {
+    "key": "sulphur",
+    "title": "Dead Man's Sulphur",
+    "baseTypes": ["Dead Man's Sulphur"],
+    "itemClass": "Stackable Currency",
+    "stack": true
+  },
+  { "key": "bottle", "title": "Message in a Bottle", "baseTypes": ["Message in a Bottle"], "itemClass": "Stackable Currency" },
+  {
+    "key": "ducats",
+    "title": "Ducats",
+    "baseTypes": [
+      "Merrick's Ducat",
+      "Cyaxan's Ducat",
+      "The Changeling's Ducat",
+      "The Genteel's Ducat",
+      "Kishara's Ducat",
+      "Telesia's Ducat",
+      "Rotmother's Ducat",
+      "Brinehook's Ducat",
+      "Katakohi's Ducat",
+      "Tzamoto's Ducat",
+      "Ukatoa's Ducat"
+    ],
+    "itemClass": "Stackable Currency"
+  },
+  {
+    "key": "crystals",
+    "title": "Enshrouding Crystals",
+    "baseTypes": [
+      "Karui Enshrouding Crystal",
+      "Imperial Enshrouding Crystal",
+      "Vaal Enshrouding Crystal",
+      "Templar Enshrouding Crystal",
+      "Maraketh Enshrouding Crystal"
+    ],
+    "itemClass": "Stackable Currency"
+  },
+  {
+    "key": "enshrouded",
+    "title": "Enshrouded Items",
+    "baseTypes": ["Enshrouded Gloves", "Enshrouded Boots", "Enshrouded Helmet", "Enshrouded Shield", "Enshrouded Body Armour"],
+    "itemClass": "Enshrouded Items"
+  }
+]

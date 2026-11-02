@@ -12,6 +12,7 @@ const emit = defineEmits<{ "update:modelValue": [value: Record<string, unknown>]
 type SoundType = "default" | "none" | "preset" | "tts" | "alert" | "file"
 
 function detectType(h: Record<string, unknown>): SoundType {
+  if (h.enabled === false || h.soundEnabled === false) return "none"
   if (typeof h.tts === "string" && h.tts) {
     return props.sounds.some((s) => s.id === h.tts) ? "preset" : "tts"
   }
@@ -31,16 +32,30 @@ const ttsText = ref(ttsTextFor(props.modelValue))
 const alert = ref(typeof props.modelValue.soundId === "number" ? props.modelValue.soundId : 1)
 const file = ref(typeof props.modelValue.soundFileName === "string" ? props.modelValue.soundFileName : "")
 
+function soundSignature(h: Record<string, unknown>): string {
+  return JSON.stringify([
+    h.tts ?? "",
+    h.soundFileName ?? "",
+    h.soundId ?? null,
+    h.enabled ?? !!(h.tts || h.soundFileName || h.soundId),
+    h.soundEnabled ?? null,
+  ])
+}
+let lastEmittedSignature: string | undefined
+
 function commit() {
   const h = { ...props.modelValue }
   delete h.tts
   delete h.soundFileName
   delete h.soundId
-  if (props.defaultLabel) h.enabled = type.value === "default"
   if (type.value === "preset" && preset.value) h.tts = preset.value
   if (type.value === "tts" && ttsText.value) h.tts = ttsText.value
   if (type.value === "alert") h.soundId = alert.value
   if (type.value === "file" && file.value) h.soundFileName = file.value
+  const enabled = type.value === "default" || !!(h.tts || h.soundFileName || h.soundId)
+  if (props.defaultLabel || "enabled" in h) h.enabled = enabled
+  if ("soundEnabled" in h) h.soundEnabled = enabled
+  lastEmittedSignature = soundSignature(h)
   emit("update:modelValue", h)
 }
 
@@ -55,10 +70,17 @@ watch(
   { flush: "sync" },
 )
 
-// Re-sync when the parent replaces the highlight (undo/redo/discard/filter switch).
+// Ignore our own feedback (including a temporarily empty TTS/file editor).
+// Otherwise re-sync on external changes such as undo/redo/discard. Comparing
+// sound values also avoids resetting drafts on unrelated parent re-renders.
 watch(
-  () => props.modelValue,
-  (h) => {
+  () => soundSignature(props.modelValue),
+  (signature) => {
+    if (signature === lastEmittedSignature) {
+      lastEmittedSignature = undefined
+      return
+    }
+    const h = props.modelValue
     syncing = true
     try {
       type.value = detectType(h)
@@ -127,7 +149,7 @@ function onAlertChange(event: Event) {
 
     <div v-if="type === 'preset'" class="flex gap-2">
       <select :value="preset" @change="onPresetChange" class="flex-1 rounded border border-neutral-700 bg-neutral-900 px-2 py-1.5 text-sm">
-        <option value="">Select a sound…</option>
+        <option value="">Select a sound</option>
         <option v-for="sound in sounds" :key="sound.id" :value="sound.id">{{ sound.name }}</option>
       </select>
       <button
@@ -169,7 +191,7 @@ function onAlertChange(event: Event) {
           placeholder="e.g. custom-alert.mp3"
           class="w-full rounded border border-neutral-700 bg-neutral-900 px-2 py-1.5 text-sm"
         /><button type="button" @click="browseSound" class="rounded border border-neutral-700 px-3 text-sm hover:bg-neutral-800">
-          Browse…
+          Browse
         </button>
       </div>
       <p v-if="soundError" class="text-xs text-red-400">{{ soundError }}</p>

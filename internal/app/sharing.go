@@ -62,7 +62,7 @@ func (s *Store) share(input Object) (Object, error) {
 		if err != nil {
 			return nil, err
 		}
-		value = Object{"format": "filtertool", "config": cfg, "defaults": c.Merge(d, c.Obj(cfg["localDefaults"])), "styles": normalizedStyles(c.Merge(st, c.Obj(cfg["localStyles"])))}
+		value = Object{"format": "filtertool", "config": cfg, "defaults": c.MergeDefaults(d, c.Obj(cfg["localDefaults"])), "styles": normalizedStyles(c.Merge(st, c.Obj(cfg["localStyles"])))}
 	}
 	var buffer bytes.Buffer
 	encoder := json.NewEncoder(&buffer)
@@ -93,7 +93,7 @@ func (s *Store) imported(value Object, defaults, styles Object) (Object, error) 
 			if err != nil {
 				return nil, err
 			}
-			cfg["localDefaults"] = snapshotDifference(c.Merge(data.Load[Object]("defaults.json"), defaults), d)
+			cfg["localDefaults"] = snapshotDifference(c.MergeDefaults(data.Load[Object]("defaults.json"), defaults), d)
 			cfg["localStyles"] = snapshotDifference(normalizedStyles(c.Merge(data.Load[Object]("styles.json"), styles)), normalizedStyles(st))
 		}
 	}

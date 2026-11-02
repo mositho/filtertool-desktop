@@ -4,7 +4,7 @@ import { createApp, defineComponent, h, nextTick, reactive, type App } from "vue
 import HighlightCard from "../../frontend/src/components/HighlightCard.vue"
 import type { ReferenceData } from "../../frontend/src/api"
 import { TEST_BASE_TYPE } from "../fixtures/base-types"
-import { emptyWeaponHighlight } from "../../src/config/form-schema"
+import { emptyHighlight, emptyWeaponHighlight } from "../../src/config/form-schema"
 
 let app: App | undefined
 let container: HTMLDivElement | undefined
@@ -17,6 +17,11 @@ afterEach(() => {
 })
 
 describe("highlight modules", () => {
+  it("enables per-rarity customization on newly created highlights and weapon phases", () => {
+    expect(emptyHighlight()).toEqual({ perRarityCustomization: true })
+    expect(emptyWeaponHighlight()).toEqual({ perRarityCustomization: true })
+  })
+
   it("does not add optional defaults when creating a weapon phase", () => {
     expect(emptyWeaponHighlight()).toEqual({ perRarityCustomization: true })
   })

@@ -12,6 +12,14 @@ import (
 var areaLevelLimit = regexp.MustCompile(`AreaLevel <= \d+`)
 
 func TestWebCompilerParity(t *testing.T) {
+	defaultsBytes, err := os.ReadFile("testdata/data/defaults.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var referenceDefaults Object
+	if err := json.Unmarshal(defaultsBytes, &referenceDefaults); err != nil {
+		t.Fatal(err)
+	}
 	// Compare both compilers against the same captured base data. Weekly CSV
 	// updates must not invalidate the oracle by changing only the Go inputs.
 	weaponBytes, err := os.ReadFile("testdata/data/weapons.json")
@@ -43,6 +51,12 @@ func TestWebCompilerParity(t *testing.T) {
 			// Freeze the web compiler's historical behavior without changing its
 			// captured output. Current opt-in/default behavior has separate tests.
 			compiler.starterSupports = nil
+			compiler.legacyCurrency = true
+			compiler.legacyEquipmentSelections = true
+			compiler.Defaults = Merge(referenceDefaults, Obj(cfg["_defaults"]))
+			// The frozen web output predates the editable Gold High Stack size.
+			// Keep its historical value without constraining current source styles.
+			compiler.Styles = Merge(Merge(compiler.Styles, Object{"goldHighStack": Object{"size": float64(25)}}), Obj(cfg["_styles"]))
 			compiler.rarityDefaults = Object{}
 			for _, phase := range List(Obj(cfg["buildProfile"])["weaponPhases"]) {
 				p := Obj(phase)

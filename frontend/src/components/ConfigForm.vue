@@ -1,18 +1,28 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue"
-import { BUILD_PROFILE_SCHEMA, BUILD_SPECIFIC_SCHEMA, type FieldGroup, type FieldSubsection, type SchemaField } from "@schema/form-schema"
+import { computed } from "vue"
+import {
+  BUILD_PROFILE_SCHEMA,
+  BUILD_SPECIFIC_SCHEMA,
+  filterEditorGroup,
+  editorSectionRank,
+  type FieldGroup,
+  type FieldSubsection,
+  type SchemaField,
+} from "@schema/form-schema"
 import type { FilterConfig, ReferenceData } from "../api"
 import { getPath, setPath, deletePath } from "../path"
 import FieldInput from "./FieldInput.vue"
 import HighlightEditor from "./HighlightEditor.vue"
 import WeaponProgression from "./WeaponProgression.vue"
-import RuleAdvanced from "./RuleAdvanced.vue"
-import { fieldDefault, defaultSource, ruleEnabledField, setStyleSize } from "../fieldDefaults"
+import { fieldDefault, defaultSource } from "../fieldDefaults"
 import RuleHeader from "./RuleHeader.vue"
 import starterSupports from "../../../internal/data/starter-supports.json"
+import CurrencyEditor from "./CurrencyEditor.vue"
+import { layoutFields } from "../formLayout"
+import { useCollapsedState } from "../viewState"
 
 const props = defineProps<{ modelValue: FilterConfig; reference: ReferenceData; filterName: string; defaults?: Record<string, unknown> }>()
-const emit = defineEmits<{ "update:modelValue": [value: FilterConfig]; "previewSection": [section: string] }>()
+const emit = defineEmits<{ "update:modelValue": [value: FilterConfig] }>()
 
 function emitChange() {
   emit("update:modelValue", props.modelValue)
@@ -59,18 +69,13 @@ function displayValue(root: Record<string, unknown>, field: SchemaField): unknow
     const gems = effectiveValue(root, field)
     return Array.isArray(gems) ? gems.filter((gem) => !starterSupports.includes(gem)) : gems
   }
-  return field.control === "number" ? getPath(root, field.path) : effectiveValue(root, field)
+  return field.control === "number" && !field.emptyMeansUncapped ? getPath(root, field.path) : effectiveValue(root, field)
 }
 
 function setFieldValue(root: Record<string, unknown>, field: SchemaField, value: unknown) {
-  if (field.path.endsWith(".style.size")) setStyleSize(root, field.path, value, props.defaults)
-  else if (value === undefined) deletePath(root, field.path)
+  if (value === undefined) deletePath(root, field.path)
   else setPath(root, field.path, value)
   emitChange()
-}
-
-function setRuleEnabled(root: Record<string, unknown>, field: SchemaField, value: boolean) {
-  setFieldValue(root, field, value === defaultFor(root, field) ? undefined : value)
 }
 
 function placeholderFor(root: Record<string, unknown>, field: SchemaField): string | undefined {
@@ -119,10 +124,6 @@ function setHighlights(value: Record<string, unknown>[]) {
   emitChange()
 }
 
-function isWide(field: SchemaField): boolean {
-  return field.fullWidth ?? ["multiselect", "link-colors", "style", "icon", "rule-sound"].includes(field.control)
-}
-
 function subsectionRoot(groupRoot: Record<string, unknown>, subsection: FieldSubsection): Record<string, unknown> {
   if (subsection.root === "buildProfile") return buildProfile.value
   if (subsection.root === "buildSpecificOptions") return buildSpecific.value
@@ -143,14 +144,10 @@ function visibleFields(root: Record<string, unknown>, fields: SchemaField[]): Sc
   return fields.filter((field) => isVisible(root, field))
 }
 
-function previewSectionFor(group: FieldGroup, subsection?: FieldSubsection, field?: SchemaField): string | undefined {
-  return field?.previewSection ?? subsection?.previewSection ?? group.previewSection
-}
-
 type SubsectionEntry = {
   key: string
   subsection: FieldSubsection
-  enabledField?: SchemaField
+  visibilityField?: SchemaField
   group: FieldGroup
   root: Record<string, unknown>
   depth: number
@@ -159,74 +156,54 @@ type SubsectionEntry = {
 
 function subsectionEntries(group: FieldGroup, groupRoot: Record<string, unknown>): SubsectionEntry[] {
   const entries: SubsectionEntry[] = []
-  const walk = (subsections: FieldSubsection[], parentRoot: Record<string, unknown>, depth: number, previewSection?: string) => {
+  const walk = (subsections: FieldSubsection[], parentRoot: Record<string, unknown>, depth: number) => {
     subsections.forEach((subsection, index) => {
       if (subsection.module) return
       const root = subsectionRoot(parentRoot, subsection)
-      const resolved = { ...subsection, previewSection: subsection.previewSection ?? previewSection }
       entries.push({
         key: `${depth}-${subsection.key}`,
-        subsection: resolved,
-        enabledField: subsection.collapsed ? ruleEnabledField(subsection) : undefined,
+        subsection,
+        visibilityField: subsection.headerVisibility ? subsection.fields.find((field) => field.path.endsWith(".visibility")) : undefined,
         group,
         root,
         depth,
         hasSiblingAbove: index > 0,
       })
-      if (!subsectionCollapsed(group.key, subsection)) walk(subsection.subsections ?? [], root, depth + 1, resolved.previewSection)
+      if (!subsectionCollapsed(group.key, subsection)) walk(subsection.subsections ?? [], root, depth + 1)
     })
   }
   walk(group.subsections ?? [], groupRoot, 0)
   return entries
 }
 
-function onFocusIn(event: FocusEvent) {
-  const target = event.target as HTMLElement | null
-  const el = target?.closest?.("[data-preview-section]") as HTMLElement | null
-  const section = el?.dataset.previewSection
-  if (section) emit("previewSection", section)
-}
-
 const buildProfileGroups = computed(() => BUILD_PROFILE_SCHEMA.map((group) => ({ group, root: buildProfile.value })))
-const buildSpecificGroups = computed(() => BUILD_SPECIFIC_SCHEMA.map((group) => ({ group, root: buildSpecific.value })))
+const buildSpecificGroups = computed(() =>
+  BUILD_SPECIFIC_SCHEMA.map((group) => ({ group: filterEditorGroup(group), root: buildSpecific.value })),
+)
 
-const allGroups = computed(() => [...buildProfileGroups.value, ...buildSpecificGroups.value])
+// Editor navigation order is independent of compiled filter rule priority.
+const allGroups = computed(() =>
+  [...buildProfileGroups.value, ...buildSpecificGroups.value].sort(
+    (a, b) => editorSectionRank(a.group.key) - editorSectionRank(b.group.key),
+  ),
+)
 
 function defaultCollapsed(): Record<string, boolean> {
-  return { buildProfile: true }
+  return Object.fromEntries(allGroups.value.map(({ group }) => [group.key, !["buildProfile", "weaponPhases"].includes(group.key)]))
 }
 
-function loadCollapsed(): Record<string, boolean> {
-  try {
-    const saved = localStorage.getItem(`filtertool:collapsed:${props.filterName}`)
-    if (saved) return { ...defaultCollapsed(), ...JSON.parse(saved) }
-  } catch {
-    // Fall back to the default view if stored state is unavailable or invalid.
-  }
-  return defaultCollapsed()
-}
-
-const collapsed = ref<Record<string, boolean>>(loadCollapsed())
+const collapsed = useCollapsedState(
+  computed(() => `filtertool:collapsed:${props.filterName}`),
+  defaultCollapsed,
+)
 
 function subsectionCollapsed(group: string, section: FieldSubsection): boolean {
-  return collapsed.value[`${group}:${section.key}`] ?? section.collapsed ?? false
+  return collapsed.value[`${group}:${section.key}`] ?? section.collapsed ?? true
 }
 
 function toggleSubsection(group: string, section: FieldSubsection) {
   collapsed.value[`${group}:${section.key}`] = !subsectionCollapsed(group, section)
 }
-
-watch(
-  collapsed,
-  (value) => {
-    try {
-      localStorage.setItem(`filtertool:collapsed:${props.filterName}`, JSON.stringify(value))
-    } catch {
-      // The editor remains usable when browser storage is unavailable.
-    }
-  },
-  { deep: true },
-)
 
 function isCollapsed(key: string): boolean {
   return !!collapsed.value[key]
@@ -250,7 +227,7 @@ function expandAll() {
 </script>
 
 <template>
-  <div class="space-y-4" @focusin="onFocusIn">
+  <div class="space-y-4">
     <div class="flex items-center justify-end gap-2">
       <button
         type="button"
@@ -269,7 +246,7 @@ function expandAll() {
     </div>
 
     <template v-for="entry in allGroups" :key="entry.group.key">
-      <section class="rounded border border-neutral-800 bg-neutral-900/40" :data-preview-section="entry.group.previewSection">
+      <section class="rounded border border-neutral-800 bg-neutral-900/40" :data-editor-group="entry.group.key">
         <button
           type="button"
           @click="toggleSection(entry.group.key)"
@@ -283,6 +260,15 @@ function expandAll() {
         <div v-show="!isCollapsed(entry.group.key)" class="px-4 pb-4">
           <p v-if="entry.group.description" class="mb-3 text-xs text-neutral-500">{{ entry.group.description }}</p>
 
+          <CurrencyEditor
+            v-if="entry.group.key === 'currency'"
+            :root="buildSpecific"
+            :reference="reference"
+            :filter-name="filterName"
+            :defaults="defaults"
+            @change="emitChange"
+          />
+
           <HighlightEditor
             v-if="entry.group.key === 'highlightedEquipment'"
             :highlights="highlights"
@@ -291,17 +277,22 @@ function expandAll() {
             @update:highlights="setHighlights"
           />
 
-          <template v-else-if="entry.group.key === 'weaponProgression'">
-            <WeaponProgression :phases="weaponPhases" :reference="reference" @update:phases="setWeaponPhases" @change="emitChange" />
+          <template v-else-if="entry.group.key === 'weaponPhases'">
+            <WeaponProgression
+              :phases="weaponPhases"
+              :reference="reference"
+              :phase-template="getPath(defaults ?? {}, 'weaponPhaseTemplate') as Record<string, unknown> | undefined"
+              @update:phases="setWeaponPhases"
+              @change="emitChange"
+            />
           </template>
 
           <template v-else>
             <div v-if="entry.group.fields.length > 0" class="grid grid-cols-1 items-end gap-3 sm:grid-cols-2">
               <div
-                v-for="field in visibleFields(entry.root, entry.group.fields)"
+                v-for="{ field, fullWidth } in layoutFields(visibleFields(entry.root, entry.group.fields))"
                 :key="field.path"
-                :class="['min-w-0', isWide(field) ? 'sm:col-span-2' : '']"
-                :data-preview-section="previewSectionFor(entry.group, undefined, field)"
+                :class="['min-w-0', fullWidth ? 'sm:col-span-2' : '']"
               >
                 <FieldInput
                   :reference="reference"
@@ -321,6 +312,7 @@ function expandAll() {
             <div
               v-for="sub in subsectionEntries(entry.group, entry.root)"
               :key="sub.key"
+              :data-editor-subsection="sub.subsection.key"
               :class="
                 sub.subsection.layout === 'cutoff-size'
                   ? 'mt-1'
@@ -330,29 +322,43 @@ function expandAll() {
                       ? 'mt-4 border-t border-neutral-800/60 pt-3'
                       : 'mt-4'
               "
-              :style="{ marginLeft: `${sub.depth}rem` }"
-              :data-preview-section="previewSectionFor(sub.group, sub.subsection)"
             >
+              <div v-if="sub.visibilityField" class="mb-3 flex items-center justify-between gap-2">
+                <RuleHeader
+                  class="min-w-0 flex-1"
+                  :title="sub.subsection.title"
+                  :heading="sub.depth === 0"
+                  compact
+                  :expanded="!subsectionCollapsed(entry.group.key, sub.subsection)"
+                  @toggle="toggleSubsection(entry.group.key, sub.subsection)"
+                />
+                <select
+                  :aria-label="`${sub.subsection.title} visibility`"
+                  :data-field-path="sub.visibilityField.path"
+                  :value="effectiveValue(sub.root, sub.visibilityField)"
+                  class="rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-xs"
+                  @change="
+                    setFieldValue(
+                      sub.root,
+                      sub.visibilityField,
+                      ($event.target as HTMLSelectElement).value === defaultFor(sub.root, sub.visibilityField)
+                        ? undefined
+                        : ($event.target as HTMLSelectElement).value,
+                    )
+                  "
+                >
+                  <option value="Show">Show</option>
+                  <option value="Hide">Hide</option>
+                </select>
+              </div>
               <RuleHeader
-                v-if="sub.subsection.collapsed"
+                v-else
                 :title="sub.subsection.title"
                 :heading="sub.depth === 0"
                 :compact="sub.subsection.layout === 'cutoff-size'"
                 :expanded="!subsectionCollapsed(entry.group.key, sub.subsection)"
-                :field="sub.enabledField"
-                :enabled="sub.enabledField && effectiveValue(sub.root, sub.enabledField)"
-                :defaulted="!sub.enabledField || !fieldIsSet(sub.root, sub.enabledField)"
                 @toggle="toggleSubsection(entry.group.key, sub.subsection)"
-                @change="sub.enabledField && setRuleEnabled(sub.root, sub.enabledField, $event)"
-                @reset="sub.enabledField && setFieldValue(sub.root, sub.enabledField, undefined)"
               />
-              <h3
-                v-else
-                class="mb-1 font-semibold uppercase tracking-wide"
-                :class="sub.depth > 0 ? 'text-xs text-neutral-500' : 'text-sm text-neutral-400'"
-              >
-                {{ sub.subsection.title }}
-              </h3>
               <p
                 v-if="sub.subsection.description && !subsectionCollapsed(entry.group.key, sub.subsection)"
                 class="mb-3 text-xs text-neutral-500"
@@ -361,10 +367,11 @@ function expandAll() {
               </p>
               <div v-show="!subsectionCollapsed(entry.group.key, sub.subsection)" class="grid grid-cols-1 items-end gap-3 sm:grid-cols-2">
                 <div
-                  v-for="field in visibleFields(sub.root, sub.subsection.fields).filter((field) => field !== sub.enabledField)"
+                  v-for="{ field, fullWidth } in layoutFields(
+                    visibleFields(sub.root, sub.subsection.fields).filter((field) => field !== sub.visibilityField),
+                  )"
                   :key="field.path"
-                  :class="['min-w-0', isWide(field) ? 'sm:col-span-2' : '']"
-                  :data-preview-section="previewSectionFor(sub.group, sub.subsection, field)"
+                  :class="['min-w-0', fullWidth ? 'sm:col-span-2' : '']"
                 >
                   <FieldInput
                     :reference="reference"
@@ -380,25 +387,6 @@ function expandAll() {
                   />
                 </div>
               </div>
-              <RuleAdvanced
-                v-if="!subsectionCollapsed(entry.group.key, sub.subsection)"
-                :modules="(sub.subsection.subsections ?? []).filter((child) => child.module)"
-              >
-                <template #default="{ field }">
-                  <FieldInput
-                    :reference="reference"
-                    :default-source="defaultSource(field, defaults)"
-                    :field="field"
-                    :value="displayValue(sub.root, field)"
-                    :options="optionsFor(field)"
-                    :placeholder="displayPlaceholder(sub.root, field)"
-                    :defaulted="!fieldIsSet(sub.root, field) && defaultFor(sub.root, field) !== undefined"
-                    :can-reset="fieldIsSet(sub.root, field)"
-                    @update:value="setFieldValue(sub.root, field, $event)"
-                    @reset="setFieldValue(sub.root, field, undefined)"
-                  />
-                </template>
-              </RuleAdvanced>
             </div>
           </template>
         </div>

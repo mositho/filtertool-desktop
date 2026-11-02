@@ -1,4 +1,17 @@
 [
+  { "id": "sacred_life", "text": "Sacred Life", "name": "Sacred Life Flask" },
+  { "id": "sanctified_life", "text": "Sanctified Life", "name": "Sanctified Life Flask" },
+  { "id": "eternal_life", "text": "Eternal Life", "name": "Eternal Life Flask" },
+  { "id": "ashbark_tincture", "text": "Ashbark Tincture", "name": "Ashbark Tincture" },
+  { "id": "blood_sap_tincture", "text": "Blood Sap Tincture", "name": "Blood Sap Tincture" },
+  { "id": "borealwood_tincture", "text": "Borealwood Tincture", "name": "Borealwood Tincture" },
+  { "id": "fulgurite_tincture", "text": "Fulgurite Tincture", "name": "Fulgurite Tincture" },
+  { "id": "ironwood_tincture", "text": "Ironwood Tincture", "name": "Ironwood Tincture" },
+  { "id": "oakbranch_tincture", "text": "Oakbranch Tincture", "name": "Oakbranch Tincture" },
+  { "id": "poisonberry_tincture", "text": "Poisonberry Tincture", "name": "Poisonberry Tincture" },
+  { "id": "prismatic_tincture", "text": "Prismatic Tincture", "name": "Prismatic Tincture" },
+  { "id": "rosethorn_tincture", "text": "Rosethorn Tincture", "name": "Rosethorn Tincture" },
+  { "id": "sporebloom_tincture", "text": "Sporebloom Tincture", "name": "Sporebloom Tincture" },
   {
     "id": "chaos_orb",
     "text": "Chaos",

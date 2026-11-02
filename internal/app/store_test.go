@@ -46,6 +46,46 @@ func mustCall(t *testing.T, s *Store, action string, input Object) any {
 	}
 	return v
 }
+
+func TestLocalCurrencySoundReplacesGlobalSource(t *testing.T) {
+	s := testStore(t)
+	mustCall(t, s, "saveDefaults", Object{"defaults": Object{"currency": Object{"items": Object{
+		"Chaos Orb": Object{"sound": Object{"enabled": true, "tts": "chaos_orb"}},
+	}}}})
+	cfg := Object{"buildProfile": Object{}, "buildSpecificOptions": Object{}, "localDefaults": Object{"currency": Object{"items": Object{
+		"Chaos Orb": Object{"sound": Object{"enabled": true, "soundId": float64(8)}},
+	}}}}
+	mustCall(t, s, "saveConfig", Object{"name": "Caster Template", "config": cfg})
+	defaults := c.Obj(mustCall(t, s, "filterDefaults", Object{"name": "Caster Template"}).(Object)["defaults"])
+	sound := c.Obj(c.Obj(c.Obj(c.Obj(defaults["currency"])["items"])["Chaos Orb"])["sound"])
+	if sound["tts"] != nil || sound["soundId"] != float64(8) {
+		t.Fatal("local sound retained the global source", sound)
+	}
+	out := mustCall(t, s, "preview", Object{"name": "Caster Template"}).(Object)["output"].(string)
+	found := false
+	for _, block := range strings.Split(out, "\n\n") {
+		if !strings.Contains(block, `BaseType == "Chaos Orb"`) {
+			continue
+		}
+		found = true
+		if !strings.Contains(block, "PlayAlertSound 8 240") || strings.Contains(block, "CustomAlertSound") {
+			t.Fatal("compiler did not use the local sound", block)
+		}
+	}
+	if !found {
+		t.Fatal("missing Chaos Orb rule")
+	}
+	shared := mustCall(t, s, "share", Object{"name": "Caster Template", "includeGlobals": true}).(Object)
+	var snapshot Object
+	if err := json.Unmarshal([]byte(c.Text(shared["text"])), &snapshot); err != nil {
+		t.Fatal(err)
+	}
+	sharedSound := c.Obj(c.Obj(c.Obj(c.Obj(c.Obj(snapshot["defaults"])["currency"])["items"])["Chaos Orb"])["sound"])
+	if sharedSound["tts"] != nil || sharedSound["soundId"] != float64(8) {
+		t.Fatal("sharing retained the global sound source", sharedSound)
+	}
+}
+
 func TestPersonalLaunchDoesNotSeedTemplates(t *testing.T) {
 	s, err := Open(t.TempDir())
 	if err != nil {
@@ -62,6 +102,57 @@ func TestPersonalLaunchDoesNotSeedTemplates(t *testing.T) {
 	filters, _ = s.filters()
 	if len(filters) != 1 || filters[0]["name"] != "My Caster" {
 		t.Fatal("personal filters changed on reopening", filters)
+	}
+}
+
+func TestReferenceIncludesNewPresentationPresets(t *testing.T) {
+	s := testStore(t)
+	ref := mustCall(t, s, "reference", Object{}).(Object)
+	names := ref["styleNames"].([]string)
+	if c.Obj(c.Obj(ref["currencySounds"])["Chromatic Orb"])["tts"] != "chromatic_orb" {
+		t.Fatal("reference must include Chromatic Orb's actual default sound")
+	}
+	if icon := c.Obj(c.Obj(ref["currencyIcons"])["Chromatic Orb"]); icon["iconShape"] != "Pentagon" || icon["iconColor"] != "Purple" || icon["iconSize"] != float64(2) {
+		t.Fatal("reference must include Chromatic Orb's actual default icon", icon)
+	}
+	for _, name := range []string{"currencyLow", "currencyLeaguestart", "leagueMechanic"} {
+		if !contains(names, name) || len(c.Obj(c.Obj(ref["styles"])[name])) == 0 {
+			t.Fatalf("missing selectable preset %s", name)
+		}
+	}
+}
+
+func TestGlobalCurrencyAndLeagueDefaultsReachFilters(t *testing.T) {
+	s := testStore(t)
+	mustCall(t, s, "createFilter", Object{"name": "Shared Currency"})
+	mustCall(t, s, "saveDefaults", Object{"defaults": Object{
+		"currency":       Object{"assignments": Object{"Chromatic Orb": "leaguestart"}, "items": Object{"Chromatic Orb": Object{"sound": Object{"soundId": float64(8)}}}},
+		"leagueMechanic": Object{"rules": Object{"charts": Object{"baseTypes": []any{}}}},
+	}})
+	mustCall(t, s, "saveStyles", Object{"styles": Object{"currencyLeaguestart": Object{"text": "#123456"}}})
+	blockFor := func(output, name string) string {
+		for _, block := range strings.Split(output, "\n\n") {
+			if strings.Contains(block, "BaseType == ") && strings.Contains(block, `"`+name+`"`) {
+				return block
+			}
+		}
+		return ""
+	}
+	output := c.Text(mustCall(t, s, "preview", Object{"name": "Shared Currency"}).(Object)["output"])
+	chromatic := blockFor(output, "Chromatic Orb")
+	if !strings.Contains(chromatic, "PlayAlertSound 8 240") || !strings.Contains(chromatic, "SetTextColor 18 52 86") {
+		t.Fatal("global currency defaults/styles not applied to filter")
+	}
+	if !strings.HasPrefix(blockFor(output, "Sandy Seabed Chart"), "Hide\n") {
+		t.Fatal("global empty league selection must hide charts")
+	}
+	config := Object{"buildProfile": Object{}, "buildSpecificOptions": Object{
+		"currency":       Object{"items": Object{"Chromatic Orb": Object{"visibility": "Hide"}}},
+		"leagueMechanic": Object{"rules": Object{"charts": Object{"baseTypes": []any{"Sandy Seabed Chart"}}}},
+	}}
+	output = c.Text(mustCall(t, s, "preview", Object{"name": "Shared Currency", "config": config}).(Object)["output"])
+	if !strings.HasPrefix(blockFor(output, "Chromatic Orb"), "Hide\n") || !strings.HasPrefix(blockFor(output, "Sandy Seabed Chart"), "Show\n") {
+		t.Fatal("filter-specific settings must override global item defaults")
 	}
 }
 func TestLifecycleValidationAndPreview(t *testing.T) {
@@ -192,6 +283,140 @@ func TestSoundSyncOnlyDeletesUnusedGeneratedCache(t *testing.T) {
 	if _, err := os.Stat(filepath.Join(s.Root, "sounds", "old-generated.mp3")); !errors.Is(err, os.ErrNotExist) {
 		t.Fatal("stale generated audio remains")
 	}
+}
+
+func TestRemovedRuleOverridesAreDiscardedOnLoadAndSave(t *testing.T) {
+	s := testStore(t)
+	mustCall(t, s, "createFilter", Object{"name": "Simple Rules"})
+	config := Object{"buildProfile": Object{}, "buildSpecificOptions": Object{
+		"early":                Object{"earlyMaxAreaLevel": float64(24), "rules": Object{"armour2": Object{"maxAreaLevel": float64(2), "style": Object{"size": float64(22)}}}},
+		"currency":             Object{"items": Object{"Chaos Orb": Object{"visibility": "Hide"}}},
+		"highlightedEquipment": Object{"highlights": []any{Object{"baseTypes": []any{"Iron Ring"}, "style": Object{"text": "#123456"}}}},
+	}, "localDefaults": Object{"links": Object{"rules": Object{"3generic": Object{"size": float64(20)}}}}}
+	path, err := s.filterPath("Simple Rules")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := writeJSON(path, config); err != nil {
+		t.Fatal(err)
+	}
+	loaded := mustCall(t, s, "getConfig", Object{"name": "Simple Rules"}).(Object)
+	if _, exists := c.Obj(c.Obj(loaded["buildSpecificOptions"])["early"])["rules"]; exists {
+		t.Fatal("obsolete filter rules were loaded")
+	}
+	if _, exists := c.Obj(c.Obj(loaded["localDefaults"])["links"])["rules"]; exists {
+		t.Fatal("filter-local rules were loaded")
+	}
+	mustCall(t, s, "saveConfig", Object{"name": "Simple Rules", "config": config})
+	saved, err := readObject(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	options := c.Obj(saved["buildSpecificOptions"])
+	if _, exists := c.Obj(options["early"])["rules"]; exists {
+		t.Fatal("obsolete filter rules were saved")
+	}
+	if c.Obj(options["early"])["earlyMaxAreaLevel"] != float64(24) || c.Obj(c.Obj(c.Obj(options["currency"])["items"])["Chaos Orb"])["visibility"] != "Hide" || len(c.List(c.Obj(options["highlightedEquipment"])["highlights"])) != 1 {
+		t.Fatal("unrelated overrides were lost")
+	}
+}
+
+func TestGlobalRulesSaveOnlyMaximumAndSizeAndApplyToFilters(t *testing.T) {
+	s := testStore(t)
+	mustCall(t, s, "createFilter", Object{"name": "Global Rule Tuning"})
+	mustCall(t, s, "saveDefaults", Object{"defaults": Object{"early": Object{"rules": Object{"armour2": Object{
+		"maxAreaLevel": float64(17), "size": float64(31), "enabled": false,
+		"style": Object{"text": "#123456", "size": float64(22)}, "icon": Object{"iconShape": "Star"}, "sound": Object{"soundId": float64(8)},
+	}}}}})
+	saved, err := s.optional("defaults.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	rule := c.Obj(c.Obj(c.Obj(saved["early"])["rules"])["armour2"])
+	if len(rule) != 2 || rule["size"] != float64(31) || rule["maxAreaLevel"] != float64(17) {
+		t.Fatal("obsolete rule overrides retained or migrated", rule)
+	}
+	out := c.Text(mustCall(t, s, "preview", Object{"name": "Global Rule Tuning"}).(Object)["output"])
+	start := strings.Index(out, "### Early Sockets")
+	if start < 0 {
+		t.Fatal("missing Early Sockets output")
+	}
+	end := strings.Index(out[start:], "### Flasks")
+	if end < 0 {
+		t.Fatal("missing Flasks output")
+	}
+	section := out[start : start+end]
+	if !strings.Contains(section, "AreaLevel <= 17") || !strings.Contains(section, "SetFontSize 31") || strings.Contains(section, "Hide\n") || strings.Contains(section, "AlertSound") {
+		t.Fatal("global numeric tuning not applied cleanly", section)
+	}
+}
+
+func TestGlobalFlaskCutoffsAndStylesReachFilterPreviews(t *testing.T) {
+	s := testStore(t)
+	mustCall(t, s, "createFilter", Object{"name": "Flask Cutoffs"})
+	mustCall(t, s, "saveDefaults", Object{"defaults": Object{"flasks": Object{
+		"lifeMaxAreaLevels": Object{"small": float64(18)},
+		"manaMaxAreaLevels": Object{"eternal": float64(72)},
+	}}})
+	mustCall(t, s, "saveStyles", Object{"styles": Object{"lifeFlask": Object{"text": "#123456"}}})
+	blockFor := func(output, base string) string {
+		for _, block := range strings.Split(output, "\n\n") {
+			if strings.Contains(block, `BaseType == "`+base+`"`) {
+				return block
+			}
+		}
+		return ""
+	}
+	out := c.Text(mustCall(t, s, "preview", Object{"name": "Flask Cutoffs"}).(Object)["output"])
+	small := blockFor(out, "Small Life Flask")
+	if !strings.Contains(small, "AreaLevel <= 18") || !strings.Contains(small, "SetTextColor 18 52 86") || !strings.Contains(small, "life.mp3") {
+		t.Fatal("global flask cutoffs, styles or automatic TTS missing", small)
+	}
+	if !strings.Contains(blockFor(out, "Eternal Mana Flask"), "AreaLevel <= 72") {
+		t.Fatal("global final-flask cutoff missing")
+	}
+	config := Object{"buildProfile": Object{}, "buildSpecificOptions": Object{"flasks": Object{"lifeMaxAreaLevels": Object{"small": nil}}}}
+	mustCall(t, s, "saveConfig", Object{"name": "Flask Cutoffs", "config": config})
+	out = c.Text(mustCall(t, s, "preview", Object{"name": "Flask Cutoffs"}).(Object)["output"])
+	if strings.Contains(blockFor(out, "Small Life Flask"), "AreaLevel") {
+		t.Fatal("saved explicit null must remove inherited cutoff")
+	}
+	if !strings.Contains(blockFor(out, "Eternal Mana Flask"), "AreaLevel <= 72") {
+		t.Fatal("filter override lost unrelated global cutoff")
+	}
+}
+
+func TestGenerateSoundsAlsoCleansCacheAndSyncs(t *testing.T) {
+	s := testStore(t)
+	game := t.TempDir()
+	settings, _ := s.settings()
+	settings["filterPath"] = game
+	mustCall(t, s, "saveSettings", Object{"settings": settings})
+	s.FetchAudio = func(string, string) ([]byte, error) { return []byte("fake TTS"), nil }
+	s.AudioProcessor = func(b []byte, path string, _ float64) error { return os.WriteFile(path, b, 0600) }
+	for _, name := range []string{"old-generated.mp3", "personal.mp3"} {
+		if err := os.WriteFile(filepath.Join(s.Root, "sounds", name), []byte("audio"), 0600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := s.write("sound-state.json", Object{"old-generated.mp3": "old-signature"}); err != nil {
+		t.Fatal(err)
+	}
+	mustCall(t, s, "generateSounds", nil)
+	if _, err := os.Stat(filepath.Join(s.Root, "sounds", "old-generated.mp3")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatal("stale generated cache remains", err)
+	}
+	if _, err := os.Stat(filepath.Join(game, soundFolder(settings), "old-generated.mp3")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatal("stale generated cache was copied to PoE", err)
+	}
+	for _, name := range []string{"chaos_orb.mp3", "personal.mp3"} {
+		if _, err := os.Stat(filepath.Join(game, soundFolder(settings), name)); err != nil {
+			t.Fatal("sound not synced", name, err)
+		}
+	}
+	// Unchanged generated sounds must still work offline.
+	s.FetchAudio = func(string, string) ([]byte, error) { return nil, errors.New("offline") }
+	mustCall(t, s, "generateSounds", nil)
 }
 
 func TestAudioStatusReportsMissingFFmpeg(t *testing.T) {

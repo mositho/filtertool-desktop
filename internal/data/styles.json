@@ -21,6 +21,17 @@
     "border": "#00FFFF",
     "text": "#00FFFF"
   },
+  "currencyLeaguestart": {
+    "background": "#000000",
+    "border": "#00FFFF",
+    "text": "#00FFFF"
+  },
+  "currencyLow": {
+    "background": "#000000",
+    "border": "#666666",
+    "size": 35,
+    "text": "#AAAAAA"
+  },
   "divinationCard": {
     "background": "#000000",
     "border": "#8800ff",
@@ -41,6 +52,11 @@
     "backgroundOpacity": 0.9019607843137255,
     "border": "#00ff80",
     "text": "#00ff80"
+  },
+  "fiveLink": {
+    "background": "#00A8FF",
+    "border": "#FFFFFF",
+    "text": "#FFFFFF"
   },
   "fragments": {
     "background": "#000000",
@@ -68,13 +84,18 @@
     "background": "#000000",
     "backgroundOpacity": 0.7058823529411765,
     "border": "#000000",
-    "size": 25,
+    "size": 30,
     "text": "#DADADA"
   },
   "goodFourLink": {
     "background": "#000000",
     "border": "#00ff80",
     "text": "#00ff80"
+  },
+  "sixLink": {
+    "background": "#FFFFFF",
+    "border": "#00A8FF",
+    "text": "#00A8FF"
   },
   "goodThreeLink": {
     "background": "#000000",
@@ -105,6 +126,12 @@
     "background": "#320046",
     "border": "#C000FF",
     "text": "#F5D8FF"
+  },
+  "leagueMechanic": {
+    "background": "#102B2B",
+    "border": "#40D9B0",
+    "size": 40,
+    "text": "#B0FFE8"
   },
   "lifeFlask": {
     "background": "#630401",
