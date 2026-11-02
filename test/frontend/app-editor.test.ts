@@ -51,6 +51,7 @@ it.each([true, false])("has no output preview or background compilation in deskt
   app = createApp(App)
   app.mount(root)
   await settle()
+  expect(root.querySelector("main img")?.getAttribute("src")).toBe("/favicon.svg")
   root.querySelector<HTMLButtonElement>("nav > button")!.click()
   await settle()
   expect(root.querySelector('[data-editor-group="buildProfile"]')).not.toBeNull()
