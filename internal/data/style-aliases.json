@@ -1,0 +1,10 @@
+{
+  "earlyShieldLink": "earlyShieldBase",
+  "gemCallout": "gemHighlight",
+  "goodTwoLink": "twoLink",
+  "selectedTwoLink": "twoLink",
+  "goodThreeLink": "threeLink",
+  "selectedThreeLink": "threeLink",
+  "goodFourLink": "fourLink",
+  "selectedFourLink": "fourLink"
+}

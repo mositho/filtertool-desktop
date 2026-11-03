@@ -42,11 +42,6 @@
     "border": "#000000",
     "text": "#000000"
   },
-  "earlyShieldLink": {
-    "background": "#ffffff",
-    "border": "#ff0000",
-    "text": "#000000"
-  },
   "fourLink": {
     "background": "#000000",
     "backgroundOpacity": 0.9019607843137255,
@@ -68,7 +63,7 @@
     "border": "#000000",
     "text": "#00FFFF"
   },
-  "gemCallout": {
+  "gemHighlight": {
     "background": "#002a2a",
     "border": "#00FFFF",
     "text": "#00FFFF"
@@ -87,25 +82,10 @@
     "size": 30,
     "text": "#DADADA"
   },
-  "goodFourLink": {
-    "background": "#000000",
-    "border": "#00ff80",
-    "text": "#00ff80"
-  },
   "sixLink": {
     "background": "#FFFFFF",
     "border": "#00A8FF",
     "text": "#00A8FF"
-  },
-  "goodThreeLink": {
-    "background": "#000000",
-    "border": "#B9FF66",
-    "text": "#B9FF66"
-  },
-  "goodTwoLink": {
-    "background": "#000000",
-    "border": "#FFC800",
-    "text": "#DADADA"
   },
   "highlightedEquipmentMagic": {
     "background": "#001515",
@@ -158,6 +138,9 @@
     "border": "#0055ff",
     "text": "#ffffff"
   },
+  "normal": { "text": "#c8c8c8" },
+  "magic": { "text": "#8888ff" },
+  "rare": { "text": "#ffff77" },
   "maps": {
     "background": "#282828",
     "border": "#FFFFFF",
@@ -187,21 +170,6 @@
     "background": "#280014",
     "border": "#FF0032",
     "text": "#FF0032"
-  },
-  "selectedFourLink": {
-    "background": "#000000",
-    "border": "#00FF95",
-    "text": "#00FF95"
-  },
-  "selectedThreeLink": {
-    "background": "#000000",
-    "border": "#51FF00",
-    "text": "#51FF00"
-  },
-  "selectedTwoLink": {
-    "background": "#000000",
-    "border": "#FFC800",
-    "text": "#FFFFFF"
   },
   "sixSocket": {
     "background": "#00A800",

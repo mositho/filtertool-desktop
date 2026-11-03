@@ -122,6 +122,31 @@ func TestReferenceIncludesNewPresentationPresets(t *testing.T) {
 	}
 }
 
+func TestReferenceSeparatesGlobalAndLocalStyles(t *testing.T) {
+	s := testStore(t)
+	mustCall(t, s, "createFilter", Object{"name": "Local Styles"})
+	mustCall(t, s, "saveStyles", Object{"styles": Object{"gemCallout": Object{"text": "#123456"}}})
+	mustCall(t, s, "saveConfig", Object{"name": "Local Styles", "config": Object{
+		"buildProfile": Object{}, "buildSpecificOptions": Object{},
+		"localStyles": Object{"gemCallout": Object{"text": "#abcdef"}},
+	}})
+	ref := mustCall(t, s, "reference", Object{"name": "Local Styles"}).(Object)
+	if c.Obj(c.Obj(ref["styles"])["gemCallout"])["text"] != "#abcdef" {
+		t.Fatal("effective reference must include local styles")
+	}
+	if c.Obj(c.Obj(ref["globalStyles"])["gemCallout"])["text"] != "#123456" {
+		t.Fatal("reset baseline must exclude local styles")
+	}
+	if c.Obj(c.Obj(ref["styles"])["gemHighlight"])["text"] != "#abcdef" {
+		t.Fatal("legacy local gem override must reach the renamed style")
+	}
+	for _, name := range ref["styleNames"].([]string) {
+		if c.LegacyStyle(name) {
+			t.Fatal("retired style offered for new selections", name)
+		}
+	}
+}
+
 func TestGlobalCurrencyAndLeagueDefaultsReachFilters(t *testing.T) {
 	s := testStore(t)
 	mustCall(t, s, "createFilter", Object{"name": "Shared Currency"})

@@ -69,9 +69,9 @@ func TestGenericLinkExtensionsOnlyAddShowRules(t *testing.T) {
 	}
 }
 
-func TestFiveAndSixLinksUseDedicatedStylesWithHighlightRarityTextColors(t *testing.T) {
+func TestFiveAndSixLinksUseDedicatedStylesWithOrdinaryRarityTextColors(t *testing.T) {
 	defaultLinks := New(nil, nil, "").links(Object{}, Object{})
-	if !strings.Contains(defaultLinks, "LinkedSockets = 5\nRarity == Normal\nMinimapIcon 2 Orange Diamond\nSetTextColor 217 255 255\nSetBackgroundColor 0 168 255\nSetBorderColor 255 255 255") {
+	if !strings.Contains(defaultLinks, "LinkedSockets = 5\nRarity == Normal\nMinimapIcon 2 Orange Diamond\nSetTextColor 200 200 200\nSetBackgroundColor 0 168 255\nSetBorderColor 255 255 255") {
 		t.Fatal("default five-link style should use the blue background and white border")
 	}
 	c := New(nil, Object{
@@ -86,7 +86,7 @@ func TestFiveAndSixLinksUseDedicatedStylesWithHighlightRarityTextColors(t *testi
 		bg      string
 		border  string
 	}{{5, "Orange", "five_link", "18 52 86", "101 67 33"}, {6, "Red", "six_link", "35 69 103", "118 84 50"}} {
-		for _, rarity := range []struct{ name, text string }{{"Normal", "217 255 255"}, {"Magic", "102 179 255"}, {"Rare", "255 255 0"}} {
+		for _, rarity := range []struct{ name, text string }{{"Normal", "200 200 200"}, {"Magic", "136 136 255"}, {"Rare", "255 255 119"}} {
 			want := []string{
 				fmt.Sprintf("LinkedSockets = %d", link.sockets),
 				"Rarity == " + rarity.name,
@@ -119,14 +119,21 @@ func TestFiveAndSixLinksUseDedicatedStylesWithHighlightRarityTextColors(t *testi
 
 func TestTwoThroughFourLinksOnlyChangeTextForRarity(t *testing.T) {
 	styles := Object{
-		"highlightedEquipmentNormal": Object{"text": "#123456"},
-		"highlightedEquipmentMagic":  Object{"text": "#234567"},
-		"highlightedEquipmentRare":   Object{"text": "#345678"},
+		"normal": Object{"text": "#123456"},
+		"magic":  Object{"text": "#234567"},
+		"rare":   Object{"text": "#345678"},
 	}
 	c := New(nil, styles, "custom-sounds")
 	profile := Object{"preferredColors": []any{"RGB"}, "preferredArmour": []any{"armour"}}
 	options := Object{"links": Object{"genericThreeLinksEnabled": true, "genericFourLinksEnabled": true}}
 	out := c.links(profile, options)
+	// Compare matching against the frozen renderer, using today's consolidated
+	// styles so the intentional style cleanup does not mask matching regressions.
+	for old, name := range styleAliases {
+		if strings.HasPrefix(old, "good") || strings.HasPrefix(old, "selected") {
+			c.Styles[old] = Clone(Obj(c.Styles[name]))
+		}
+	}
 	c.legacyEquipmentSelections = true
 	legacy := c.links(profile, options)
 	blocks := strings.Split(out, "\n\n")
@@ -144,7 +151,7 @@ func TestTwoThroughFourLinksOnlyChangeTextForRarity(t *testing.T) {
 			}
 			for j, rarity := range []string{"Normal", "Magic", "Rare"} {
 				variant := blocks[i-3+j]
-				text := "SetTextColor " + rgb(Text(Obj(c.Styles["highlightedEquipment"+rarity])["text"]))
+				text := "SetTextColor " + rgb(Text(Obj(c.Styles[strings.ToLower(rarity)])["text"]))
 				if !strings.Contains(variant, "Rarity == "+rarity) || !strings.Contains(variant, text) {
 					t.Fatalf("missing rarity text in rule: %s", variant)
 				}

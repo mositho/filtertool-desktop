@@ -18,6 +18,7 @@ export type ReferenceData = {
   shieldProgressionModes: string[]
   styleNames: string[]
   styles: Record<string, Record<string, unknown>>
+  globalStyles?: Record<string, Record<string, unknown>>
   ttsLocales: string[]
   ttsSpeed: { min: number; max: number }
   sounds: { id: string; name: string; hasFile?: boolean }[]

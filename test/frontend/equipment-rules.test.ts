@@ -68,7 +68,7 @@ it("inherits global rule size from the shared preset and global rule maxima from
   const size = field("links.rules.3generic.size")
   expect(fieldDefault(size, {}, {}, { threeLink: { size: 28 } })).toBe(28)
   expect(fieldDefault(size, {}, { links: { rules: { "3generic": { size: 31 } } } }, { threeLink: { size: 28 } })).toBe(31)
-  expect(fieldDefault(field("early.rules.armour2.size"), {})).toBe(40)
+  expect(fieldDefault(field("early.rules.armour2.size"), {})).toBe(45)
   expect(fieldDefault(field("early.rules.armour3.maxAreaLevel"), { early: { earlyMaxAreaLevel: 21 } })).toBe(21)
   expect(fieldDefault(field("links.rules.3generic.maxAreaLevel"), { links: { threeLinkMaxAreaLevel: 37 } })).toBe(37)
 })
@@ -88,6 +88,48 @@ it("keeps linked early cutoffs dynamic and restores inherited filter values", as
   modelValue.buildSpecificOptions.early.earlyMaxAreaLevel = 25
   await nextTick()
   expect(row.querySelector("input")?.placeholder).toBe("25")
+})
+
+it("labels an inherited uncapped rare-item limit as using default and restores it after resetting an override", async () => {
+  const modelValue = reactive({ buildProfile: {}, buildSpecificOptions: {} as Record<string, unknown> })
+  mount(ConfigForm, { modelValue, filterName: "rare-default", reference: refData, defaults: { rareItems: {} } })
+  const row = root.querySelector('[data-field-path="rareItems.maxAreaLevel"]')!
+  const input = row.querySelector<HTMLInputElement>("input")!
+  expect(input.placeholder).toBe("uncapped")
+  expect(row.textContent).toContain("using default")
+  expect(modelValue.buildSpecificOptions).toEqual({})
+  input.value = "45"
+  input.dispatchEvent(new Event("input", { bubbles: true }))
+  await nextTick()
+  expect(row.textContent).not.toContain("using default")
+  row.querySelector<HTMLButtonElement>('[title="Use default"]')!.click()
+  await nextTick()
+  expect(input.value).toBe("")
+  expect(input.placeholder).toBe("uncapped")
+  expect(row.textContent).toContain("using default")
+})
+
+it("recognizes a saved default shield progression and clears redundant overrides when reselected", async () => {
+  const modelValue = reactive({ buildProfile: { shieldProgression: "early" as string | undefined }, buildSpecificOptions: {} })
+  const defaults = reactive({ shieldProgression: "early" })
+  mount(ConfigForm, { modelValue, filterName: "shield-default", reference: refData, defaults })
+  const row = root.querySelector('[data-field-path="shieldProgression"]')!
+  const select = row.querySelector<HTMLSelectElement>("select")!
+  expect(select.value).toBe("early")
+  expect(row.textContent).toContain("using default")
+  defaults.shieldProgression = "full"
+  await nextTick()
+  expect(row.textContent).not.toContain("using default")
+  defaults.shieldProgression = "early"
+  select.value = "full"
+  select.dispatchEvent(new Event("change", { bubbles: true }))
+  await nextTick()
+  expect(row.textContent).not.toContain("using default")
+  select.value = "early"
+  select.dispatchEvent(new Event("change", { bubbles: true }))
+  await nextTick()
+  expect(modelValue.buildProfile.shieldProgression).toBeUndefined()
+  expect(row.textContent).toContain("using default")
 })
 
 it("places the early generic-link cutoff before toggles on its own row", () => {

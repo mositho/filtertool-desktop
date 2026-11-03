@@ -10,6 +10,7 @@ const props = defineProps<{
   placeholder?: string
   decimals?: number
   invalid?: boolean
+  ariaLabel?: string
 }>()
 const emit = defineEmits<{ "update:modelValue": [value: number | undefined] }>()
 
@@ -95,6 +96,7 @@ function onWheel(event: WheelEvent) {
       :value="text"
       :placeholder="placeholder ?? (integer ? 'e.g. 12' : 'e.g. 1.3')"
       :aria-invalid="invalid || undefined"
+      :aria-label="ariaLabel"
       @input="onInput"
       @wheel="onWheel"
       @focus="focused = true"

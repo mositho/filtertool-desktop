@@ -66,6 +66,7 @@ describe("editor view controls", () => {
       "Gems",
       "League Mechanic",
       "Highlights",
+      "Styles",
     ])
     expect(modelValue).toEqual({ buildProfile: {}, buildSpecificOptions: {} })
   })

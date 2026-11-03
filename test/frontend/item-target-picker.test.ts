@@ -80,41 +80,16 @@ it.each([false, true])("selects every visible base without altering class select
   expect(button.textContent?.trim()).toBe("Select results")
   button.click()
   await nextTick()
-  if (weaponOnly) {
-    expect(state.bases).toEqual([])
-    expect(state.classes).toEqual(["Bows", "Wands"])
-  } else {
-    expect(state.bases).toEqual([
-      "Short Bow",
-      "Driftwood Wand",
-      "Goat's Horn",
-      "Spiraled Wand",
-      "Assembler Wand",
-      "Sage Wand",
-      "Unknown Wand",
-    ])
-    expect(state.classes).toEqual(["Bows"])
-  }
+  expect(state.bases).toEqual([])
+  expect(state.classes).toEqual(["Bows", "Wands"])
   expect(button.disabled).toBe(true)
   expect(details.open).toBe(true)
-  if (weaponOnly) {
-    const wandClass = [...root.querySelectorAll<HTMLLabelElement>("details:nth-of-type(1) label")].find((label) =>
-      label.textContent?.includes("Wands"),
-    )!
-    wandClass.querySelector<HTMLInputElement>("input")!.click()
-    await nextTick()
-    expect(state.classes).toEqual(["Bows"])
-  } else {
-    root.querySelector<HTMLButtonElement>('[aria-label="Remove base type Sage Wand"]')!.click()
-    await nextTick()
-    expect(state.bases).not.toContain("Sage Wand")
-    expect(button.disabled).toBe(false)
-    expect(
-      options()
-        .find((label) => label.textContent?.includes("Sage Wand"))!
-        .querySelector("input")!.checked,
-    ).toBe(false)
-  }
+  const wandClass = [...root.querySelectorAll<HTMLLabelElement>("details:nth-of-type(1) label")].find((label) =>
+    label.textContent?.includes("Wands"),
+  )!
+  wandClass.querySelector<HTMLInputElement>("input")!.click()
+  await nextTick()
+  expect(state.classes).toEqual(["Bows"])
 })
 
 it("adds only search results while preserving other selections", async () => {
@@ -129,17 +104,17 @@ it("adds only search results while preserving other selections", async () => {
   expect(button.textContent).toBe("Select results")
   button.click()
   await nextTick()
-  expect(state.bases).toContain("Goat's Horn")
-  expect(state.bases).toContain("Short Bow")
-  expect(state.bases).toHaveLength(7)
+  expect(state.classes).toContain("Wands")
+  expect(state.classes).toContain("Bows")
+  expect(state.bases).toEqual([])
   search.value = "no matching base"
   search.dispatchEvent(new Event("input", { bubbles: true }))
   await nextTick()
   expect(button.disabled).toBe(true)
 })
 
-it("selects a whole class and expands it to individual bases when one is deselected", async () => {
-  const state = mount([], true)
+it.each([false, true])("selects, expands and collapses a whole class, weaponOnly=%s", async (weaponOnly) => {
+  const state = mount([], weaponOnly)
   const classDetails = root.querySelector<HTMLDetailsElement>("details:nth-of-type(1)")!
   classDetails.open = true
   const wandCheckbox = [...classDetails.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')].find((input) =>
@@ -185,8 +160,8 @@ it("selects a whole class and expands it to individual bases when one is deselec
   expect(root.querySelectorAll('[aria-label^="Remove base type "]')).toHaveLength(0)
 })
 
-it("shows a partially selected class as mixed and selecting it replaces base selections", async () => {
-  const state = mount(["Goat's Horn", "Driftwood Wand"], true)
+it.each([false, true])("shows partial selection as mixed and selecting it replaces bases, weaponOnly=%s", async (weaponOnly) => {
+  const state = mount(["Goat's Horn", "Driftwood Wand"], weaponOnly)
   const classDetails = root.querySelector<HTMLDetailsElement>("details:nth-of-type(1)")!
   classDetails.open = true
   const wandCheckbox = [...classDetails.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')].find((input) =>
@@ -199,4 +174,21 @@ it("shows a partially selected class as mixed and selecting it replaces base sel
   expect(state.bases).toEqual([])
   expect(wandCheckbox.checked).toBe(true)
   expect(wandCheckbox.indeterminate).toBe(false)
+})
+
+it.each([false, true])("deselects search results from a class without removing other bases, weaponOnly=%s", async (weaponOnly) => {
+  const state = mount([], weaponOnly, ["Wands", "Bows"])
+  const search = root.querySelector<HTMLInputElement>('[aria-label="Search base types"]')!
+  search.value = "Sage"
+  search.dispatchEvent(new Event("input", { bubbles: true }))
+  await nextTick()
+  const button = [...root.querySelectorAll<HTMLButtonElement>("details:nth-of-type(2) button")].find(
+    (entry) => entry.textContent?.trim() === "Deselect results",
+  )!
+  button.click()
+  await nextTick()
+  expect(state.classes).toEqual(["Bows"])
+  expect(state.bases).toHaveLength(5)
+  expect(state.bases).not.toContain("Sage Wand")
+  expect(state.bases).toContain("Goat's Horn")
 })

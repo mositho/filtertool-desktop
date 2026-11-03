@@ -150,7 +150,10 @@ function onAlertChange(event: Event) {
     <div v-if="type === 'preset'" class="flex gap-2">
       <select :value="preset" @change="onPresetChange" class="flex-1 rounded border border-neutral-700 bg-neutral-900 px-2 py-1.5 text-sm">
         <option value="">Select a sound</option>
-        <option v-for="sound in sounds" :key="sound.id" :value="sound.id">{{ sound.name }}</option>
+        <option v-if="preset && sounds.some((sound) => sound.id === preset && !sound.hasFile)" :value="preset" disabled>
+          {{ sounds.find((sound) => sound.id === preset)?.name }} (unavailable)
+        </option>
+        <option v-for="sound in sounds.filter((sound) => sound.hasFile)" :key="sound.id" :value="sound.id">{{ sound.name }}</option>
       </select>
       <button
         v-if="preset && sounds.find((s) => s.id === preset)?.hasFile"
@@ -196,5 +199,8 @@ function onAlertChange(event: Event) {
       </div>
       <p v-if="soundError" class="text-xs text-red-400">{{ soundError }}</p>
     </div>
+    <p v-if="type === 'preset' && !sounds.some((sound) => sound.hasFile)" class="text-xs text-neutral-400">
+      No template sound files available. Generate sounds in Global Settings.
+    </p>
   </div>
 </template>

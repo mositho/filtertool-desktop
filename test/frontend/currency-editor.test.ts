@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { afterEach, expect, it } from "vitest"
+import { afterEach, expect, it, vi } from "vitest"
 import { createApp, nextTick, reactive, type App } from "vue"
 import CurrencyEditor from "../../frontend/src/components/CurrencyEditor.vue"
 import type { ReferenceData } from "../../frontend/src/api"
@@ -9,6 +9,14 @@ import ConfigForm from "../../frontend/src/components/ConfigForm.vue"
 import builtinReference from "../../internal/data/reference.json"
 import soundManifest from "../../internal/data/manifest.json"
 import { BUILD_SPECIFIC_SCHEMA } from "../../src/config/form-schema"
+
+vi.mock("../../frontend/src/api", () => ({
+  api: {
+    soundUrl: async () => {
+      throw new Error("No native audio preview in tests")
+    },
+  },
+}))
 
 let app: App | undefined
 let container: HTMLDivElement
@@ -24,7 +32,7 @@ function mount(defaults: Record<string, unknown> = {}, filterName = "currency-te
   const root = reactive<Record<string, unknown>>({})
   const reference = {
     baseTypesByClass: { "Stackable Currency": ["Scroll Fragment", "Chaos Orb", "Chromatic Orb", "Dead Man's Sulphur", "Portal Scroll"] },
-    sounds: soundManifest,
+    sounds: soundManifest.map((sound) => ({ ...sound, hasFile: true })),
     currencySounds: {
       "Chromatic Orb": { enabled: true, tts: "chromatic_orb" },
       "Chaos Orb": { enabled: true, tts: "chaos_orb" },
@@ -65,12 +73,11 @@ async function resetCurrency() {
   await nextTick()
 }
 
-it("opens tier fallback details and keeps tier information beside the title", async () => {
+it("opens tier fallback details without tier previews or item counts", async () => {
   const root = mount()
   const card = container.querySelector('[data-currency-tier="s"]')!
-  const information = card.querySelector("[data-tier-information]")!
-  expect(tierHeader("s").contains(information)).toBe(true)
-  expect(information.querySelector('[title="Style preview · edit in Global Settings"]')).not.toBeNull()
+  expect(card.querySelector("[data-tier-information]")).toBeNull()
+  expect(card.querySelector('[title="Style preview"]')).toBeNull()
   expect(card.querySelector('[aria-label="S Tier visibility"]')).not.toBeNull()
   card.querySelector<HTMLButtonElement>('[aria-label="S Tier settings"]')!.click()
   await nextTick()

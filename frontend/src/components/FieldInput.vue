@@ -11,6 +11,8 @@ import SoundSelector from "./SoundSelector.vue"
 import IconPicker from "./IconPicker.vue"
 import type { ReferenceData } from "../api"
 import { computed } from "vue"
+import StyleShortcut from "./StyleShortcut.vue"
+import { fieldStyleKeys } from "../namedStyles"
 
 const props = defineProps<{
   field: SchemaField
@@ -41,6 +43,7 @@ function updateIcon(key: string, value: unknown) {
     <div class="flex min-h-5 flex-wrap items-center justify-between gap-x-2 gap-y-1">
       <FieldLabel class="min-w-0" :label="field.label" :tooltip="field.tooltip" />
       <div class="flex min-w-0 flex-wrap items-center justify-end gap-1" :class="defaultsEditor ? 'h-5 w-5 shrink-0' : ''">
+        <StyleShortcut :style-keys="fieldStyleKeys(field, value)" />
         <span v-if="defaulted && !defaultsEditor" class="text-[10px] italic text-neutral-500"
           >using default<span v-if="defaultSource"> · {{ defaultSource }}</span></span
         >

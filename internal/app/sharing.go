@@ -62,7 +62,7 @@ func (s *Store) share(input Object) (Object, error) {
 		if err != nil {
 			return nil, err
 		}
-		value = Object{"format": "filtertool", "config": cfg, "defaults": c.MergeDefaults(d, c.Obj(cfg["localDefaults"])), "styles": normalizedStyles(c.Merge(st, c.Obj(cfg["localStyles"])))}
+		value = Object{"format": "filtertool", "config": cfg, "defaults": c.MergeDefaults(d, c.Obj(cfg["localDefaults"])), "styles": normalizedStyles(c.MergeStyles(st, c.Obj(cfg["localStyles"])))}
 	}
 	var buffer bytes.Buffer
 	encoder := json.NewEncoder(&buffer)
@@ -85,7 +85,7 @@ func (s *Store) imported(value Object, defaults, styles Object) (Object, error) 
 			return nil, err
 		}
 		cfg["localDefaults"] = snapshotDifference(c.Obj(value["defaults"]), d)
-		cfg["localStyles"] = snapshotDifference(normalizedStyles(c.Obj(value["styles"])), normalizedStyles(st))
+		cfg["localStyles"] = snapshotDifference(normalizedStyles(c.MergeStyles(Object{}, c.Obj(value["styles"]))), normalizedStyles(st))
 	} else {
 		cfg = c.Clone(cfg)
 		if defaults != nil || styles != nil {
@@ -94,7 +94,7 @@ func (s *Store) imported(value Object, defaults, styles Object) (Object, error) 
 				return nil, err
 			}
 			cfg["localDefaults"] = snapshotDifference(c.MergeDefaults(data.Load[Object]("defaults.json"), defaults), d)
-			cfg["localStyles"] = snapshotDifference(normalizedStyles(c.Merge(data.Load[Object]("styles.json"), styles)), normalizedStyles(st))
+			cfg["localStyles"] = snapshotDifference(normalizedStyles(c.MergeStyles(data.Load[Object]("styles.json"), styles)), normalizedStyles(st))
 		}
 	}
 	// JSON copied by the old web app can omit one of the two empty objects.

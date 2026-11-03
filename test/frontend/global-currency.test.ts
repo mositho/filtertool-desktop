@@ -314,24 +314,12 @@ it("exposes every bundled style preset including flask and tincture styles", asy
   }
 })
 
-it("shows inherited highlight rarity text in link style controls and previews", async () => {
+it("shows inherited ordinary rarity text in link style controls and previews", async () => {
   await mount()
   const panel = [...root.querySelectorAll("section")].find((section) => section.querySelector("h2")?.textContent === "Styles")!
   for (const button of panel.querySelectorAll<HTMLButtonElement>("button[aria-expanded]")) button.click()
   await nextTick()
-  for (const key of [
-    "twoLink",
-    "goodTwoLink",
-    "selectedTwoLink",
-    "threeLink",
-    "goodThreeLink",
-    "selectedThreeLink",
-    "fourLink",
-    "goodFourLink",
-    "selectedFourLink",
-    "fiveLink",
-    "sixLink",
-  ]) {
+  for (const key of ["twoLink", "threeLink", "fourLink", "fiveLink", "sixLink"]) {
     const row = panel.querySelector(`[data-style-key="${key}"]`)!
     // Both responsive layouts retain background/border controls, but no
     // misleading independent text-color picker.
@@ -340,7 +328,7 @@ it("shows inherited highlight rarity text in link style controls and previews", 
       const previews = row.querySelectorAll<HTMLElement>(`[data-rarity-preview="${rarity}"]`)
       expect(previews).toHaveLength(2)
       const expected = document.createElement("span")
-      expected.style.color = styles[`highlightedEquipment${rarity}` as keyof typeof styles].text!
+      expected.style.color = styles[rarity.toLowerCase() as "normal" | "magic" | "rare"].text
       for (const preview of previews) expect(preview.style.color).toBe(expected.style.color)
     }
   }

@@ -62,14 +62,18 @@ it("retains top-level, nested, Advanced and currency-tier preferences on rename"
     JSON.stringify({ "equipment": false, "equipment:lifeFlasks": false, "early:early.rules.armour2:advanced": false }),
   )
   localStorage.setItem("filtertool:currency-tiers:old", JSON.stringify({ a: false }))
+  localStorage.setItem("filtertool:styles:old", JSON.stringify({ styles: false, Currency: false }))
   renameFilterViewState("old", "new")
   expect(localStorage.getItem("filtertool:collapsed:new")).toContain('"equipment:lifeFlasks":false')
   expect(localStorage.getItem("filtertool:currency-tiers:new")).toBe('{"a":false}')
+  expect(localStorage.getItem("filtertool:styles:new")).toBe('{"styles":false,"Currency":false}')
   expect(localStorage.getItem("filtertool:collapsed:old")).toBeNull()
   expect(localStorage.getItem("filtertool:currency-tiers:old")).toBeNull()
+  expect(localStorage.getItem("filtertool:styles:old")).toBeNull()
   forgetFilterViewState("new")
   expect(localStorage.getItem("filtertool:collapsed:new")).toBeNull()
   expect(localStorage.getItem("filtertool:currency-tiers:new")).toBeNull()
+  expect(localStorage.getItem("filtertool:styles:new")).toBeNull()
 })
 
 it("remembers every subsection per filter without modifying filter data", async () => {

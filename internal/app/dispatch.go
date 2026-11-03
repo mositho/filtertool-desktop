@@ -199,7 +199,7 @@ func (s *Store) Dispatch(action string, input Object) (any, error) {
 			if key == "defaults" {
 				value = c.CleanRuleDefaults(c.MergeDefaults(base, value))
 			} else {
-				value = c.Merge(base, value)
+				value = c.MergeStyles(base, value)
 			}
 			return Object{"ok": true}, s.writeSource(key, value)
 		}
@@ -210,17 +210,20 @@ func (s *Store) Dispatch(action string, input Object) (any, error) {
 		if err != nil {
 			return nil, err
 		}
+		ref["globalStyles"] = c.ResolveStyles(styles)
 		if name != "" {
 			cfg, err := s.readFilter(name)
 			if err != nil {
 				return nil, err
 			}
-			styles = c.Merge(styles, c.Obj(cfg["localStyles"]))
+			styles = c.MergeStyles(styles, c.Obj(cfg["localStyles"]))
 		}
-		ref["styles"] = styles
+		ref["styles"] = c.ResolveStyles(styles)
 		styleNames := make([]string, 0, len(styles))
 		for key := range styles {
-			styleNames = append(styleNames, key)
+			if !c.LegacyStyle(key) {
+				styleNames = append(styleNames, key)
+			}
 		}
 		sort.Strings(styleNames)
 		ref["styleNames"] = styleNames

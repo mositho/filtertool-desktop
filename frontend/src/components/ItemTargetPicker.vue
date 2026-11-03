@@ -31,19 +31,16 @@ function classForBase(base: string): string | undefined {
 }
 function baseSelected(base: string): boolean {
   const itemClass = classForBase(base)
-  return selectedBaseNames.value.has(base) || Boolean(props.weaponOnly && itemClass && props.classes.includes(itemClass))
+  return selectedBaseNames.value.has(base) || Boolean(itemClass && props.classes.includes(itemClass))
 }
 function baseIsCovered(base: string): boolean {
   const itemClass = classForBase(base)
-  return Boolean(props.weaponOnly && itemClass && props.classes.includes(itemClass))
+  return Boolean(itemClass && props.classes.includes(itemClass))
 }
 const selectedBases = computed(() => [...props.bases].filter((base) => !baseIsCovered(base)).sort(compareBases))
 function classFullySelected(itemClass: string): boolean {
   const itemBases = classBases(itemClass)
-  return (
-    props.classes.includes(itemClass) ||
-    Boolean(props.weaponOnly && itemBases.length > 0 && itemBases.every((base) => selectedBaseNames.value.has(base)))
-  )
+  return props.classes.includes(itemClass) || Boolean(itemBases.length > 0 && itemBases.every((base) => selectedBaseNames.value.has(base)))
 }
 const visibleSelectionState = computed(() => {
   if (!bases.value.length) return "none"
@@ -59,13 +56,12 @@ const bases = computed(() => {
 })
 const allBasesSelected = computed(() => !bases.value.length || visibleSelectionState.value === "all")
 const noBasesSelected = computed(() => !bases.value.length || visibleSelectionState.value === "none")
-function normalizeWeaponSelections(selectedClasses: string[], selectedBases: string[]) {
-  if (!props.weaponOnly) return { classes: selectedClasses, bases: selectedBases }
+function normalizeSelections(selectedClasses: string[], selectedBases: string[]) {
   const classesResult = [...selectedClasses]
   const basesResult = new Set(selectedBases)
   for (const itemClass of classes.value) {
     const itemBases = classBases(itemClass)
-    if (itemBases.length && itemBases.every((base) => basesResult.has(base))) {
+    if (classesResult.includes(itemClass) || (itemBases.length && itemBases.every((base) => basesResult.has(base)))) {
       classesResult.push(itemClass)
       for (const base of itemBases) basesResult.delete(base)
     }
@@ -77,7 +73,7 @@ function setVisibleBases(selected: boolean) {
   if (!selected) {
     for (const base of bases.value) {
       const itemClass = classForBase(base)
-      if (props.weaponOnly && itemClass && props.classes.includes(itemClass)) classesToExpand.add(itemClass)
+      if (itemClass && props.classes.includes(itemClass)) classesToExpand.add(itemClass)
     }
   }
 
@@ -90,19 +86,12 @@ function setVisibleBases(selected: boolean) {
 
   const visible = new Set(bases.value)
   nextBases = selected ? [...new Set([...nextBases, ...bases.value])] : nextBases.filter((base) => !visible.has(base))
-  const normalized = selected ? normalizeWeaponSelections(nextClasses, nextBases) : { classes: nextClasses, bases: nextBases }
+  const normalized = selected ? normalizeSelections(nextClasses, nextBases) : { classes: nextClasses, bases: nextBases }
   emit("update:classes", normalized.classes)
   emit("update:bases", normalized.bases)
 }
 
 function toggleClass(itemClass: string) {
-  if (!props.weaponOnly) {
-    emit(
-      "update:classes",
-      props.classes.includes(itemClass) ? props.classes.filter((entry) => entry !== itemClass) : [...props.classes, itemClass],
-    )
-    return
-  }
   if (classFullySelected(itemClass)) {
     emit(
       "update:classes",
@@ -132,7 +121,7 @@ function toggleBase(base: string) {
     return
   }
   const nextBases = props.bases.includes(base) ? props.bases.filter((entry) => entry !== base) : [...props.bases, base]
-  const normalized = normalizeWeaponSelections(props.classes, nextBases)
+  const normalized = normalizeSelections(props.classes, nextBases)
   emit("update:classes", normalized.classes)
   emit("update:bases", normalized.bases)
 }
@@ -178,9 +167,7 @@ function toggleBase(base: string) {
             <input
               type="checkbox"
               :checked="classFullySelected(itemClass)"
-              :indeterminate="
-                weaponOnly && !classFullySelected(itemClass) && classBases(itemClass).some((base) => selectedBaseNames.has(base))
-              "
+              :indeterminate="!classFullySelected(itemClass) && classBases(itemClass).some((base) => selectedBaseNames.has(base))"
               @change="toggleClass(itemClass)"
             />
             {{ itemClass }}

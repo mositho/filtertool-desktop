@@ -1,0 +1,8 @@
+{
+  "goodFourLink": { "background": "#000000", "border": "#00ff80", "text": "#00ff80" },
+  "goodThreeLink": { "background": "#000000", "border": "#B9FF66", "text": "#B9FF66" },
+  "goodTwoLink": { "background": "#000000", "border": "#FFC800", "text": "#DADADA" },
+  "selectedFourLink": { "background": "#000000", "border": "#00FF95", "text": "#00FF95" },
+  "selectedThreeLink": { "background": "#000000", "border": "#51FF00", "text": "#51FF00" },
+  "selectedTwoLink": { "background": "#000000", "border": "#FFC800", "text": "#FFFFFF" }
+}

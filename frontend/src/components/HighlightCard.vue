@@ -14,6 +14,7 @@ import ItemTargetPicker from "./ItemTargetPicker.vue"
 import AdvancedOptions from "./AdvancedOptions.vue"
 import { areaLevelRangeError, itemLevelRangeError } from "@schema/range-validation"
 import rarityDefaults from "../../../internal/data/highlight-defaults.json"
+import StyleShortcut from "./StyleShortcut.vue"
 
 const props = defineProps<{
   highlight: Record<string, unknown>
@@ -120,6 +121,7 @@ const hasWeaponClass = computed(() => {
 const weaponCutoffAvailable = computed(() => {
   const bases = (fieldValue("baseTypes") as string[] | undefined) ?? []
   return (
+    !!props.phaseMode ||
     hasWeaponClass.value ||
     (props.reference.weaponClasses ?? []).some((itemClass) =>
       bases.some((base) => props.reference.baseTypesByClass[itemClass]?.includes(base)),
@@ -169,6 +171,11 @@ function fieldValue(path: string): unknown {
 }
 
 const rarityValue = computed(() => (props.highlight.rarities as string[] | undefined) ?? [...HIGHLIGHT_RARITIES])
+const styleKeys = computed(() => {
+  const style = props.highlight.style as Record<string, unknown> | undefined
+  if (typeof style?.preset === "string") return [style.preset]
+  return style && Object.keys(style).length ? [] : rarityValue.value.map((rarity) => `highlightedEquipment${rarity}`)
+})
 
 function setRarities(value: string[]) {
   setField("rarities", value)
@@ -336,7 +343,10 @@ function applyRaritySound(rarity: string, next: Record<string, unknown>) {
 <template>
   <div class="space-y-4">
     <div class="space-y-1">
-      <FieldLabel label="Match" tooltip="Select item classes, individual base types, or both." />
+      <div class="flex items-center justify-between gap-2">
+        <FieldLabel label="Match" tooltip="Select item classes, individual base types, or both." />
+        <StyleShortcut :style-keys="styleKeys" />
+      </div>
       <ItemTargetPicker
         :classes="(fieldValue('itemClasses') as string[]) ?? []"
         :bases="(fieldValue('baseTypes') as string[]) ?? []"
@@ -504,6 +514,7 @@ function applyRaritySound(rarity: string, next: Record<string, unknown>) {
                 tooltip="A named style from Global Settings applied to this whole highlight. Editing any field turns it into a custom style. Without a style, the per-rarity highlight styles are used."
               />
               <StyleEditor
+                allow-highlight-presets
                 :model-value="(fieldValue('style') as Record<string, unknown>) ?? {}"
                 :style-names="reference.styleNames"
                 :styles="reference.styles"

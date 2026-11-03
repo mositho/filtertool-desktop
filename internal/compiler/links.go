@@ -31,7 +31,7 @@ func (c *Compiler) links(p, o Object) string {
 		}{{6, "sixLink", "Red", "six_link"}, {5, "fiveLink", "Orange", "five_link"}} {
 			for _, rarity := range []string{"Normal", "Magic", "Rare"} {
 				style := Clone(Obj(c.Styles[link.style]))
-				style["text"] = Obj(c.Styles["highlightedEquipment"+rarity])["text"]
+				style["text"] = Obj(c.Styles[strings.ToLower(rarity)])["text"]
 				r := newRule().set("LinkedSockets", fmt.Sprintf("= %d", link.sockets)).set("Rarity", "== "+rarity).icon(link.color, "Diamond", 2).style(style)
 				rules = append(rules, c.tts(r, link.sound))
 			}
@@ -95,7 +95,7 @@ func (c *Compiler) links(p, o Object) string {
 						}
 					}
 					r.set("Rarity", "== "+rarity)
-					if text := Obj(c.Styles["highlightedEquipment"+rarity])["text"]; text != nil {
+					if text := Obj(c.Styles[strings.ToLower(rarity)])["text"]; text != nil {
 						r.set("SetTextColor", rgb(Text(text)))
 					}
 					result = append(result, r)
@@ -109,18 +109,18 @@ func (c *Compiler) links(p, o Object) string {
 		for _, class := range classes {
 			for _, kind := range kinds {
 				for _, color := range colors {
-					rules = append(rules, build(class, kind, color, "selected", "selected"+title(word)+"Link", maxFor("selected"))...)
+					rules = append(rules, build(class, kind, color, "selected", c.linkStyle(word, "selected"), maxFor("selected"))...)
 				}
 			}
 		}
 		for _, class := range classes {
 			for _, color := range colors {
-				rules = append(rules, build(class, "", color, "good", "good"+title(word)+"Link", maxFor("good"))...)
+				rules = append(rules, build(class, "", color, "good", c.linkStyle(word, "good"), maxFor("good"))...)
 			}
 		}
 		for _, class := range classes {
 			for _, kind := range kinds {
-				rules = append(rules, build(class, kind, "", "good", "good"+title(word)+"Link", maxFor("good"))...)
+				rules = append(rules, build(class, kind, "", "good", c.linkStyle(word, "good"), maxFor("good"))...)
 			}
 		}
 		generic := func(maximum float64) {

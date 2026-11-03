@@ -15,6 +15,7 @@ import NumberField from "./NumberField.vue"
 import { fieldDefault, defaultSource } from "../fieldDefaults"
 import RuleHeader from "./RuleHeader.vue"
 import { DEFAULT_STYLE_SETTINGS, MIN_STYLE_SIZE } from "../../../src/style-defaults"
+import { isLegacyStyle, mergeStyles, STYLE_ALIASES, STYLE_GRID_TEMPLATE, STYLE_SECTIONS, type StyleMap } from "../namedStyles"
 import CurrencyEditor from "./CurrencyEditor.vue"
 import { layoutFields } from "../formLayout"
 import { useCollapsedState } from "../viewState"
@@ -333,7 +334,7 @@ function toggleDefaultSubsection(group: string, section: FieldSubsection) {
 }
 
 function effectiveStyle(key: string): Record<string, unknown> {
-  return { ...((baseStyles.value[key] as Record<string, unknown>) ?? {}), ...(userStyles.value[key] ?? {}) }
+  return mergeStyles(baseStyles.value as StyleMap, userStyles.value)[key] ?? {}
 }
 
 function styleColor(style: Record<string, unknown>, prop: string): string {
@@ -342,7 +343,8 @@ function styleColor(style: Record<string, unknown>, prop: string): string {
 }
 
 function setStyleProp(key: string, prop: string, value: unknown) {
-  const entry = { ...(userStyles.value[key] ?? {}) }
+  const entry = { ...(mergeStyles({}, userStyles.value)[key] ?? {}) }
+  for (const old of ["gemCallout", "earlyShieldLink"]) if (STYLE_ALIASES[old] === key) delete userStyles.value[old]
   if (value === "" || value === undefined || value === null) delete entry[prop]
   else entry[prop] = value
   if (Object.keys(entry).length === 0) delete userStyles.value[key]
@@ -351,6 +353,10 @@ function setStyleProp(key: string, prop: string, value: unknown) {
 
 function resetStyle(key: string) {
   delete userStyles.value[key]
+  for (const old of ["gemCallout", "earlyShieldLink"]) if (STYLE_ALIASES[old] === key) delete userStyles.value[old]
+}
+function styleIsOverridden(key: string): boolean {
+  return !!mergeStyles({}, userStyles.value)[key]
 }
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
@@ -387,47 +393,12 @@ function stylePreviews(key: string): string[] {
 
 function swatchStyle(key: string, rarity: string): Record<string, string> {
   const style = effectiveStyle(key)
-  return swatchFrom(usesRarityText(key) ? { ...style, text: effectiveStyle(`highlightedEquipment${rarity}`).text } : style)
+  return swatchFrom(usesRarityText(key) ? { ...style, text: effectiveStyle(rarity.toLowerCase()).text } : style)
 }
-
-const STYLE_SECTIONS: { title: string; keys: string[] }[] = [
-  {
-    title: "Currency",
-    keys: ["currencyA", "currencyB", "currencyC", "currencyLeaguestart", "currencyLow", "gold", "goldHighStack", "wisdom", "portal"],
-  },
-  { title: "League Mechanic", keys: ["leagueMechanic"] },
-  {
-    title: "Links",
-    keys: [
-      "twoLink",
-      "goodTwoLink",
-      "selectedTwoLink",
-      "threeLink",
-      "goodThreeLink",
-      "selectedThreeLink",
-      "fourLink",
-      "goodFourLink",
-      "selectedFourLink",
-      "sixSocket",
-      "fiveLink",
-      "sixLink",
-    ],
-  },
-  { title: "Shields", keys: ["earlyShieldLink", "earlyShieldBase"] },
-  {
-    title: "Flasks & Tinctures",
-    keys: ["lifeFlask", "magicLifeFlask", "manaFlask", "magicManaFlask", "utilityFlask", "tincture"],
-  },
-  { title: "Jewellery", keys: ["jewellery", "magicJewellery", "rareJewellery", "rareArmour"] },
-  {
-    title: "Highlights",
-    keys: ["highlightedEquipmentRare", "highlightedEquipmentMagic", "highlightedEquipmentNormal"],
-  },
-]
 
 const styleSections = computed(() => {
   const used = new Set(STYLE_SECTIONS.flatMap((section) => section.keys))
-  const other = Object.keys(baseStyles.value).filter((key) => !used.has(key))
+  const other = Object.keys(baseStyles.value).filter((key) => !used.has(key) && !isLegacyStyle(key))
   return [...STYLE_SECTIONS, { title: "Other", keys: other }]
 })
 
@@ -435,8 +406,6 @@ const collapsed = useCollapsedState(
   computed(() => "filtertool:global-styles"),
   () => Object.fromEntries([...STYLE_SECTIONS.map((section) => section.title), "Other"].map((key) => [key, true])),
 )
-
-const STYLE_GRID_TEMPLATE = "minmax(7rem, 1fr) 2.75rem 2.75rem 2.75rem 3.5rem 4rem 5rem minmax(10rem, 2fr)"
 
 function toggleSection(title: string) {
   collapsed.value[title] = !collapsed.value[title]
@@ -524,6 +493,7 @@ function copyStyle(key: string) {
 
 function pasteStyle(key: string) {
   if (!clipboard.value) return
+  for (const old of ["gemCallout", "earlyShieldLink"]) if (STYLE_ALIASES[old] === key) delete userStyles.value[old]
   userStyles.value[key] = { ...clipboard.value.style }
 }
 
@@ -837,7 +807,7 @@ function removeSaved(name: string) {
                     @input="setStyleProp(key, 'text', ($event.target as HTMLInputElement).value)"
                     class="h-7 w-full cursor-pointer rounded border border-neutral-700 bg-transparent"
                   />
-                  <span v-else class="text-[10px] text-neutral-400" title="Text colors are inherited from Highlights by item rarity"
+                  <span v-else class="text-[10px] text-neutral-400" title="Text colors are inherited from Normal, Magic and Rare styles"
                     >Rarity</span
                   >
                   <input
@@ -871,7 +841,7 @@ function removeSaved(name: string) {
                     <button
                       type="button"
                       @click="copyStyle(key)"
-                      class="flex h-6 w-6 items-center justify-center rounded text-neutral-400 hover:bg-neutral-700 hover:text-white"
+                      class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded text-neutral-400 hover:bg-neutral-700 hover:text-white"
                       title="Copy style"
                     >
                       <svg
@@ -891,7 +861,7 @@ function removeSaved(name: string) {
                       type="button"
                       :disabled="!clipboard"
                       @click="pasteStyle(key)"
-                      class="flex h-6 w-6 items-center justify-center rounded text-neutral-400 hover:bg-neutral-700 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
+                      class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded text-neutral-400 hover:bg-neutral-700 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
                       title="Paste style"
                     >
                       <svg
@@ -909,10 +879,10 @@ function removeSaved(name: string) {
                     </button>
                     <button
                       type="button"
-                      :disabled="!userStyles[key]"
-                      :class="devMode && !userStyles[key] ? 'invisible' : ''"
+                      :disabled="!styleIsOverridden(key)"
+                      :class="devMode && !styleIsOverridden(key) ? 'invisible' : ''"
                       @click="resetStyle(key)"
-                      class="flex h-6 w-6 items-center justify-center rounded text-neutral-400 hover:bg-neutral-700 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
+                      class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded text-neutral-400 hover:bg-neutral-700 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
                       title="Reset style"
                     >
                       <svg
@@ -949,7 +919,7 @@ function removeSaved(name: string) {
                       <button
                         type="button"
                         @click="copyStyle(key)"
-                        class="flex h-6 w-6 items-center justify-center rounded text-neutral-400 hover:bg-neutral-700 hover:text-white"
+                        class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded text-neutral-400 hover:bg-neutral-700 hover:text-white"
                         title="Copy style"
                       >
                         <svg
@@ -969,7 +939,7 @@ function removeSaved(name: string) {
                         type="button"
                         :disabled="!clipboard"
                         @click="pasteStyle(key)"
-                        class="flex h-6 w-6 items-center justify-center rounded text-neutral-400 hover:bg-neutral-700 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
+                        class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded text-neutral-400 hover:bg-neutral-700 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
                         title="Paste style"
                       >
                         <svg
@@ -987,10 +957,10 @@ function removeSaved(name: string) {
                       </button>
                       <button
                         type="button"
-                        :disabled="!userStyles[key]"
-                        :class="devMode && !userStyles[key] ? 'invisible' : ''"
+                        :disabled="!styleIsOverridden(key)"
+                        :class="devMode && !styleIsOverridden(key) ? 'invisible' : ''"
                         @click="resetStyle(key)"
-                        class="flex h-6 w-6 items-center justify-center rounded text-neutral-400 hover:bg-neutral-700 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
+                        class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded text-neutral-400 hover:bg-neutral-700 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
                         title="Reset style"
                       >
                         <svg
@@ -1018,7 +988,7 @@ function removeSaved(name: string) {
                         @input="setStyleProp(key, 'text', ($event.target as HTMLInputElement).value)"
                         class="h-8 w-full cursor-pointer rounded border border-neutral-700 bg-transparent"
                       />
-                      <span v-else class="text-xs text-neutral-400">From Highlights by rarity</span>
+                      <span v-else class="text-xs text-neutral-400">From Normal, Magic and Rare</span>
                     </label>
                     <label class="flex flex-col gap-1">
                       <span class="text-[10px] uppercase text-neutral-500">Bg</span>

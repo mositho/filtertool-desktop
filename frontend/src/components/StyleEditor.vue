@@ -3,12 +3,14 @@ import { computed } from "vue"
 import NumberField from "./NumberField.vue"
 import { styleClipboard } from "../styleClipboard"
 import { DEFAULT_STYLE_SETTINGS, MIN_STYLE_SIZE } from "../../../src/style-defaults"
+import { isLegacyStyle } from "../namedStyles"
 
 const props = defineProps<{
   modelValue: Record<string, unknown>
   styleNames: string[]
   styles: Record<string, Record<string, unknown>>
   defaultStyle?: Record<string, unknown>
+  allowHighlightPresets?: boolean
 }>()
 
 const emit = defineEmits<{ "update:modelValue": [value: Record<string, unknown> | undefined] }>()
@@ -28,7 +30,10 @@ const COLOR_DEFAULTS: Record<string, string> = {
 
 const OVERRIDE_KEYS = ["text", "background", "border", "size", "backgroundOpacity"] as const
 
-const GRID_TEMPLATE = "minmax(7rem, 1fr) 2.75rem 2.75rem 2.75rem 3.5rem 4rem 5rem minmax(10rem, 2fr)"
+const GRID_TEMPLATE = "minmax(7rem, 1fr) 2.75rem 2.75rem 2.75rem 3.5rem 4rem 7rem minmax(10rem, 2fr)"
+const availableNames = computed(() =>
+  props.styleNames.filter((name) => !isLegacyStyle(name) && (props.allowHighlightPresets || !name.startsWith("highlightedEquipment"))),
+)
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
   const match = /^#?([0-9a-f]{6})$/i.exec(hex)
@@ -105,21 +110,22 @@ function pasteStyle() {
 <template>
   <div class="@container min-w-0 space-y-2">
     <div
-      class="hidden items-center gap-3 text-[10px] uppercase text-neutral-600 @min-[44rem]:grid"
+      class="hidden items-center gap-3 text-[10px] uppercase text-neutral-600 @min-[48rem]:grid"
       :style="{ gridTemplateColumns: GRID_TEMPLATE }"
     >
       <span>Preset</span><span>Text</span><span>Bg</span><span>Border</span><span title="20–45">Size</span
       ><span title="1 = fully opaque, 0 = transparent">Opacity</span><span></span><span class="text-right">Preview</span>
     </div>
 
-    <div class="hidden items-center gap-3 @min-[44rem]:grid" :style="{ gridTemplateColumns: GRID_TEMPLATE }">
+    <div class="hidden items-center gap-3 @min-[48rem]:grid" :style="{ gridTemplateColumns: GRID_TEMPLATE }">
       <select
         :value="preset"
         @change="setPreset(($event.target as HTMLSelectElement).value)"
         class="w-full min-w-0 rounded border border-neutral-700 bg-neutral-900 px-2 py-1.5 text-sm"
       >
         <option value="">Custom style</option>
-        <option v-for="name in styleNames" :key="name" :value="name">{{ name }}</option>
+        <option v-if="preset && !availableNames.includes(preset)" :value="preset">{{ preset }} (saved style)</option>
+        <option v-for="name in availableNames" :key="name" :value="name">{{ name }}</option>
       </select>
       <input
         type="color"
@@ -158,7 +164,7 @@ function pasteStyle() {
         <button
           type="button"
           @click="copyStyle"
-          class="flex h-6 w-6 items-center justify-center rounded text-neutral-400 hover:bg-neutral-700 hover:text-white"
+          class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded text-neutral-400 hover:bg-neutral-700 hover:text-white"
           title="Copy style"
         >
           <svg
@@ -178,7 +184,7 @@ function pasteStyle() {
           type="button"
           :disabled="!styleClipboard"
           @click="pasteStyle"
-          class="flex h-6 w-6 items-center justify-center rounded text-neutral-400 hover:bg-neutral-700 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
+          class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded text-neutral-400 hover:bg-neutral-700 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
           title="Paste style"
         >
           <svg
@@ -198,7 +204,7 @@ function pasteStyle() {
           type="button"
           :disabled="preset === '' && Object.keys(props.modelValue).length === 0"
           @click="resetStyle"
-          class="flex h-6 w-6 items-center justify-center rounded text-neutral-400 hover:bg-neutral-700 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
+          class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded text-neutral-400 hover:bg-neutral-700 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
           title="Reset style"
         >
           <svg
@@ -223,7 +229,7 @@ function pasteStyle() {
       </div>
     </div>
 
-    <div class="rounded border border-neutral-800 p-2 @min-[44rem]:hidden">
+    <div class="rounded border border-neutral-800 p-2 @min-[48rem]:hidden">
       <div class="mb-2 flex items-center justify-between gap-2">
         <select
           :value="preset"
@@ -231,13 +237,14 @@ function pasteStyle() {
           class="min-w-0 flex-1 rounded border border-neutral-700 bg-neutral-900 px-2 py-1.5 text-sm"
         >
           <option value="">Custom style</option>
-          <option v-for="name in styleNames" :key="name" :value="name">{{ name }}</option>
+          <option v-if="preset && !availableNames.includes(preset)" :value="preset">{{ preset }} (saved style)</option>
+          <option v-for="name in availableNames" :key="name" :value="name">{{ name }}</option>
         </select>
         <div class="flex shrink-0 items-center gap-0.5">
           <button
             type="button"
             @click="copyStyle"
-            class="flex h-6 w-6 items-center justify-center rounded text-neutral-400 hover:bg-neutral-700 hover:text-white"
+            class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded text-neutral-400 hover:bg-neutral-700 hover:text-white"
             title="Copy style"
           >
             <svg
@@ -257,7 +264,7 @@ function pasteStyle() {
             type="button"
             :disabled="!styleClipboard"
             @click="pasteStyle"
-            class="flex h-6 w-6 items-center justify-center rounded text-neutral-400 hover:bg-neutral-700 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
+            class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded text-neutral-400 hover:bg-neutral-700 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
             title="Paste style"
           >
             <svg
@@ -277,7 +284,7 @@ function pasteStyle() {
             type="button"
             :disabled="preset === '' && Object.keys(props.modelValue).length === 0"
             @click="resetStyle"
-            class="flex h-6 w-6 items-center justify-center rounded text-neutral-400 hover:bg-neutral-700 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
+            class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded text-neutral-400 hover:bg-neutral-700 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
             title="Reset style"
           >
             <svg

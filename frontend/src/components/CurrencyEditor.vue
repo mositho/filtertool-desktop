@@ -7,6 +7,7 @@ import type { ReferenceData } from "../api"
 import FieldInput from "./FieldInput.vue"
 import { layoutFields } from "../formLayout"
 import { useCollapsedState } from "../viewState"
+import StyleShortcut from "./StyleShortcut.vue"
 
 const props = defineProps<{
   root: Record<string, unknown>
@@ -73,7 +74,6 @@ const tiers = computed(() =>
   CURRENCY_TIERS.map((tier) => ({
     ...tier,
     items: visible.value.filter((name) => assignments.value[name] === tier.key),
-    total: Object.values(assignments.value).filter((key) => key === tier.key).length,
   })),
 )
 const active = computed(() => (selected.value.length === 1 ? selected.value[0] : undefined))
@@ -298,17 +298,9 @@ function updateField(field: SchemaField, value: unknown) {
   emit("change")
 }
 
-function previewStyle(tier: (typeof CURRENCY_TIERS)[number]) {
-  const configured = {
-    ...((getPath(props.defaults ?? {}, `currency.tiers.${tier.key}.style`) ?? {}) as Record<string, unknown>),
-    ...((getPath(props.root, `currency.tiers.${tier.key}.style`) ?? {}) as Record<string, unknown>),
-  }
-  const style = { ...props.reference.styles?.[tier.style], ...props.reference.styles?.[String(configured.preset)], ...configured }
-  return {
-    color: String(style.text ?? "#C8C8C8"),
-    backgroundColor: String(style.background ?? "#000000"),
-    borderColor: String(style.border ?? "#000000"),
-  }
+function tierStyleKey(tier: (typeof CURRENCY_TIERS)[number]): string {
+  const configured = effectiveTierSetting(tier.key, "style") as Record<string, unknown> | undefined
+  return typeof configured?.preset === "string" ? configured.preset : tier.style
 }
 </script>
 
@@ -353,15 +345,6 @@ function previewStyle(tier: (typeof CURRENCY_TIERS)[number]) {
               >
                 <span aria-hidden="true" class="text-neutral-400">{{ tierExpanded(tier) ? "▾" : "▸" }}</span>
                 <span class="text-sm font-semibold text-neutral-300">{{ tier.title }}</span>
-                <span class="flex flex-wrap items-center gap-2" data-tier-information>
-                  <span class="text-xs text-neutral-500">{{ search ? `${tier.items.length} / ` : "" }}{{ tier.total }}</span>
-                  <span
-                    class="rounded border px-2 py-0.5 text-xs"
-                    :style="previewStyle(tier)"
-                    title="Style preview · edit in Global Settings"
-                    >{{ tier.title }}</span
-                  >
-                </span>
               </button>
             </h3>
             <div class="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-2">
@@ -387,6 +370,7 @@ function previewStyle(tier: (typeof CURRENCY_TIERS)[number]) {
                   <path d="m9 3-1 3-3 1-2 3 2 2-1 3 2 3 3-1 3 2 3-1 1-3 3-1 2-3-2-2 1-3-2-3-3 1-3-2-3 1Z" />
                 </svg>
               </button>
+              <StyleShortcut :style-keys="[tierStyleKey(tier)]" />
             </div>
           </div>
           <div

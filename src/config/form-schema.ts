@@ -476,6 +476,7 @@ const equipmentRarityItems: SchemaField[] = [
     min: 0,
     integer: true,
     placeholder: "uncapped",
+    defaultValue: null,
     previewSection: "Rare Items",
     tooltip: "Area level up to which rare items are shown; empty means uncapped. Only applies to items that don't match other rules.",
   },
@@ -633,7 +634,7 @@ const socketRules = [2, 3].map((count) =>
   ruleSection(
     `early.rules.armour${count}`,
     `${count} Sockets · Armour`,
-    { size: count === 2 ? 40 : 45 },
+    {},
     {
       path: `early.${count === 2 ? "two" : "three"}SocketMaxAreaLevel`,
       label: `${count === 2 ? "Two" : "Three"} Sockets`,
@@ -645,7 +646,7 @@ const socketRules = [2, 3].map((count) =>
 const linkRules = [2, 3, 4].flatMap((count) =>
   ["selected", "good", "generic"].map((tier) => {
     const word = count === 2 ? "two" : count === 3 ? "three" : "four"
-    const preset = `${tier === "generic" ? "" : tier}${tier === "generic" ? word : word[0].toUpperCase() + word.slice(1)}Link`
+    const preset = `${word}Link`
     return ruleSection(
       `links.rules.${count}${tier}`,
       `${count} Links · ${tier === "selected" ? "Colours + Armour" : tier === "good" ? "Colours or Armour" : "Generic"}`,

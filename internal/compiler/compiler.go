@@ -24,13 +24,17 @@ type Compiler struct {
 	rarityDefaults            Object
 	legacyCurrency            bool // Only used by the frozen web parity tests.
 	legacyEquipmentSelections bool // Only used by the frozen web parity tests.
+	legacyLinkStyles          map[string]bool
 }
 
 func New(defaults, styles Object, folder string) *Compiler {
 	if folder == "" {
 		folder = "poeft-sounds-v2"
 	}
-	c := &Compiler{Defaults: MergeDefaults(data.Load[Object]("defaults.json"), defaults), Styles: Merge(data.Load[Object]("styles.json"), styles), SoundFolder: folder, templates: data.Load[Object]("rules.json"), weapons: data.Load[[]Weapon]("weapons.json"), manifest: map[string]string{}}
+	c := &Compiler{Defaults: MergeDefaults(data.Load[Object]("defaults.json"), defaults), Styles: ResolveStyles(styles), SoundFolder: folder, templates: data.Load[Object]("rules.json"), weapons: data.Load[[]Weapon]("weapons.json"), manifest: map[string]string{}, legacyLinkStyles: map[string]bool{}}
+	for name := range data.Load[Object]("legacy-styles.json") {
+		_, c.legacyLinkStyles[name] = styles[name]
+	}
 	c.starterSupports = data.Load[[]string]("starter-supports.json")
 	c.Defaults = CleanRuleDefaults(c.Defaults)
 	c.rarityDefaults = data.Load[Object]("highlight-defaults.json")
@@ -129,14 +133,20 @@ func (c *Compiler) gems(cfg Object) string {
 	rules := []*rule{}
 	sounding := Strings(cfg["gems"])
 	for _, gem := range sounding {
-		r := newRule().quoted("BaseType", true, gem).icon("Cyan", "Star", 2).style(Obj(c.Styles["gemCallout"]))
+		r := newRule().quoted("BaseType", true, gem).icon("Cyan", "Star", 2).style(Obj(c.Styles["gemHighlight"]))
 		rules = append(rules, c.tts(r, strings.TrimSuffix(gem, " Support")))
 	}
-	for _, gem := range unique(append(Strings(cfg["styleOnly"]), c.starterSupports...)) {
+	for _, gem := range unique(Strings(cfg["styleOnly"])) {
 		if contains(sounding, gem) {
 			continue
 		}
 		rules = append(rules, newRule().quoted("BaseType", true, gem).style(Obj(c.Styles["gem"])))
+	}
+	for _, gem := range c.starterSupports {
+		if contains(sounding, gem) || contains(Strings(cfg["styleOnly"]), gem) {
+			continue
+		}
+		rules = append(rules, newRule().quoted("BaseType", true, gem).style(Obj(c.Styles["gemHighlight"])))
 	}
 	rules = append(rules, c.template(Text(c.templates["gems"]))...)
 	return heading("Gems", rules...)
@@ -233,7 +243,11 @@ func (c *Compiler) early(p, cfg Object) string {
 	}
 	if mode == "full" {
 		for _, kind := range Strings(Val(p, "preferredArmour", c.Defaults["preferredArmour"])) {
-			rules = append(rules, defence(newRule().quoted("Class", false, "Shields").number("AreaLevel", ">", max).set("Rarity", "== Rare").style(Obj(c.Styles["rareArmour"])), kind))
+			style := Obj(c.Styles["rare"])
+			if c.legacyEquipmentSelections {
+				style = Obj(c.Styles["rareArmour"])
+			}
+			rules = append(rules, defence(newRule().quoted("Class", false, "Shields").number("AreaLevel", ">", max).set("Rarity", "== Rare").style(style), kind))
 		}
 	}
 	if Val(Obj(p["misc"]), "showRusticSash", Obj(c.Defaults["misc"])["showRusticSash"]) == true {
@@ -253,12 +267,18 @@ func (c *Compiler) earlySockets(cfg Object) string {
 		if count == 3 {
 			cut = Val(cfg, "threeSocketMaxAreaLevel", cfg["earlyMaxAreaLevel"])
 		}
-		r := newRule().number("Sockets", "==", count).quoted("Class", false, armour...).number("AreaLevel", "<=", Val(rc, "maxAreaLevel", cut))
-		if rc["enabled"] == false {
-			rules = append(rules, r.hide())
-		} else {
-			rules = append(rules, c.presentation(r, rc, Object{"size": float64(40 + i*5)}))
+		base := func() *rule {
+			return newRule().number("Sockets", "==", count).quoted("Class", false, armour...).number("AreaLevel", "<=", Val(rc, "maxAreaLevel", cut))
 		}
+		if c.legacyEquipmentSelections {
+			rules = append(rules, c.presentation(base(), rc, Object{"size": float64(40 + i*5)}))
+			continue
+		}
+		for _, rarity := range []string{"Normal", "Magic", "Rare"} {
+			rules = append(rules, c.presentation(base().set("Rarity", "== "+rarity), rc, Obj(c.Styles[strings.ToLower(rarity)])))
+		}
+		// Keep the existing catch-all for unique items after the rarity variants.
+		rules = append(rules, c.presentation(base(), rc, Object{}))
 	}
 	return heading("Early Sockets", rules...)
 }
@@ -290,7 +310,11 @@ func (c *Compiler) equipment(rarity string, cfg Object) string {
 		if rc["enabled"] == false {
 			r.hide()
 		} else {
-			c.presentation(r, rc, Object{"size": float64(shape.size), "text": color})
+			style := Object{"size": float64(shape.size), "text": color}
+			if !c.legacyEquipmentSelections {
+				style = Merge(style, Obj(c.Styles[strings.ToLower(rarity)]))
+			}
+			c.presentation(r, rc, style)
 		}
 		rules = append(rules, r)
 	}
@@ -319,6 +343,12 @@ func (c *Compiler) normal(cfg Object) string {
 		} else {
 			r = newRule().quoted("Class", false, "Belts").set("Rarity", "== Normal")
 			style = Obj(c.Styles["jewellery"])
+		}
+		if !c.legacyEquipmentSelections {
+			style = Clone(Obj(c.Styles["normal"]))
+			if key == "equipment" && style["size"] == nil {
+				style["size"] = float64(40)
+			}
 		}
 		r.number("AreaLevel", "<=", Val(rc, "maxAreaLevel", cfg["maxAreaLevel"]))
 		if rc["enabled"] == false {

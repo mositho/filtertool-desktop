@@ -519,7 +519,7 @@ func (s *Store) globals() (Object, Object, error) {
 			return nil, nil, err
 		}
 		st, err := s.source("styles")
-		return c.CleanRuleDefaults(d), st, err
+		return c.CleanRuleDefaults(d), c.MergeStyles(Object{}, st), err
 	}
 	d, err := s.optional("defaults.json")
 	if err != nil {
@@ -529,7 +529,7 @@ func (s *Store) globals() (Object, Object, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	return c.CleanRuleDefaults(c.MergeDefaults(data.Load[Object]("defaults.json"), d)), c.Merge(data.Load[Object]("styles.json"), st), nil
+	return c.CleanRuleDefaults(c.MergeDefaults(data.Load[Object]("defaults.json"), d)), c.MergeStyles(data.Load[Object]("styles.json"), st), nil
 }
 func (s *Store) compiler(cfg Object) (*c.Compiler, error) {
 	c.DiscardFilterRuleOverrides(cfg)
@@ -541,7 +541,7 @@ func (s *Store) compiler(cfg Object) (*c.Compiler, error) {
 	if err != nil {
 		return nil, err
 	}
-	return c.New(c.MergeDefaults(d, c.Obj(cfg["localDefaults"])), c.Merge(st, c.Obj(cfg["localStyles"])), soundFolder(settings)), nil
+	return c.New(c.MergeDefaults(d, c.Obj(cfg["localDefaults"])), c.MergeStyles(st, c.Obj(cfg["localStyles"])), soundFolder(settings)), nil
 }
 func soundFolder(settings Object) string {
 	folder := c.Text(settings["soundsFolder"])

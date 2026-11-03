@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue"
+import { computed, provide, ref } from "vue"
 import {
   BUILD_PROFILE_SCHEMA,
   BUILD_SPECIFIC_SCHEMA,
@@ -20,9 +20,49 @@ import starterSupports from "../../../internal/data/starter-supports.json"
 import CurrencyEditor from "./CurrencyEditor.vue"
 import { layoutFields } from "../formLayout"
 import { useCollapsedState } from "../viewState"
+import { isLegacyStyle, mergeStyles, namedStylesKey, STYLE_ALIASES, type StyleMap } from "../namedStyles"
+import NamedStylesPanel from "./NamedStylesPanel.vue"
 
 const props = defineProps<{ modelValue: FilterConfig; reference: ReferenceData; filterName: string; defaults?: Record<string, unknown> }>()
 const emit = defineEmits<{ "update:modelValue": [value: FilterConfig] }>()
+const stylesPanel = ref<InstanceType<typeof NamedStylesPanel> | null>(null)
+
+const localStyles = computed(() => mergeStyles({}, (props.modelValue.localStyles ?? {}) as StyleMap))
+const effectiveReference = computed(() => {
+  const styles = mergeStyles(props.reference.globalStyles ?? props.reference.styles, localStyles.value)
+  return {
+    ...props.reference,
+    styles,
+    styleNames: Object.keys(styles)
+      .filter((key) => !isLegacyStyle(key))
+      .sort(),
+  }
+})
+function setLocalStyle(key: string, value: Record<string, unknown> | undefined) {
+  const next = { ...localStyles.value }
+  for (const old of ["gemCallout", "earlyShieldLink"]) if (STYLE_ALIASES[old] === key) delete next[old]
+  if (value && Object.keys(value).length) next[key] = value
+  else delete next[key]
+  if (Object.keys(next).length) props.modelValue.localStyles = next
+  else delete props.modelValue.localStyles
+  emitChange()
+}
+provide(namedStylesKey, {
+  openPopover: ref(null),
+  styles: computed(() => effectiveReference.value.styles),
+  overrides: localStyles,
+  set(key, property, value) {
+    const next = { ...localStyles.value[key] }
+    if (value === undefined || value === null || value === "") delete next[property]
+    else next[property] = value
+    setLocalStyle(key, next)
+  },
+  reset: (key) => setLocalStyle(key, undefined),
+  paste: setLocalStyle,
+  reveal(key) {
+    stylesPanel.value?.reveal(key)
+  },
+})
 
 function emitChange() {
   emit("update:modelValue", props.modelValue)
@@ -51,11 +91,18 @@ function optionsFor(field: SchemaField): string[] {
 }
 
 function defaultFor(root: Record<string, unknown>, field: SchemaField): unknown {
-  return fieldDefault(field, root, props.defaults, props.reference.styles)
+  return fieldDefault(field, root, props.defaults, effectiveReference.value.styles)
 }
 
 function fieldIsSet(root: Record<string, unknown>, field: SchemaField): boolean {
   return getPath(root, field.path) !== undefined
+}
+
+function usesDefault(root: Record<string, unknown>, field: SchemaField): boolean {
+  const fallback = defaultFor(root, field)
+  return (
+    fallback !== undefined && (!fieldIsSet(root, field) || (field.path === "shieldProgression" && getPath(root, field.path) === fallback))
+  )
 }
 
 function effectiveValue(root: Record<string, unknown>, field: SchemaField): unknown {
@@ -73,6 +120,7 @@ function displayValue(root: Record<string, unknown>, field: SchemaField): unknow
 }
 
 function setFieldValue(root: Record<string, unknown>, field: SchemaField, value: unknown) {
+  if (field.path === "shieldProgression" && value === defaultFor(root, field)) value = undefined
   if (value === undefined) deletePath(root, field.path)
   else setPath(root, field.path, value)
   emitChange()
@@ -214,12 +262,14 @@ function toggleSection(key: string) {
 }
 
 function collapseAll() {
+  stylesPanel.value?.collapse()
   const next: Record<string, boolean> = { ...collapsed.value }
   for (const entry of allGroups.value) next[entry.group.key] = true
   collapsed.value = next
 }
 
 function expandAll() {
+  stylesPanel.value?.expand()
   const next = { ...collapsed.value }
   for (const { group } of allGroups.value) next[group.key] = false
   collapsed.value = next
@@ -263,7 +313,7 @@ function expandAll() {
           <CurrencyEditor
             v-if="entry.group.key === 'currency'"
             :root="buildSpecific"
-            :reference="reference"
+            :reference="effectiveReference"
             :filter-name="filterName"
             :defaults="defaults"
             @change="emitChange"
@@ -272,7 +322,7 @@ function expandAll() {
           <HighlightEditor
             v-if="entry.group.key === 'highlightedEquipment'"
             :highlights="highlights"
-            :reference="reference"
+            :reference="effectiveReference"
             @change="emitChange"
             @update:highlights="setHighlights"
           />
@@ -280,7 +330,7 @@ function expandAll() {
           <template v-else-if="entry.group.key === 'weaponPhases'">
             <WeaponProgression
               :phases="weaponPhases"
-              :reference="reference"
+              :reference="effectiveReference"
               :phase-template="getPath(defaults ?? {}, 'weaponPhaseTemplate') as Record<string, unknown> | undefined"
               @update:phases="setWeaponPhases"
               @change="emitChange"
@@ -295,13 +345,13 @@ function expandAll() {
                 :class="['min-w-0', fullWidth ? 'sm:col-span-2' : '']"
               >
                 <FieldInput
-                  :reference="reference"
+                  :reference="effectiveReference"
                   :default-source="defaultSource(field, defaults)"
                   :field="field"
                   :value="displayValue(entry.root, field)"
                   :options="optionsFor(field)"
                   :placeholder="displayPlaceholder(entry.root, field)"
-                  :defaulted="!fieldIsSet(entry.root, field) && defaultFor(entry.root, field) !== undefined"
+                  :defaulted="usesDefault(entry.root, field)"
                   :can-reset="fieldIsSet(entry.root, field)"
                   @update:value="setFieldValue(entry.root, field, $event)"
                   @reset="setFieldValue(entry.root, field, undefined)"
@@ -374,13 +424,13 @@ function expandAll() {
                   :class="['min-w-0', fullWidth ? 'sm:col-span-2' : '']"
                 >
                   <FieldInput
-                    :reference="reference"
+                    :reference="effectiveReference"
                     :default-source="defaultSource(field, defaults)"
                     :field="field"
                     :value="displayValue(sub.root, field)"
                     :options="optionsFor(field)"
                     :placeholder="displayPlaceholder(sub.root, field)"
-                    :defaulted="!fieldIsSet(sub.root, field) && defaultFor(sub.root, field) !== undefined"
+                    :defaulted="usesDefault(sub.root, field)"
                     :can-reset="fieldIsSet(sub.root, field)"
                     @update:value="setFieldValue(sub.root, field, $event)"
                     @reset="setFieldValue(sub.root, field, undefined)"
@@ -392,5 +442,6 @@ function expandAll() {
         </div>
       </section>
     </template>
+    <NamedStylesPanel ref="stylesPanel" :filter-name="filterName" />
   </div>
 </template>

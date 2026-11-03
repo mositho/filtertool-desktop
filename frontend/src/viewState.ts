@@ -39,7 +39,7 @@ export function useCollapsedState(key: Readonly<Ref<string>>, defaults: () => Re
 
 export function renameFilterViewState(from: string, to: string) {
   if (from === to) return
-  for (const prefix of ["filtertool:collapsed:", "filtertool:currency-tiers:"]) {
+  for (const prefix of ["filtertool:collapsed:", "filtertool:currency-tiers:", "filtertool:styles:"]) {
     try {
       const saved = localStorage.getItem(prefix + from)
       if (saved !== null) localStorage.setItem(prefix + to, saved)
@@ -52,7 +52,7 @@ export function renameFilterViewState(from: string, to: string) {
 }
 
 export function forgetFilterViewState(name: string) {
-  for (const prefix of ["filtertool:collapsed:", "filtertool:currency-tiers:"]) {
+  for (const prefix of ["filtertool:collapsed:", "filtertool:currency-tiers:", "filtertool:styles:"]) {
     try {
       localStorage.removeItem(prefix + name)
     } catch {

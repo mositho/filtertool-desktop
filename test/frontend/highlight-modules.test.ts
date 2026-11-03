@@ -2,6 +2,7 @@
 import { afterEach, describe, expect, it } from "vitest"
 import { createApp, defineComponent, h, nextTick, reactive, type App } from "vue"
 import HighlightCard from "../../frontend/src/components/HighlightCard.vue"
+import WeaponPhaseTemplateEditor from "../../frontend/src/components/WeaponPhaseTemplateEditor.vue"
 import type { ReferenceData } from "../../frontend/src/api"
 import { TEST_BASE_TYPE } from "../fixtures/base-types"
 import { emptyHighlight, emptyWeaponHighlight } from "../../src/config/form-schema"
@@ -17,6 +18,43 @@ afterEach(() => {
 })
 
 describe("highlight modules", () => {
+  it.each([false, true])("offers every applicable phase module before selecting targets, perRarity=%s", async (perRarityCustomization) => {
+    const modelValue = reactive<Record<string, unknown>>({ perRarityCustomization })
+    const reference = {
+      itemClasses: [],
+      weaponClasses: [],
+      baseTypesByClass: {},
+      sounds: [],
+      styles: {},
+      styleNames: [],
+    } as unknown as ReferenceData
+    container = document.createElement("div")
+    document.body.append(container)
+    app = createApp({ setup: () => () => h(WeaponPhaseTemplateEditor, { modelValue, reference }) })
+    app.mount(container)
+    ;[...container.querySelectorAll<HTMLButtonElement>("button")].find((button) => button.textContent?.includes("Add module"))!.click()
+    await nextTick()
+    const buttons = [...container.querySelectorAll<HTMLButtonElement>("button")]
+    for (const label of [
+      "Minimum Attack Speed",
+      "Minimum Linked Sockets",
+      "Minimum Sockets",
+      "Item Level",
+      "Weapon Cutoff",
+      "Size",
+      "Style",
+    ]) {
+      expect(buttons.some((button) => button.textContent?.trim() === label)).toBe(true)
+    }
+    expect(buttons.some((button) => button.textContent?.trim() === "Area Level")).toBe(false)
+    for (const label of ["Icon", "Sound"])
+      expect(buttons.some((button) => button.textContent?.trim() === label)).toBe(!perRarityCustomization)
+    buttons.find((button) => button.textContent?.trim() === "Weapon Cutoff")!.click()
+    await nextTick()
+    expect(modelValue.weaponCutoffOverlap).toBe(10)
+    expect(modelValue.modules).toContain("weaponCutoff")
+  })
+
   it("enables per-rarity customization on newly created highlights and weapon phases", () => {
     expect(emptyHighlight()).toEqual({ perRarityCustomization: true })
     expect(emptyWeaponHighlight()).toEqual({ perRarityCustomization: true })

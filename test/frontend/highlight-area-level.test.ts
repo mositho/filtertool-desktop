@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it } from "vitest"
 import { createApp, defineComponent, h, nextTick, reactive, type App } from "vue"
 import HighlightCard from "../../frontend/src/components/HighlightCard.vue"
 import type { ReferenceData } from "../../frontend/src/api"
-import { TEST_BASE_TYPE } from "../fixtures/base-types"
+import { TEST_BASE_TYPE, TEST_BASE_TYPE_TWO } from "../fixtures/base-types"
 
 let app: App | undefined
 let container: HTMLDivElement | undefined
@@ -18,7 +18,7 @@ describe("highlight level inputs", () => {
     const highlight = reactive<Record<string, unknown>>({})
     const reference = {
       itemClasses: ["Rings", "One Hand Axes"],
-      baseTypesByClass: { "Rings": [TEST_BASE_TYPE], "One Hand Axes": [TEST_BASE_TYPE] },
+      baseTypesByClass: { "Rings": [TEST_BASE_TYPE_TWO], "One Hand Axes": [TEST_BASE_TYPE] },
       weaponClasses: ["One Hand Axes"],
       sounds: [],
     } as unknown as ReferenceData
@@ -50,8 +50,8 @@ describe("highlight level inputs", () => {
     )!
     baseLabel.querySelector<HTMLInputElement>("input")!.click()
     await nextTick()
-    expect(highlight.baseTypes).toEqual([TEST_BASE_TYPE])
-    expect(highlight.itemClasses).toEqual(["Rings"])
+    expect(highlight.baseTypes).toEqual([])
+    expect(highlight.itemClasses).toEqual(["Rings", "One Hand Axes"])
   })
 
   it("shows feedback when Min Area Level is above Max Area Level", async () => {
