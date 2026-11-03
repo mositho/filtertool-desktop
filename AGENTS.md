@@ -1,6 +1,6 @@
 # Agent guide
 
-Filtertool is a Windows desktop Path of Exile **1** leveling-filter builder. The internal repository/module name is `filtertool-desktop`; the public app name is Filtertool.
+Filtertool is a Windows and Linux desktop Path of Exile **1** leveling-filter builder. The internal repository/module name is `filtertool-desktop`; the public app name is Filtertool.
 
 ## Scope and context
 
@@ -15,7 +15,7 @@ Filtertool is a Windows desktop Path of Exile **1** leveling-filter builder. The
 - `frontend/` is the Vue editor; `src/config/` contains UI-only form metadata and validation, not a TypeScript backend.
 - `internal/compiler/` is the Go compiler. `testdata/` contains output captured from the original web compiler with user overrides and TTS disabled, plus the corresponding frozen weapon dataset. Keep parity tests meaningful; normal builds use current generated data.
 - `internal/data/` embeds built-in defaults, styles, rule instructions, reference data and the sound manifest. Edit source data, not generated reference/weapon JSON. Base updates must be reviewed, not silently released.
-- User filters, settings and sounds belong in `%APPDATA%\Filtertool`; never use personal data or game exports as test fixtures. Tests use temporary directories.
+- User filters, settings and sounds belong in the platform config directory (`os.UserConfigDir()/Filtertool`; for example, `%APPDATA%\Filtertool` on Windows and `$XDG_CONFIG_HOME/Filtertool` or `~/.config/Filtertool` on Linux). Never use personal data or game exports as test fixtures. Tests use temporary directories.
 - Only existing web JSON import is supported. No TypeScript config execution or pre-stable desktop migration framework.
 
 ## UI and user experience
@@ -36,7 +36,7 @@ Filtertool is a Windows desktop Path of Exile **1** leveling-filter builder. The
 - Test a shared behavior at its owning layer; add integration coverage only for wiring that could realistically fail. Do not duplicate the same assertions through every parent component.
 - Simple visual/layout changes usually need a build and manual inspection, not new automated UI tests. Do not remove useful existing regression tests solely to reduce the test count.
 - During development, run targeted tests. Before handing off code changes, run `npm run check` and `npm run frontend:build` once the changes are ready; rerun affected checks after subsequent edits. Documentation-only changes do not require the application suite.
-- Use Windows CI/manual testing for native dialogs, WebView2, installer and UI behavior. State what was verified and what still needs Windows testing; do not claim unperformed checks.
+- Use Windows CI/manual testing for Windows-specific native dialogs, WebView2, installer and UI behavior; use Linux CI/manual testing for GTK/WebKitGTK, native dialogs, Flatpak and UI behavior. State what was verified and what still needs platform testing; do not claim unperformed checks.
 
 ## Repository actions
 
