@@ -1,5 +1,5 @@
 name: Release
-run-name: Release v${{ inputs.version }} by @${{ github.actor }}
+run-name: Release by @${{ github.actor }}
 
 on:
   workflow_dispatch:
@@ -8,6 +8,9 @@ on:
         description: "Release version (major.minor.patch, e.g. 1.0.0)"
         required: true
         type: string
+  pull_request:
+    branches: [main]
+    types: [closed]
 
 concurrency:
   group: release
@@ -18,6 +21,7 @@ permissions:
 
 jobs:
   validate:
+    if: github.event_name != 'pull_request' || (github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release/v'))
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
@@ -25,10 +29,6 @@ jobs:
       tag: ${{ steps.version.outputs.tag }}
       changed: ${{ steps.version.outputs.changed }}
     steps:
-      - name: Require main
-        env:
-          RELEASE_REF: ${{ github.ref }}
-        run: test "$RELEASE_REF" = refs/heads/main
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
@@ -36,12 +36,28 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
-      - name: Validate release version
+      - name: Check release trigger
         id: version
         env:
+          EVENT_NAME: ${{ github.event_name }}
+          RELEASE_REF: ${{ github.ref }}
           RELEASE_VERSION: ${{ inputs.version }}
+          PR_MERGED: ${{ github.event.pull_request.merged }}
+          PR_BASE_REF: ${{ github.event.pull_request.base.ref }}
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
         run: |
-          node scripts/set-version.mjs "$RELEASE_VERSION"
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            [[ "$PR_MERGED" == "true" && "$PR_BASE_REF" == "main" ]] || exit 1
+            [[ "$PR_HEAD_REF" =~ ^release/v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]] || exit 1
+            RELEASE_VERSION="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.${BASH_REMATCH[3]}"
+            if [[ "$(node -p 'JSON.parse(require("fs").readFileSync("package.json", "utf8")).version')" != "$RELEASE_VERSION" ]]; then
+              echo "Merged release branch version does not match package.json."
+              exit 1
+            fi
+          else
+            [[ "$RELEASE_REF" == "refs/heads/main" ]] || exit 1
+            node scripts/set-version.mjs "$RELEASE_VERSION"
+          fi
           TAG="v$RELEASE_VERSION"
           node scripts/check-version.mjs "$TAG"
           if git show-ref --verify --quiet "refs/tags/$TAG"; then
@@ -49,7 +65,7 @@ jobs:
             exit 1
           fi
           if [[ "$(git rev-parse origin/main)" != "$GITHUB_SHA" ]]; then
-            echo "main has changed. Start a fresh run from its latest commit."
+            echo "main has changed. Start a fresh release run."
             exit 1
           fi
           echo "version=$RELEASE_VERSION" >> "$GITHUB_OUTPUT"

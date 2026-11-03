@@ -6,6 +6,13 @@
 
 A desktop item-filter builder for Path of Exile 1, focused on leveling.
 
+<p>
+  <a href="https://github.com/mositho/filtertool-desktop/releases/latest/download/Filtertool-Setup.exe"><img src="https://img.shields.io/badge/Download-Windows%20Installer-2563eb?style=for-the-badge&logo=windows&logoColor=white" alt="Download the Windows installer" height="42" /></a>
+  <a href="https://github.com/mositho/filtertool-desktop/releases/latest"><img src="https://img.shields.io/github/v/release/mositho/filtertool-desktop?label=Latest%20version&style=for-the-badge" alt="Latest Filtertool version" height="42" /></a>
+</p>
+
+[Portable Windows](https://github.com/mositho/filtertool-desktop/releases/latest/download/Filtertool.exe) · [Linux Flatpak](https://github.com/mositho/filtertool-desktop/releases/latest/download/Filtertool.flatpak) · [All downloads](https://github.com/mositho/filtertool-desktop/releases/latest)
+
 [Get started](#get-started) · [Quick guide](#quick-guide) · [Releases](https://github.com/mositho/filtertool-desktop/releases) · [Filter terminology](docs/GLOSSARY.md)
 
 </div>
@@ -14,7 +21,7 @@ A desktop item-filter builder for Path of Exile 1, focused on leveling.
 
 ## Get started
 
-Download a stable version for your platform from [Releases](https://github.com/mositho/filtertool-desktop/releases).
+Download the [Windows installer](https://github.com/mositho/filtertool-desktop/releases/latest/download/Filtertool-Setup.exe), or choose [portable Windows, Linux Flatpak, and other release files](https://github.com/mositho/filtertool-desktop/releases/latest).
 
 Your filters, settings and sounds are kept in Filtertool's application data folder. Back it up to keep a copy of your work.
 

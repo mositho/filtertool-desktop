@@ -45,9 +45,12 @@ it("keeps installation/builds out of fresh write-enabled jobs", () => {
   }
 })
 
-it("keeps releases manual, conditional on checked metadata, and off protected main", () => {
+it("requires a manual release start and resumes after a merged version PR", () => {
   const release = parse(read(".github/workflows/release.yml"))
-  expect(Object.keys(release.on)).toEqual(["workflow_dispatch"])
+  expect(Object.keys(release.on)).toEqual(["workflow_dispatch", "pull_request"])
+  expect(release.on.pull_request).toEqual({ branches: ["main"], types: ["closed"] })
+  expect(release.jobs.validate.if).toContain("pull_request.merged == true")
+  expect(release.jobs.validate.if).toContain("release/v")
   expect(release.concurrency).toEqual({ "group": "release", "cancel-in-progress": false })
   expect(release.jobs.checks.if).toBe("needs.validate.outputs.changed == 'false'")
   expect(release.jobs.package.needs).toContain("checks")
