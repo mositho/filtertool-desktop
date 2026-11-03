@@ -43,6 +43,52 @@ func TestPerRarityDefaultsAndExplicitOverrides(t *testing.T) {
 	}
 }
 
+func TestHighlightsKeepRarityStylesUnlessStyleModuleIsAdded(t *testing.T) {
+	c := New(nil, nil, "")
+	styleCheck := func(output string, colors ...string) {
+		for _, color := range colors {
+			if !strings.Contains(output, "SetTextColor "+color) {
+				t.Fatalf("missing rarity style color %s: %s", color, output)
+			}
+		}
+	}
+
+	for _, cfg := range []Object{
+		{"itemClasses": []any{"Boots"}},
+		{"itemClasses": []any{"Boots"}, "perRarityCustomization": true},
+		{"itemClasses": []any{"Boots"}, "perRarityCustomization": true, "rarities": []any{"Magic"}},
+	} {
+		rules := c.highlight(cfg)
+		want := []string{"217 255 255", "102 179 255", "255 255 0"}
+		if cfg["rarities"] != nil {
+			want = []string{"102 179 255"}
+		}
+		if len(rules) != len(want) {
+			t.Fatalf("unexpected selected rarity rules: got %d want %d", len(rules), len(want))
+		}
+		for i, r := range rules {
+			styleCheck(r.render(), want[i])
+		}
+	}
+
+	for _, makeOutput := range []func(Object) string{
+		func(cfg Object) string { return c.highlights(Object{"highlights": []any{cfg}}) },
+		func(cfg Object) string { return c.phases([]any{cfg}) },
+	} {
+		cfg := Object{"itemClasses": []any{"Test Weapons"}, "modules": []any{}, "style": Object{"text": "#123456"}}
+		output := makeOutput(cfg)
+		styleCheck(output, "217 255 255", "102 179 255", "255 255 0")
+		if strings.Contains(output, "SetTextColor 18 52 86") {
+			t.Fatalf("inactive style module overrode rarity styles: %s", output)
+		}
+		cfg["modules"] = []any{"style"}
+		output = makeOutput(cfg)
+		if !strings.Contains(output, "SetTextColor 18 52 86") {
+			t.Fatalf("explicit style module did not override rarity styles: %s", output)
+		}
+	}
+}
+
 func TestOptionalModulesOnlyApplyWhenAdded(t *testing.T) {
 	c := New(nil, nil, "")
 	c.weapons = []Weapon{{BaseType: "Test Weapon", ItemClass: "Test Weapons", DropLevel: 5, APS: 1.5}}
