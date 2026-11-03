@@ -17,8 +17,6 @@ A desktop item-filter builder for Path of Exile 1, focused on leveling.
 
 </div>
 
-![Filtertool editing the built-in Caster Template, with build preferences and weapon phases.](docs/images/filtertool-caster-template.png)
-
 ## Get started
 
 Download the [Windows installer](https://github.com/mositho/filtertool-desktop/releases/latest/download/Filtertool-Setup.exe), or choose [portable Windows, Linux Flatpak, and other release files](https://github.com/mositho/filtertool-desktop/releases/latest).
@@ -35,14 +33,6 @@ Requires 64-bit Windows 10 or 11 and Microsoft Edge WebView2. The installer inst
 TTS sound generation requires a separate FFmpeg installation. Press `Windows + R` and run `winget install ffmpeg`, or download FFmpeg from [gyan.dev](https://www.gyan.dev/ffmpeg/builds/) and add `ffmpeg.exe` to your `PATH`. Restart Filtertool after installing or changing `PATH`.
 
 On Windows, user data is stored in **`%APPDATA%\Filtertool`**.
-
-### Updates
-
-Filtertool checks GitHub for newer published stable releases at startup. Use **Check for updates** to check manually. Choose **Download update**, then **Restart & Apply**; save or discard unsaved edits first. No uninstall is needed. Updating requires write access to the application folder.
-
-**Major updates (for example, 1.x → 2.x) may break filter compatibility.** Filtertool shows a warning and requires confirmation before downloading. Back up Filtertool's application data folder, then read the release notes: filters may need migration or recreation. There is no automatic migration or automatic backup. Updates do not re-export in-game filters; use **Export** or **Export All** when ready.
-
-Older versions without the updater need one manual update: close Filtertool and run the newer setup over the same installation folder (or replace the standalone EXE). Development sessions do not self-update.
 
 ## Quick guide
 
