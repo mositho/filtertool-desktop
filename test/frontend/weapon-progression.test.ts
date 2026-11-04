@@ -47,7 +47,7 @@ describe("weapon phase area level inputs", () => {
     expect(phaseTemplate.rare.soundId).toBe(5)
   })
 
-  it("keeps collapsed phase summaries compact by showing only the name and area-level range", () => {
+  it("previews selected weapons before the area-level range and exposes the full selection in a tooltip", () => {
     const phases = ref<Array<Record<string, unknown>>>([
       {
         name: "Leveling",
@@ -73,8 +73,10 @@ describe("weapon phase area level inputs", () => {
     const summary = container.querySelector<HTMLButtonElement>("button[aria-expanded]")!
     expect(summary.textContent).toContain("Leveling")
     expect(summary.textContent).toContain("Area Level 12–28")
-    expect(summary.textContent).not.toContain("One Hand Axes")
-    expect(summary.textContent).not.toContain(TEST_BASE_TYPE)
+    const preview = `One Hand Axes, Two Hand Axes, ${TEST_BASE_TYPE}, ${TEST_BASE_TYPE_TWO}`
+    expect(summary.textContent).toContain(preview)
+    expect(summary.textContent!.indexOf(preview)).toBeLessThan(summary.textContent!.indexOf("Area Level 12–28"))
+    expect(summary.querySelector(`[title="${preview}"]`)).not.toBeNull()
   })
 
   it("lets a user type a valid two-digit Max Area Level without prepending the Min Area Level", async () => {

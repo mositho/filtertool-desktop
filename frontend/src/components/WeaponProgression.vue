@@ -27,6 +27,12 @@ function describe(phase: Phase): string {
   return `Area Level ${phase.minAreaLevel ?? 0}–${phase.maxAreaLevel ?? "∞"}`
 }
 
+function targetsPreview(phase: Phase): string {
+  const classes = (phase.itemClasses as string[] | undefined) ?? []
+  const bases = (phase.baseTypes as string[] | undefined) ?? []
+  return [...classes, ...bases].join(", ") || "Select weapons"
+}
+
 function updateAreaLevel(index: number, key: "minAreaLevel" | "maxAreaLevel", value: number | undefined) {
   const next = props.phases.map((phase) => ({ ...phase }))
   if (value === undefined) delete next[index][key]
@@ -132,12 +138,15 @@ function pastePhase() {
         <button
           v-else
           type="button"
-          class="min-w-0 flex-1 rounded px-2 py-1 text-left text-sm text-neutral-200 hover:text-white"
+          class="flex min-w-0 flex-1 items-center gap-2 overflow-hidden whitespace-nowrap rounded px-2 py-1 text-left text-sm text-neutral-200 hover:text-white"
           :aria-expanded="openPhase === index"
           @click="openPhase = openPhase === index ? null : index"
         >
-          <span class="min-w-0 truncate font-semibold">{{ openPhase === index ? "▾" : "▸" }} {{ title(phase, index) }}</span>
-          <span class="ml-2 shrink-0 text-neutral-400">{{ describe(phase) }}</span>
+          <span class="max-w-[40%] truncate font-semibold" :title="title(phase, index)"
+            >{{ openPhase === index ? "▾" : "▸" }} {{ title(phase, index) }}</span
+          >
+          <span class="min-w-0 flex-1 truncate text-neutral-400" :title="targetsPreview(phase)">{{ targetsPreview(phase) }}</span>
+          <span class="shrink-0 text-neutral-400">{{ describe(phase) }}</span>
         </button>
         <span class="ml-auto flex shrink-0 items-center gap-1">
           <button
