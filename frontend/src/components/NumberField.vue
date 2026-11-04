@@ -25,8 +25,7 @@ function sanitize(raw: string): string {
   const firstSep = cleaned.search(/[.,]/)
   if (firstSep === -1) return cleaned
   const intPart = cleaned.slice(0, firstSep)
-  let fracPart = cleaned.slice(firstSep + 1).replace(/[.,]/g, "")
-  if (props.decimals !== undefined) fracPart = fracPart.slice(0, props.decimals)
+  const fracPart = cleaned.slice(firstSep + 1).replace(/[.,]/g, "")
   return `${intPart}.${fracPart}`
 }
 
@@ -34,16 +33,20 @@ function toNumber(raw: string): number | undefined {
   const normalized = raw.replace(",", ".")
   if (normalized === "" || normalized === ".") return undefined
   const value = Number(normalized)
-  return Number.isNaN(value) ? undefined : value
+  return Number.isFinite(value) ? value : undefined
 }
 
 const text = ref(format(props.modelValue))
 const focused = ref(false)
+let edited = false
 
 watch(
   () => props.modelValue,
   (value) => {
-    if (toNumber(text.value) !== value) text.value = format(value)
+    if (toNumber(text.value) !== value) {
+      text.value = format(value)
+      edited = false
+    }
   },
 )
 
@@ -59,8 +62,36 @@ function onInput(event: Event) {
   const raw = sanitize(el.value)
   if (raw !== el.value) el.value = raw
   text.value = raw
+  edited = true
   const value = toNumber(raw)
-  emit("update:modelValue", value === undefined ? undefined : clamp(value))
+  // Keep incomplete/out-of-range drafts local. Publishing a clamped value
+  // feeds it back through the parent and replaces what the user is typing.
+  if (value === undefined || raw.endsWith(".") || clamp(value) !== value) return
+  if (props.decimals !== undefined && (raw.split(".")[1]?.length ?? 0) > props.decimals) return
+  publish(value)
+}
+
+function publish(value: number | undefined) {
+  if (value !== props.modelValue) emit("update:modelValue", value)
+}
+
+function commit() {
+  if (!edited) return
+  edited = false
+  let value = toNumber(text.value)
+  if (value !== undefined) {
+    if (props.decimals !== undefined) value = Number(value.toFixed(props.decimals))
+    value = clamp(value)
+  }
+  // Clearing can leave the effective prop unchanged when the parent inherits
+  // the same default. Any changed effective value will be synced by the watcher.
+  text.value = format(value ?? props.modelValue)
+  publish(value)
+}
+
+function onBlur() {
+  focused.value = false
+  commit()
 }
 
 function decimalsFor(step: number): number {
@@ -74,8 +105,9 @@ function stepBy(direction: number) {
   const decimals = props.decimals ?? decimalsFor(step)
   let next = Number((base + direction * step).toFixed(decimals))
   next = clamp(next)
+  edited = false
   text.value = format(next)
-  emit("update:modelValue", next)
+  publish(next)
 }
 
 function onWheel(event: WheelEvent) {
@@ -100,13 +132,15 @@ function onWheel(event: WheelEvent) {
       @input="onInput"
       @wheel="onWheel"
       @focus="focused = true"
-      @blur="focused = false"
+      @blur="onBlur"
+      @keydown.enter.prevent="commit"
       class="w-full min-w-0 bg-transparent px-2 py-1.5 text-sm outline-none"
     />
     <div class="flex flex-col border-l border-neutral-700">
       <button
         type="button"
         tabindex="-1"
+        @mousedown.prevent
         @click="stepBy(1)"
         class="flex flex-1 items-center justify-center px-1.5 text-[10px] leading-none text-neutral-400 hover:bg-neutral-700 hover:text-white"
         :title="`Increase by ${step ?? (integer ? 1 : 0.05)}`"
@@ -116,6 +150,7 @@ function onWheel(event: WheelEvent) {
       <button
         type="button"
         tabindex="-1"
+        @mousedown.prevent
         @click="stepBy(-1)"
         class="flex flex-1 items-center justify-center border-t border-neutral-700 px-1.5 text-[10px] leading-none text-neutral-400 hover:bg-neutral-700 hover:text-white"
         :title="`Decrease by ${step ?? (integer ? 1 : 0.05)}`"
