@@ -22,6 +22,7 @@ vi.mock("../../frontend/src/api", () => ({
 
 import GlobalSettings from "../../frontend/src/components/GlobalSettings.vue"
 import { ruleButton } from "./ruleButtons"
+import { editColor } from "./colorFields"
 
 let app: App | undefined
 let container: HTMLDivElement | undefined
@@ -198,24 +199,24 @@ describe("global settings style history", () => {
 
     const getLifeFlaskTextColor = () => {
       const name = [...container!.querySelectorAll<HTMLElement>("span")].find((span) => span.textContent?.trim() === "lifeFlask")!
-      return name.parentElement!.querySelector<HTMLInputElement>('input[type="color"]')!
+      return name.parentElement!.querySelector<HTMLButtonElement>('[aria-label="lifeFlask text"]')!
     }
-    const changeColor = (color: string) => {
-      const input = getLifeFlaskTextColor()
-      input.value = color
-      input.dispatchEvent(new Event("input", { bubbles: true }))
-    }
-
-    changeColor("#aabbcc")
+    const color = getLifeFlaskTextColor()
+    color.click()
+    await nextTick()
+    const hex = container.querySelector<HTMLInputElement>('[aria-label="lifeFlask text hex"]')!
+    hex.value = "#aabbcc"
+    hex.dispatchEvent(new Event("input", { bubbles: true }))
     await nextTick()
     expect(exposed.value?.dirty).toBe(true)
+    container.querySelector<HTMLButtonElement>('[aria-label="Close color picker"]')!.click()
+    await nextTick()
     ;(exposed.value as unknown as { undo: () => void }).undo()
     await nextTick()
     expect(getLifeFlaskTextColor().value).toBe(originalColor)
     expect(exposed.value?.dirty).toBe(false)
 
-    changeColor("#445566")
-    await nextTick()
+    await editColor(getLifeFlaskTextColor(), "#445566")
     expect(exposed.value?.dirty).toBe(true)
     ;(exposed.value as unknown as { discard: () => void }).discard()
     await nextTick()

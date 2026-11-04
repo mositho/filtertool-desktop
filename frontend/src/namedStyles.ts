@@ -2,6 +2,16 @@ import type { ComputedRef, InjectionKey, Ref } from "vue"
 import type { SchemaField } from "@schema/form-schema"
 import { DEFAULT_STYLE_SETTINGS, MIN_STYLE_SIZE } from "../../src/style-defaults"
 import aliases from "../../internal/data/style-aliases.json"
+import { CURRENCY_TIERS } from "../../src/config/currency"
+
+const currencyStyleLabels: Record<string, string> = Object.fromEntries(
+  CURRENCY_TIERS.map((tier) => [tier.style, tier.key === "low" ? tier.title : `Currency · ${tier.title}`]),
+)
+
+/** Keep saved preset keys stable while displaying the currency editor's tiers. */
+export function styleLabel(key: string): string {
+  return currencyStyleLabels[key] ?? key
+}
 
 export type Style = Record<string, unknown>
 export type StyleMap = Record<string, Style>
@@ -14,12 +24,18 @@ export function isLegacyStyle(key: string): boolean {
 export function mergeStyles(base: StyleMap, overrides: StyleMap): StyleMap {
   const result = { ...base }
   for (const [key, style] of Object.entries(overrides)) result[key] = { ...base[key], ...style }
-  for (const old of ["gemCallout", "earlyShieldLink"]) {
+  for (const old of ["gemCallout", "earlyShieldLink", "goldHighStack"]) {
     if (overrides[old]) {
       const key = STYLE_ALIASES[old]
       result[key] = { ...base[key], ...overrides[old], ...overrides[key] }
     }
     if (base[old]) result[old] = { ...result[STYLE_ALIASES[old]] }
+  }
+  for (const rarity of ["Normal", "Magic", "Rare"]) {
+    const key = `highlightedEquipment${rarity}`
+    if (result[key] && result[rarity.toLowerCase()]) {
+      result[key] = { ...result[key], text: result[rarity.toLowerCase()].text }
+    }
   }
   return result
 }
@@ -37,23 +53,75 @@ export const STYLE_GRID_TEMPLATE = "minmax(7rem, 1fr) 2.75rem 2.75rem 2.75rem 3.
 
 export const STYLE_SECTIONS = [
   {
-    title: "Currency",
-    keys: ["currencyA", "currencyB", "currencyC", "currencyLeaguestart", "currencyLow", "gold", "goldHighStack", "wisdom", "portal"],
+    title: "Equipment",
+    keys: [
+      "earlyShieldBase",
+      "jewellery",
+      "magicJewellery",
+      "rareJewellery",
+      "normal",
+      "magic",
+      "rare",
+      "highlightedEquipmentNormal",
+      "highlightedEquipmentMagic",
+      "highlightedEquipmentRare",
+    ],
   },
-  { title: "League Mechanic", keys: ["leagueMechanic"] },
   {
     title: "Links",
     keys: ["twoLink", "threeLink", "fourLink", "fiveLink", "sixLink"],
   },
-  { title: "Shields", keys: ["earlyShieldBase"] },
   { title: "Flasks & Tinctures", keys: ["lifeFlask", "magicLifeFlask", "manaFlask", "magicManaFlask", "utilityFlask", "tincture"] },
-  { title: "Jewellery", keys: ["jewellery", "magicJewellery", "rareJewellery"] },
-  { title: "Rarities", keys: ["normal", "magic", "rare"] },
-  { title: "Highlights", keys: ["highlightedEquipmentRare", "highlightedEquipmentMagic", "highlightedEquipmentNormal"] },
+  {
+    title: "Currency",
+    keys: [
+      "currencyA",
+      "currencyB",
+      "currencyC",
+      "currencyLeaguestart",
+      "currencyLow",
+      "gold",
+      "goldStack",
+      "goldStackLarge",
+      "wisdom",
+      "portal",
+    ],
+  },
+  { title: "Gems", keys: ["gem", "gemHighlight"] },
+  { title: "League Mechanic", keys: ["leagueMechanic"] },
+  {
+    title: "Miscellaneous",
+    keys: [
+      "chromatic",
+      "divinationCard",
+      "fragments",
+      "maps",
+      "questItem",
+      "relics",
+      "sixSocket",
+      "unique",
+      "unknownItem",
+      "whetstoneRecipe",
+    ],
+  },
 ]
 
+export function groupStyleSections(keys: string[]) {
+  const used = new Set(STYLE_SECTIONS.flatMap((section) => section.keys))
+  const other = keys.filter((key) => !used.has(key) && !isLegacyStyle(key)).sort()
+  return STYLE_SECTIONS.map((section) => (section.title === "Miscellaneous" ? { ...section, keys: [...section.keys, ...other] } : section))
+}
+
 export function usesRarityText(key: string): boolean {
-  return /^(?:(?:good|selected)?(?:Two|Three|Four)|two|three|four|five|six)Link$/.test(key)
+  return (
+    /^highlightedEquipment(Normal|Magic|Rare)$/.test(key) ||
+    /^(?:(?:good|selected)?(?:Two|Three|Four)|two|three|four|five|six)Link$/.test(key)
+  )
+}
+
+export function rarityTextPreviews(key: string): string[] {
+  const rarity = /^highlightedEquipment(Normal|Magic|Rare)$/.exec(key)?.[1]
+  return rarity ? [rarity] : ["Normal", "Magic", "Rare"]
 }
 
 export function styleSwatch(style: Style): Record<string, string> {
@@ -99,11 +167,11 @@ export function fieldStyleKeys(field: SchemaField, value?: unknown): string[] {
   if (path.startsWith("flasks.mana")) return ["manaFlask", "magicManaFlask"]
   if (path === "flasks.utilityFlasks") return ["utilityFlask"]
   if (path.startsWith("tinctures.")) return ["tincture"]
-  if (path === "gemCallouts.styleOnly") return ["gem"]
   if (path.startsWith("gemCallouts.")) return ["gemHighlight"]
   if (path.startsWith("leagueMechanic.")) return ["leagueMechanic"]
-  if (path.startsWith("currency.gold.highStack")) return ["goldHighStack"]
-  if (path.startsWith("currency.gold.")) return ["gold", "goldHighStack"]
+  if (path.startsWith("currency.gold.highStack")) return ["goldStackLarge"]
+  if (path.startsWith("currency.gold.stack")) return ["goldStack"]
+  if (path.startsWith("currency.gold.")) return ["gold", "goldStack", "goldStackLarge"]
   if (path.startsWith("currency.scrolls.wisdom.")) return ["wisdom"]
   if (path.startsWith("currency.scrolls.portal.")) return ["portal"]
   return []

@@ -342,7 +342,7 @@ function applyRaritySound(rarity: string, next: Record<string, unknown>) {
 
 <template>
   <div class="space-y-4">
-    <div class="space-y-1">
+    <div class="editor-card space-y-1">
       <div class="flex items-center justify-between gap-2">
         <FieldLabel label="Match" tooltip="Select item classes, individual base types, or both." />
         <StyleShortcut :style-keys="styleKeys" />
@@ -364,7 +364,7 @@ function applyRaritySound(rarity: string, next: Record<string, unknown>) {
       {{ itemLevelError }}
     </p>
     <AdvancedOptions>
-      <div class="space-y-1">
+      <div class="editor-card space-y-1">
         <FieldLabel label="Rarities" :tooltip="FIELD_BY_PATH.rarities?.tooltip" />
         <MultiSelect :model-value="rarityValue" :options="HIGHLIGHT_RARITIES" @update:model-value="setRarities($event)" />
         <div class="flex items-center gap-2 pt-1">

@@ -1,26 +1,17 @@
 <script setup lang="ts">
 import { computed, inject, nextTick, ref } from "vue"
-import { isLegacyStyle, namedStylesKey, STYLE_ALIASES, STYLE_GRID_TEMPLATE, STYLE_SECTIONS } from "../namedStyles"
+import { groupStyleSections, namedStylesKey, STYLE_ALIASES, STYLE_GRID_TEMPLATE } from "../namedStyles"
 import { useCollapsedState } from "../viewState"
 import NamedStyleEditor from "./NamedStyleEditor.vue"
 
 const props = defineProps<{ filterName: string }>()
 const context = inject(namedStylesKey)!
 const panel = ref<HTMLElement | null>(null)
-const sections = computed(() => {
-  const used = new Set(STYLE_SECTIONS.flatMap((section) => section.keys))
-  return [
-    ...STYLE_SECTIONS,
-    {
-      title: "Other",
-      keys: Object.keys(context.styles.value)
-        .filter((key) => !used.has(key) && !isLegacyStyle(key))
-        .sort(),
-    },
-  ]
+const sections = computed(() =>
+  groupStyleSections(Object.keys(context.styles.value))
     .map((section) => ({ ...section, keys: section.keys.filter((key) => context.styles.value[key]) }))
-    .filter((section) => section.keys.length)
-})
+    .filter((section) => section.keys.length),
+)
 const collapsed = useCollapsedState(
   computed(() => `filtertool:styles:${props.filterName}`),
   () => ({ styles: true }),
@@ -70,14 +61,14 @@ defineExpose({
           class="rounded border border-neutral-700 px-2 py-0.5 text-xs text-neutral-300 hover:bg-neutral-800"
           @click="setAll(true)"
         >
-          Collapse all styles
+          Collapse all
         </button>
         <button
           type="button"
           class="rounded border border-neutral-700 px-2 py-0.5 text-xs text-neutral-300 hover:bg-neutral-800"
           @click="setAll(false)"
         >
-          Expand all styles
+          Expand all
         </button>
       </div>
       <div v-for="section in sections" :key="section.title" class="mb-3 rounded border border-neutral-800">

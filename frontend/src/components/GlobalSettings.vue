@@ -11,11 +11,22 @@ import {
 } from "@schema/form-schema"
 import { getPath, setPath, deletePath, pruneEmpty, stableStringify } from "../path"
 import FieldInput from "./FieldInput.vue"
+import ColorField from "./ColorField.vue"
 import NumberField from "./NumberField.vue"
 import { fieldDefault, defaultSource } from "../fieldDefaults"
 import RuleHeader from "./RuleHeader.vue"
 import { DEFAULT_STYLE_SETTINGS, MIN_STYLE_SIZE } from "../../../src/style-defaults"
-import { isLegacyStyle, mergeStyles, STYLE_ALIASES, STYLE_GRID_TEMPLATE, STYLE_SECTIONS, type StyleMap } from "../namedStyles"
+import {
+  groupStyleSections,
+  rarityTextPreviews,
+  usesRarityText,
+  mergeStyles,
+  styleLabel,
+  STYLE_ALIASES,
+  STYLE_GRID_TEMPLATE,
+  STYLE_SECTIONS,
+  type StyleMap,
+} from "../namedStyles"
 import CurrencyEditor from "./CurrencyEditor.vue"
 import { layoutFields } from "../formLayout"
 import { useCollapsedState } from "../viewState"
@@ -42,6 +53,8 @@ const reference = ref<ReferenceData | null>(null)
 
 const baseStyles = ref<Record<string, unknown>>({})
 const userStyles = ref<Record<string, Record<string, unknown>>>({})
+const mergedStyles = computed(() => mergeStyles(baseStyles.value as StyleMap, userStyles.value))
+const styleOverrides = computed(() => mergeStyles({}, userStyles.value))
 const defaultsReference = computed(() =>
   reference.value
     ? {
@@ -334,7 +347,7 @@ function toggleDefaultSubsection(group: string, section: FieldSubsection) {
 }
 
 function effectiveStyle(key: string): Record<string, unknown> {
-  return mergeStyles(baseStyles.value as StyleMap, userStyles.value)[key] ?? {}
+  return mergedStyles.value[key] ?? {}
 }
 
 function styleColor(style: Record<string, unknown>, prop: string): string {
@@ -343,8 +356,8 @@ function styleColor(style: Record<string, unknown>, prop: string): string {
 }
 
 function setStyleProp(key: string, prop: string, value: unknown) {
-  const entry = { ...(mergeStyles({}, userStyles.value)[key] ?? {}) }
-  for (const old of ["gemCallout", "earlyShieldLink"]) if (STYLE_ALIASES[old] === key) delete userStyles.value[old]
+  const entry = { ...styleOverrides.value[key] }
+  for (const old of ["gemCallout", "earlyShieldLink", "goldHighStack"]) if (STYLE_ALIASES[old] === key) delete userStyles.value[old]
   if (value === "" || value === undefined || value === null) delete entry[prop]
   else entry[prop] = value
   if (Object.keys(entry).length === 0) delete userStyles.value[key]
@@ -353,10 +366,10 @@ function setStyleProp(key: string, prop: string, value: unknown) {
 
 function resetStyle(key: string) {
   delete userStyles.value[key]
-  for (const old of ["gemCallout", "earlyShieldLink"]) if (STYLE_ALIASES[old] === key) delete userStyles.value[old]
+  for (const old of ["gemCallout", "earlyShieldLink", "goldHighStack"]) if (STYLE_ALIASES[old] === key) delete userStyles.value[old]
 }
 function styleIsOverridden(key: string): boolean {
-  return !!mergeStyles({}, userStyles.value)[key]
+  return !!styleOverrides.value[key]
 }
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
@@ -381,14 +394,8 @@ function swatchFrom(style: Record<string, unknown>): Record<string, string> {
   }
 }
 
-const LINK_RARITIES = ["Normal", "Magic", "Rare"]
-
-function usesRarityText(key: string): boolean {
-  return /^(?:(?:good|selected)?(?:Two|Three|Four)|two|three|four|five|six)Link$/.test(key)
-}
-
 function stylePreviews(key: string): string[] {
-  return usesRarityText(key) ? LINK_RARITIES : [key]
+  return usesRarityText(key) ? rarityTextPreviews(key) : [styleLabel(key)]
 }
 
 function swatchStyle(key: string, rarity: string): Record<string, string> {
@@ -396,15 +403,11 @@ function swatchStyle(key: string, rarity: string): Record<string, string> {
   return swatchFrom(usesRarityText(key) ? { ...style, text: effectiveStyle(rarity.toLowerCase()).text } : style)
 }
 
-const styleSections = computed(() => {
-  const used = new Set(STYLE_SECTIONS.flatMap((section) => section.keys))
-  const other = Object.keys(baseStyles.value).filter((key) => !used.has(key) && !isLegacyStyle(key))
-  return [...STYLE_SECTIONS, { title: "Other", keys: other }]
-})
+const styleSections = computed(() => groupStyleSections(Object.keys(baseStyles.value)))
 
 const collapsed = useCollapsedState(
   computed(() => "filtertool:global-styles"),
-  () => Object.fromEntries([...STYLE_SECTIONS.map((section) => section.title), "Other"].map((key) => [key, true])),
+  () => Object.fromEntries(STYLE_SECTIONS.map((section) => [section.title, true])),
 )
 
 function toggleSection(title: string) {
@@ -487,7 +490,7 @@ function persistSavedStyles() {
 }
 
 function copyStyle(key: string) {
-  clipboard.value = { name: key, style: { ...effectiveStyle(key) } }
+  clipboard.value = { name: styleLabel(key), style: { ...effectiveStyle(key) } }
   clipboardOpen.value = true
 }
 
@@ -529,7 +532,7 @@ function removeSaved(name: string) {
         <span class="text-neutral-400">{{ settingsCollapsed ? "▸" : "▾" }}</span>
       </button>
       <div v-show="!settingsCollapsed" class="px-4 pb-4">
-        <div class="space-y-3">
+        <div class="editor-card space-y-3">
           <div>
             <label class="block text-xs text-neutral-400" title="Where exported .filter files and sounds are written"
               >PoE Filter Path</label
@@ -554,7 +557,7 @@ function removeSaved(name: string) {
           </div>
         </div>
 
-        <div class="mt-4 border-t border-neutral-800/60 pt-3">
+        <div class="editor-card mt-3">
           <h3 class="mb-2 text-sm font-semibold uppercase tracking-wide text-neutral-400">Sounds</h3>
           <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
@@ -629,17 +632,22 @@ function removeSaved(name: string) {
         <div class="px-4 pb-4">
           <p class="mb-2 text-xs text-neutral-500">Used when a filter leaves a field unset.</p>
 
-          <div v-for="group in defaultGroups" :key="group.key" :data-defaults-group="group.key" class="mb-4">
+          <div
+            v-for="group in defaultGroups"
+            :key="group.key"
+            :data-defaults-group="group.key"
+            class="mb-3 min-w-0 rounded border border-neutral-800"
+          >
             <button
               type="button"
               @click="toggleDefaultsGroup(group.key)"
               :aria-expanded="!isDefaultsCollapsed(group.key)"
-              class="mb-1 flex w-full items-center justify-between gap-2 rounded py-3 text-left hover:bg-neutral-900/40"
+              class="flex w-full items-center justify-between gap-2 rounded px-3 py-2 text-left hover:bg-neutral-900/40"
             >
               <span class="text-base font-semibold uppercase tracking-wide text-neutral-400">{{ group.title }}</span>
               <span class="text-sm text-neutral-500">{{ isDefaultsCollapsed(group.key) ? "▸" : "▾" }}</span>
             </button>
-            <div v-show="!isDefaultsCollapsed(group.key)">
+            <div v-show="!isDefaultsCollapsed(group.key)" class="border-t border-neutral-800 p-3">
               <p v-if="isItemDefaultsGroup(group) && group.description" class="mb-3 text-xs text-neutral-500">{{ group.description }}</p>
               <CurrencyEditor
                 v-if="group.key === 'currency' && defaultsReference"
@@ -655,7 +663,10 @@ function removeSaved(name: string) {
                 :reference="defaultsReference"
                 @update:model-value="setWeaponPhaseTemplate"
               />
-              <div v-if="group.fields.length > 0" class="grid grid-cols-1 items-end gap-3 sm:grid-cols-2">
+              <div
+                v-if="visibleDefaultsFields(group.fields).length > 0"
+                class="editor-card grid grid-cols-1 items-end gap-3 sm:grid-cols-2"
+              >
                 <div
                   v-for="{ field, fullWidth } in layoutFields(visibleDefaultsFields(group.fields))"
                   :key="field.path"
@@ -679,15 +690,7 @@ function removeSaved(name: string) {
                 v-for="sub in defaultsSubsectionEntries(group)"
                 :key="sub.key"
                 :data-editor-subsection="sub.subsection.key"
-                :class="
-                  sub.subsection.layout === 'cutoff-size'
-                    ? 'mt-1'
-                    : sub.depth > 0
-                      ? 'mt-2'
-                      : sub.hasSiblingAbove
-                        ? 'mt-4 border-t border-neutral-800/60 pt-3'
-                        : 'mt-3'
-                "
+                class="editor-card mt-3"
               >
                 <div v-if="sub.visibilityField" class="mb-3 flex items-center justify-between gap-2">
                   <RuleHeader
@@ -713,7 +716,7 @@ function removeSaved(name: string) {
                   v-else
                   :title="sub.subsection.title"
                   :heading="sub.depth === 0"
-                  :compact="sub.subsection.layout === 'cutoff-size'"
+                  compact
                   :expanded="!defaultSubsectionCollapsed(group.key, sub.subsection)"
                   @toggle="toggleDefaultSubsection(group.key, sub.subsection)"
                 />
@@ -799,27 +802,27 @@ function removeSaved(name: string) {
 
               <div v-for="key in section.keys" :key="key" class="py-2" :data-style-key="key">
                 <div class="hidden items-center gap-3 @min-[48rem]:grid" :style="{ gridTemplateColumns: STYLE_GRID_TEMPLATE }">
-                  <span class="min-w-0 truncate text-xs text-neutral-300" :title="key">{{ key }}</span>
-                  <input
+                  <span class="min-w-0 truncate text-xs text-neutral-300" :title="styleLabel(key)">{{ styleLabel(key) }}</span>
+                  <ColorField
                     v-if="!usesRarityText(key)"
-                    type="color"
-                    :value="styleColor(effectiveStyle(key), 'text')"
-                    @input="setStyleProp(key, 'text', ($event.target as HTMLInputElement).value)"
+                    :label="`${styleLabel(key)} text`"
+                    :model-value="styleColor(effectiveStyle(key), 'text')"
+                    @update:model-value="setStyleProp(key, 'text', $event)"
                     class="h-7 w-full cursor-pointer rounded border border-neutral-700 bg-transparent"
                   />
                   <span v-else class="text-[10px] text-neutral-400" title="Text colors are inherited from Normal, Magic and Rare styles"
-                    >Rarity</span
+                    >Rarities</span
                   >
-                  <input
-                    type="color"
-                    :value="styleColor(effectiveStyle(key), 'background')"
-                    @input="setStyleProp(key, 'background', ($event.target as HTMLInputElement).value)"
+                  <ColorField
+                    :label="`${styleLabel(key)} background`"
+                    :model-value="styleColor(effectiveStyle(key), 'background')"
+                    @update:model-value="setStyleProp(key, 'background', $event)"
                     class="h-7 w-full cursor-pointer rounded border border-neutral-700 bg-transparent"
                   />
-                  <input
-                    type="color"
-                    :value="styleColor(effectiveStyle(key), 'border')"
-                    @input="setStyleProp(key, 'border', ($event.target as HTMLInputElement).value)"
+                  <ColorField
+                    :label="`${styleLabel(key)} border`"
+                    :model-value="styleColor(effectiveStyle(key), 'border')"
+                    @update:model-value="setStyleProp(key, 'border', $event)"
                     class="h-7 w-full cursor-pointer rounded border border-neutral-700 bg-transparent"
                   />
                   <NumberField
@@ -914,7 +917,7 @@ function removeSaved(name: string) {
 
                 <div class="rounded border border-neutral-800 p-2 @min-[48rem]:hidden">
                   <div class="mb-2 flex items-center justify-between gap-2">
-                    <span class="truncate text-sm font-medium text-neutral-200">{{ key }}</span>
+                    <span class="truncate text-sm font-medium text-neutral-200">{{ styleLabel(key) }}</span>
                     <div class="flex shrink-0 items-center gap-0.5">
                       <button
                         type="button"
@@ -979,35 +982,37 @@ function removeSaved(name: string) {
                     </div>
                   </div>
                   <div class="grid grid-cols-3 gap-2">
-                    <label class="flex flex-col gap-1">
+                    <div class="flex flex-col gap-1">
                       <span class="text-[10px] uppercase text-neutral-500">Text</span>
-                      <input
+                      <ColorField
                         v-if="!usesRarityText(key)"
-                        type="color"
-                        :value="styleColor(effectiveStyle(key), 'text')"
-                        @input="setStyleProp(key, 'text', ($event.target as HTMLInputElement).value)"
+                        :label="`${styleLabel(key)} text`"
+                        :model-value="styleColor(effectiveStyle(key), 'text')"
+                        @update:model-value="setStyleProp(key, 'text', $event)"
                         class="h-8 w-full cursor-pointer rounded border border-neutral-700 bg-transparent"
                       />
-                      <span v-else class="text-xs text-neutral-400">From Normal, Magic and Rare</span>
-                    </label>
-                    <label class="flex flex-col gap-1">
+                      <span v-else class="text-xs text-neutral-400" title="Text colors are inherited from Normal, Magic and Rare styles"
+                        >Rarities</span
+                      >
+                    </div>
+                    <div class="flex flex-col gap-1">
                       <span class="text-[10px] uppercase text-neutral-500">Bg</span>
-                      <input
-                        type="color"
-                        :value="styleColor(effectiveStyle(key), 'background')"
-                        @input="setStyleProp(key, 'background', ($event.target as HTMLInputElement).value)"
+                      <ColorField
+                        :label="`${styleLabel(key)} background`"
+                        :model-value="styleColor(effectiveStyle(key), 'background')"
+                        @update:model-value="setStyleProp(key, 'background', $event)"
                         class="h-8 w-full cursor-pointer rounded border border-neutral-700 bg-transparent"
                       />
-                    </label>
-                    <label class="flex flex-col gap-1">
+                    </div>
+                    <div class="flex flex-col gap-1">
                       <span class="text-[10px] uppercase text-neutral-500">Border</span>
-                      <input
-                        type="color"
-                        :value="styleColor(effectiveStyle(key), 'border')"
-                        @input="setStyleProp(key, 'border', ($event.target as HTMLInputElement).value)"
+                      <ColorField
+                        :label="`${styleLabel(key)} border`"
+                        :model-value="styleColor(effectiveStyle(key), 'border')"
+                        @update:model-value="setStyleProp(key, 'border', $event)"
                         class="h-8 w-full cursor-pointer rounded border border-neutral-700 bg-transparent"
                       />
-                    </label>
+                    </div>
                   </div>
                   <div class="mt-2 grid grid-cols-2 gap-2">
                     <label class="flex flex-col gap-1">
@@ -1061,7 +1066,7 @@ function removeSaved(name: string) {
           class="flex min-w-0 items-center justify-center overflow-hidden rounded border px-1"
           :style="{ ...swatchFrom(clipboard.style), borderWidth: '1px', borderStyle: 'solid' }"
         >
-          <span class="truncate">{{ clipboard.name }}</span>
+          <span class="truncate">{{ styleLabel(clipboard.name) }}</span>
         </div>
         <div class="mt-3 flex items-center gap-2">
           <button type="button" @click="saveClipboard" class="rounded bg-neutral-800 px-2.5 py-1 text-xs hover:bg-neutral-700">Save</button>
@@ -1077,9 +1082,9 @@ function removeSaved(name: string) {
             type="button"
             @click="useSaved(saved.name)"
             class="min-w-0 flex-1 truncate text-left text-xs text-neutral-300 hover:text-white"
-            :title="`Use ${saved.name}`"
+            :title="`Use ${styleLabel(saved.name)}`"
           >
-            {{ saved.name }}
+            {{ styleLabel(saved.name) }}
           </button>
           <button type="button" @click="removeSaved(saved.name)" class="text-neutral-500 hover:text-red-400" title="Remove saved style">
             ✕

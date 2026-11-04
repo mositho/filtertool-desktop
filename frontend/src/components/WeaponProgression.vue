@@ -168,7 +168,7 @@ function pastePhase() {
         </span>
       </div>
       <div v-if="openPhase === index" class="mt-3 space-y-3">
-        <div class="grid max-w-lg grid-cols-1 gap-3 sm:grid-cols-2">
+        <div class="editor-card grid max-w-lg grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
             <label class="mb-1 block text-xs text-neutral-400">Min Area Level</label>
             <NumberField

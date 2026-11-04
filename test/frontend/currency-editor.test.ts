@@ -629,6 +629,7 @@ it("starts Gold and scrolls collapsed without visibility controls", async () => 
   }
   for (const path of [
     "currency.gold.minStackSize",
+    "currency.gold.stackSize",
     "currency.gold.highStackSize",
     "currency.scrolls.wisdom.soundCutoffLevel",
     "currency.scrolls.portal.soundCutoffLevel",
@@ -642,10 +643,13 @@ it("starts Gold and scrolls collapsed without visibility controls", async () => 
     expect(container.querySelector(`[data-field-path="${path}"]`)?.parentElement?.classList.contains("sm:col-span-2")).toBe(true)
   }
   const minimum = container.querySelector('[data-field-path="currency.gold.minStackSize"]')!
+  const stack = container.querySelector('[data-field-path="currency.gold.stackSize"]')!
   const highStack = container.querySelector('[data-field-path="currency.gold.highStackSize"]')!
-  expect(minimum.parentElement?.parentElement).toBe(highStack.parentElement?.parentElement)
+  expect(minimum.parentElement?.parentElement).toBe(stack.parentElement?.parentElement)
+  expect(stack.parentElement?.parentElement).toBe(highStack.parentElement?.parentElement)
   expect(minimum.parentElement?.classList.contains("sm:col-span-2")).toBe(false)
-  expect(highStack.parentElement?.classList.contains("sm:col-span-2")).toBe(false)
+  expect(stack.parentElement?.classList.contains("sm:col-span-2")).toBe(false)
+  expect(highStack.parentElement?.classList.contains("sm:col-span-2")).toBe(true)
   expect(currency.querySelectorAll("summary")).toHaveLength(0)
   expect(currency.querySelector('[data-field-path="currency.gold.sound"]')).toBeNull()
   expect(currency.querySelector('[data-field-path="currency.scrolls.wisdom.icon"]')).toBeNull()

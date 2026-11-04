@@ -164,6 +164,14 @@ func TestGoldSulphurAndChartControls(t *testing.T) {
 	}
 }
 
+func TestGoldStackStyleTiers(t *testing.T) {
+	out := compileCurrencyTest(t, Object{"currency": Object{"gold": Object{"stackSize": float64(12), "highStackSize": float64(75)}}})
+	gold := strings.Split(out[strings.Index(out, "# Gold"):], "\n\n")
+	if len(gold) < 4 || !strings.Contains(gold[1], "StackSize >= 75") || !strings.Contains(gold[2], "StackSize >= 12") || !strings.Contains(gold[3], "SetFontSize") {
+		t.Fatalf("gold tiers should order large, stack, then regular: %v", gold[:4])
+	}
+}
+
 func TestScrollCutoffsAndRemovedVisibilityOverride(t *testing.T) {
 	out := compileCurrencyTest(t, Object{"currency": Object{"scrolls": Object{
 		"wisdom": Object{"soundCutoffLevel": float64(12), "style": Object{"size": float64(30)}, "sound": Object{"enabled": true}},

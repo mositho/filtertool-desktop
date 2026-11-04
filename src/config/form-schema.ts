@@ -783,12 +783,20 @@ goldRule.fields.push(
     defaultValue: 0,
     tooltip: "Smaller stacks are hidden.",
   },
-  { path: "currency.gold.highStackSize", label: "High Stack Threshold", control: "number", min: 0, integer: true, defaultValue: 50 },
+  { path: "currency.gold.stackSize", label: "Stack Threshold", control: "number", min: 0, integer: true, defaultValue: 10 },
+  { path: "currency.gold.highStackSize", label: "Large Stack Threshold", control: "number", min: 0, integer: true, defaultValue: 50 },
+  {
+    path: "currency.gold.stack.style",
+    label: "Stack Style",
+    control: "style",
+    defaultValue: { preset: "goldStack" },
+    sharedOnly: true,
+  },
   {
     path: "currency.gold.highStack.style",
-    label: "High Stack Style",
+    label: "Large Stack Style",
     control: "style",
-    defaultValue: { preset: "goldHighStack" },
+    defaultValue: { preset: "goldStackLarge" },
     sharedOnly: true,
   },
 )

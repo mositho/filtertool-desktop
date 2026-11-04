@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, inject, nextTick, onBeforeUnmount, ref, useId, watch } from "vue"
-import { namedStylesKey } from "../namedStyles"
+import { namedStylesKey, styleLabel } from "../namedStyles"
 import NamedStyleEditor from "./NamedStyleEditor.vue"
 
 const props = defineProps<{ styleKeys: string[] }>()
@@ -76,7 +76,7 @@ onBeforeUnmount(() => {
     v-if="context && keys.length"
     ref="button"
     type="button"
-    :aria-label="`Edit style: ${styleKeys.join(', ')}`"
+    :aria-label="`Edit style: ${styleKeys.map(styleLabel).join(', ')}`"
     title="Edit style for this filter"
     :aria-expanded="open"
     aria-haspopup="dialog"
@@ -97,7 +97,7 @@ onBeforeUnmount(() => {
       :id="id"
       ref="panel"
       role="dialog"
-      :aria-label="`Edit ${selected} style`"
+      :aria-label="`Edit ${styleLabel(selected)} style`"
       class="fixed z-50 overflow-y-auto rounded border border-neutral-600 bg-neutral-900 p-4 text-neutral-200 shadow-xl"
       :style="position"
       @click.stop
@@ -107,7 +107,7 @@ onBeforeUnmount(() => {
         <button
           v-if="selected"
           type="button"
-          :aria-label="`Show ${selected} in Styles`"
+          :aria-label="`Show ${styleLabel(selected)} in Styles`"
           title="Show in Styles"
           class="flex h-7 w-7 items-center justify-center rounded text-neutral-400 hover:bg-neutral-700 hover:text-white"
           @click="context?.reveal(selected)"
@@ -143,7 +143,7 @@ onBeforeUnmount(() => {
         aria-label="Style to edit"
         class="mb-3 w-full rounded border border-neutral-700 bg-neutral-950 px-2 py-1.5 text-sm"
       >
-        <option v-for="key in keys" :key="key" :value="key">{{ key }}</option>
+        <option v-for="key in keys" :key="key" :value="key">{{ styleLabel(key) }}</option>
       </select>
       <NamedStyleEditor v-if="selected" :style-key="selected" card />
     </div>

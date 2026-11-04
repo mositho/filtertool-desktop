@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, expect, it } from "vitest"
-import { createApp, nextTick, reactive, type App } from "vue"
+import { createApp, h, nextTick, reactive, ref, type App } from "vue"
 import ConfigForm from "../../frontend/src/components/ConfigForm.vue"
 import StyleEditor from "../../frontend/src/components/StyleEditor.vue"
 import { fieldDefault } from "../../frontend/src/fieldDefaults"
@@ -14,6 +14,7 @@ import {
 } from "../../src/config/form-schema"
 import reference from "../../internal/data/reference.json"
 import type { ReferenceData } from "../../frontend/src/api"
+import { editColor } from "./colorFields"
 
 let app: App
 let root: HTMLDivElement
@@ -161,12 +162,51 @@ it("keeps starter supports out of style-only choices but allows spoken callouts"
 
 it("previews unspecified style colors using compiler defaults", () => {
   mount(StyleEditor, { modelValue: {}, styleNames: [], styles: {} })
-  expect([...root.querySelectorAll<HTMLInputElement>('input[type="color"]')].slice(0, 3).map((input) => input.value)).toEqual([
-    "#c8c8c8",
-    "#000000",
-    "#000000",
-  ])
+  expect(
+    [...root.querySelectorAll<HTMLButtonElement>('button[aria-haspopup="dialog"][value]')].slice(0, 3).map((input) => input.value),
+  ).toEqual(["#c8c8c8", "#000000", "#000000"])
   const preview = root.querySelector<HTMLElement>(".border[style]")!
   expect(preview.style.color).toBe("rgb(200, 200, 200)")
   expect(preview.style.backgroundColor).toBe("rgba(0, 0, 0, 0.941)")
+})
+
+it("edits inline colors with the shared picker and detaches from the preset without losing its other properties", async () => {
+  const value = ref<Record<string, unknown>>({ preset: "example" })
+  root = document.createElement("div")
+  document.body.append(root)
+  const style = { text: "#abcdef", background: "#102030", border: "#405060", size: 35, backgroundOpacity: 0.5 }
+  app = createApp({
+    setup: () => () =>
+      h(StyleEditor, {
+        "modelValue": value.value,
+        "styles": { example: style },
+        "styleNames": ["example"],
+        "onUpdate:modelValue": (next) => (value.value = next ?? {}),
+      }),
+  })
+  app.mount(root)
+  await editColor(root.querySelector<HTMLButtonElement>('[aria-label="Style text"]')!, "#123456")
+  expect(value.value).toEqual({ ...style, text: "#123456" })
+  expect(root.querySelector<HTMLSelectElement>("select")!.value).toBe("")
+})
+
+it("labels currency presets with the editor tiers without changing their saved values", () => {
+  let saved: Record<string, unknown> | undefined
+  mount(StyleEditor, {
+    "modelValue": { preset: "currencyB" },
+    "styleNames": ["currencyA", "currencyB", "currencyC"],
+    "styles": {},
+    "onUpdate:modelValue": (value: Record<string, unknown> | undefined) => (saved = value),
+  })
+  const select = root.querySelector<HTMLSelectElement>("select")!
+  expect([...select.options].slice(1).map((option) => [option.value, option.textContent])).toEqual([
+    ["currencyA", "Currency · S Tier"],
+    ["currencyB", "Currency · A Tier"],
+    ["currencyC", "Currency · B Tier"],
+  ])
+  expect(select.value).toBe("currencyB")
+  expect(root.textContent).toContain("Currency · A Tier")
+  select.value = "currencyC"
+  select.dispatchEvent(new Event("change", { bubbles: true }))
+  expect(saved).toEqual({ preset: "currencyC" })
 })

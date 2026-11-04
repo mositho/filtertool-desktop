@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed } from "vue"
 import NumberField from "./NumberField.vue"
+import ColorField from "./ColorField.vue"
 import { styleClipboard } from "../styleClipboard"
 import { DEFAULT_STYLE_SETTINGS, MIN_STYLE_SIZE } from "../../../src/style-defaults"
-import { isLegacyStyle } from "../namedStyles"
+import { isLegacyStyle, styleLabel } from "../namedStyles"
 
 const props = defineProps<{
   modelValue: Record<string, unknown>
@@ -98,7 +99,7 @@ function resetStyle() {
 }
 
 function copyStyle() {
-  styleClipboard.value = { name: preset.value || "Custom", style: effectiveStyle() }
+  styleClipboard.value = { name: styleLabel(preset.value) || "Custom", style: effectiveStyle() }
 }
 
 function pasteStyle() {
@@ -124,25 +125,25 @@ function pasteStyle() {
         class="w-full min-w-0 rounded border border-neutral-700 bg-neutral-900 px-2 py-1.5 text-sm"
       >
         <option value="">Custom style</option>
-        <option v-if="preset && !availableNames.includes(preset)" :value="preset">{{ preset }} (saved style)</option>
-        <option v-for="name in availableNames" :key="name" :value="name">{{ name }}</option>
+        <option v-if="preset && !availableNames.includes(preset)" :value="preset">{{ styleLabel(preset) }} (saved style)</option>
+        <option v-for="name in availableNames" :key="name" :value="name">{{ styleLabel(name) }}</option>
       </select>
-      <input
-        type="color"
-        :value="colorValue('text')"
-        @input="editProp('text', ($event.target as HTMLInputElement).value)"
+      <ColorField
+        label="Style text"
+        :model-value="colorValue('text')"
+        @update:model-value="editProp('text', $event)"
         class="h-7 w-full cursor-pointer rounded border border-neutral-700 bg-transparent"
       />
-      <input
-        type="color"
-        :value="colorValue('background')"
-        @input="editProp('background', ($event.target as HTMLInputElement).value)"
+      <ColorField
+        label="Style background"
+        :model-value="colorValue('background')"
+        @update:model-value="editProp('background', $event)"
         class="h-7 w-full cursor-pointer rounded border border-neutral-700 bg-transparent"
       />
-      <input
-        type="color"
-        :value="colorValue('border')"
-        @input="editProp('border', ($event.target as HTMLInputElement).value)"
+      <ColorField
+        label="Style border"
+        :model-value="colorValue('border')"
+        @update:model-value="editProp('border', $event)"
         class="h-7 w-full cursor-pointer rounded border border-neutral-700 bg-transparent"
       />
       <NumberField
@@ -225,7 +226,7 @@ function pasteStyle() {
         class="flex w-full items-center justify-center justify-self-end overflow-hidden rounded border px-1 text-center"
         :style="{ ...swatch, borderWidth: '1px', borderStyle: 'solid' }"
       >
-        <span class="truncate">{{ preset || "Custom" }}</span>
+        <span class="truncate">{{ styleLabel(preset) || "Custom" }}</span>
       </div>
     </div>
 
@@ -237,8 +238,8 @@ function pasteStyle() {
           class="min-w-0 flex-1 rounded border border-neutral-700 bg-neutral-900 px-2 py-1.5 text-sm"
         >
           <option value="">Custom style</option>
-          <option v-if="preset && !availableNames.includes(preset)" :value="preset">{{ preset }} (saved style)</option>
-          <option v-for="name in availableNames" :key="name" :value="name">{{ name }}</option>
+          <option v-if="preset && !availableNames.includes(preset)" :value="preset">{{ styleLabel(preset) }} (saved style)</option>
+          <option v-for="name in availableNames" :key="name" :value="name">{{ styleLabel(name) }}</option>
         </select>
         <div class="flex shrink-0 items-center gap-0.5">
           <button
@@ -303,33 +304,33 @@ function pasteStyle() {
         </div>
       </div>
       <div class="grid grid-cols-3 gap-2">
-        <label class="flex flex-col gap-1">
+        <div class="flex flex-col gap-1">
           <span class="text-[10px] uppercase text-neutral-500">Text</span>
-          <input
-            type="color"
-            :value="colorValue('text')"
-            @input="editProp('text', ($event.target as HTMLInputElement).value)"
+          <ColorField
+            label="Style text"
+            :model-value="colorValue('text')"
+            @update:model-value="editProp('text', $event)"
             class="h-8 w-full cursor-pointer rounded border border-neutral-700 bg-transparent"
           />
-        </label>
-        <label class="flex flex-col gap-1">
+        </div>
+        <div class="flex flex-col gap-1">
           <span class="text-[10px] uppercase text-neutral-500">Bg</span>
-          <input
-            type="color"
-            :value="colorValue('background')"
-            @input="editProp('background', ($event.target as HTMLInputElement).value)"
+          <ColorField
+            label="Style background"
+            :model-value="colorValue('background')"
+            @update:model-value="editProp('background', $event)"
             class="h-8 w-full cursor-pointer rounded border border-neutral-700 bg-transparent"
           />
-        </label>
-        <label class="flex flex-col gap-1">
+        </div>
+        <div class="flex flex-col gap-1">
           <span class="text-[10px] uppercase text-neutral-500">Border</span>
-          <input
-            type="color"
-            :value="colorValue('border')"
-            @input="editProp('border', ($event.target as HTMLInputElement).value)"
+          <ColorField
+            label="Style border"
+            :model-value="colorValue('border')"
+            @update:model-value="editProp('border', $event)"
             class="h-8 w-full cursor-pointer rounded border border-neutral-700 bg-transparent"
           />
-        </label>
+        </div>
       </div>
       <div class="mt-2 grid grid-cols-2 gap-2">
         <label class="flex flex-col gap-1">
@@ -358,7 +359,7 @@ function pasteStyle() {
         class="mt-2 flex items-center justify-center overflow-hidden rounded border"
         :style="{ ...swatch, borderWidth: '1px', borderStyle: 'solid' }"
       >
-        <span class="truncate text-xs">{{ preset || "Custom" }}</span>
+        <span class="truncate text-xs">{{ styleLabel(preset) || "Custom" }}</span>
       </div>
     </div>
   </div>

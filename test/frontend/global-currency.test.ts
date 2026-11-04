@@ -7,6 +7,7 @@ import styles from "../../internal/data/styles.json"
 import sounds from "../../internal/data/manifest.json"
 import { getPath } from "../../frontend/src/path"
 import { ruleButton } from "./ruleButtons"
+import { editColor } from "./colorFields"
 
 const mock = vi.hoisted(() => ({
   getSettings: vi.fn(),
@@ -115,7 +116,17 @@ it("uses the current currency/league editors and keeps styles in the Styles pane
       .click()
     await nextTick()
   }
-  expect(stylePanel.textContent).toContain("currencyLeaguestart")
+  for (const [key, label] of [
+    ["currencyA", "Currency · S Tier"],
+    ["currencyB", "Currency · A Tier"],
+    ["currencyC", "Currency · B Tier"],
+    ["currencyLeaguestart", "Currency · Leaguestart"],
+    ["currencyLow", "Low-value Currency"],
+  ]) {
+    const row = stylePanel.querySelector(`[data-style-key="${key}"]`)!
+    expect(row.textContent).toContain(label)
+    expect(row.textContent).not.toContain(key)
+  }
   expect(stylePanel.textContent).toContain("leagueMechanic")
   ;[...stylePanel.querySelectorAll<HTMLButtonElement>("button")].find((button) => button.textContent?.includes("Links"))!.click()
   await nextTick()
@@ -237,10 +248,8 @@ it("rebases saved dev defaults and styles so reset uses the newly authored sourc
     .click()
   await nextTick()
   const row = () => stylePanel.querySelector('span[title="lifeFlask"]')!.parentElement!
-  const color = row().querySelector<HTMLInputElement>('input[type="color"]')!
-  color.value = "#123456"
-  color.dispatchEvent(new Event("input", { bubbles: true }))
-  await nextTick()
+  const color = row().querySelector<HTMLButtonElement>('[aria-label="lifeFlask text"]')!
+  await editColor(color, "#123456")
   expect(field.querySelector('button[title="Use default"]')).not.toBeNull()
   expect(row().querySelector<HTMLButtonElement>('[title="Reset style"]')!.disabled).toBe(false)
   expect(exposed.value?.dirty).toBe(true)
@@ -254,9 +263,7 @@ it("rebases saved dev defaults and styles so reset uses the newly authored sourc
   expect(exposed.value?.canUndo).toBe(false)
   input.value = "12"
   input.dispatchEvent(new Event("input", { bubbles: true }))
-  color.value = "#abcdef"
-  color.dispatchEvent(new Event("input", { bubbles: true }))
-  await nextTick()
+  await editColor(color, "#abcdef")
   field.querySelector<HTMLButtonElement>('button[title="Use default"]')!.click()
   row().querySelector<HTMLButtonElement>('[title="Reset style"]')!.click()
   await nextTick()
@@ -282,6 +289,8 @@ it("mirrors flask progression and paired field layouts using global reset semant
   input.dispatchEvent(new Event("input", { bubbles: true }))
   await nextTick()
   expect(input.value).toBe("")
+  input.dispatchEvent(new FocusEvent("blur"))
+  await nextTick()
   await exposed.value!.save()
   expect(getPath(saved[0], "flasks.lifeMaxAreaLevels.small")).toBeNull()
   field.querySelector<HTMLButtonElement>('button[title="Use default"]')!.click()
@@ -310,7 +319,7 @@ it("exposes every bundled style preset including flask and tincture styles", asy
   }
   await nextTick()
   for (const key of Object.keys(styles)) {
-    expect(panel.querySelector(`span[title="${key}"]`)).not.toBeNull()
+    expect(panel.querySelector(`[data-style-key="${key}"]`)).not.toBeNull()
   }
 })
 
@@ -323,7 +332,7 @@ it("shows inherited ordinary rarity text in link style controls and previews", a
     const row = panel.querySelector(`[data-style-key="${key}"]`)!
     // Both responsive layouts retain background/border controls, but no
     // misleading independent text-color picker.
-    expect(row.querySelectorAll('input[type="color"]')).toHaveLength(4)
+    expect(row.querySelectorAll('button[aria-haspopup="dialog"][value]')).toHaveLength(4)
     for (const rarity of ["Normal", "Magic", "Rare"]) {
       const previews = row.querySelectorAll<HTMLElement>(`[data-rarity-preview="${rarity}"]`)
       expect(previews).toHaveLength(2)
@@ -332,7 +341,7 @@ it("shows inherited ordinary rarity text in link style controls and previews", a
       for (const preview of previews) expect(preview.style.color).toBe(expected.style.color)
     }
   }
-  expect(panel.querySelector('[data-style-key="sixSocket"]')!.querySelectorAll('input[type="color"]')).toHaveLength(6)
+  expect(panel.querySelector('[data-style-key="sixSocket"]')!.querySelectorAll('button[aria-haspopup="dialog"][value]')).toHaveLength(6)
 })
 
 it("persists global defaults, nested disclosures, Settings and Styles without marking edits", async () => {
@@ -443,7 +452,10 @@ it("omits Gold/scroll visibility controls and preserves matching field widths", 
   ]) {
     expect(root.querySelector(`[data-field-path="${path}"]`)?.parentElement?.classList.contains("sm:col-span-2")).toBe(true)
   }
-  for (const path of ["currency.gold.minStackSize", "currency.gold.highStackSize"]) {
+  for (const path of ["currency.gold.minStackSize", "currency.gold.stackSize"]) {
     expect(root.querySelector(`[data-field-path="${path}"]`)?.parentElement?.classList.contains("sm:col-span-2")).toBe(false)
   }
+  expect(root.querySelector('[data-field-path="currency.gold.highStackSize"]')?.parentElement?.classList.contains("sm:col-span-2")).toBe(
+    true,
+  )
 })

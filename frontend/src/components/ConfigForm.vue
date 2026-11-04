@@ -338,7 +338,10 @@ function expandAll() {
           </template>
 
           <template v-else>
-            <div v-if="entry.group.fields.length > 0" class="grid grid-cols-1 items-end gap-3 sm:grid-cols-2">
+            <div
+              v-if="visibleFields(entry.root, entry.group.fields).length > 0"
+              class="editor-card grid grid-cols-1 items-end gap-3 sm:grid-cols-2"
+            >
               <div
                 v-for="{ field, fullWidth } in layoutFields(visibleFields(entry.root, entry.group.fields))"
                 :key="field.path"
@@ -363,15 +366,7 @@ function expandAll() {
               v-for="sub in subsectionEntries(entry.group, entry.root)"
               :key="sub.key"
               :data-editor-subsection="sub.subsection.key"
-              :class="
-                sub.subsection.layout === 'cutoff-size'
-                  ? 'mt-1'
-                  : sub.depth > 0
-                    ? 'mt-2'
-                    : sub.hasSiblingAbove
-                      ? 'mt-4 border-t border-neutral-800/60 pt-3'
-                      : 'mt-4'
-              "
+              class="editor-card mt-3"
             >
               <div v-if="sub.visibilityField" class="mb-3 flex items-center justify-between gap-2">
                 <RuleHeader
@@ -405,7 +400,7 @@ function expandAll() {
                 v-else
                 :title="sub.subsection.title"
                 :heading="sub.depth === 0"
-                :compact="sub.subsection.layout === 'cutoff-size'"
+                compact
                 :expanded="!subsectionCollapsed(entry.group.key, sub.subsection)"
                 @toggle="toggleSubsection(entry.group.key, sub.subsection)"
               />

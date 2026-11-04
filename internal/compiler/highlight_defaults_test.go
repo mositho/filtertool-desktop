@@ -44,7 +44,12 @@ func TestPerRarityDefaultsAndExplicitOverrides(t *testing.T) {
 }
 
 func TestHighlightsKeepRarityStylesUnlessStyleModuleIsAdded(t *testing.T) {
-	c := New(nil, nil, "")
+	c := New(nil, Object{
+		"normal":                     Object{"text": "#112233"},
+		"magic":                      Object{"text": "#445566"},
+		"rare":                       Object{"text": "#778899"},
+		"highlightedEquipmentNormal": Object{"text": "#ff0000", "background": "#abcdef", "size": float64(38)},
+	}, "")
 	styleCheck := func(output string, colors ...string) {
 		for _, color := range colors {
 			if !strings.Contains(output, "SetTextColor "+color) {
@@ -59,15 +64,19 @@ func TestHighlightsKeepRarityStylesUnlessStyleModuleIsAdded(t *testing.T) {
 		{"itemClasses": []any{"Boots"}, "perRarityCustomization": true, "rarities": []any{"Magic"}},
 	} {
 		rules := c.highlight(cfg)
-		want := []string{"217 255 255", "102 179 255", "255 255 0"}
+		want := []string{"17 34 51", "68 85 102", "119 136 153"}
 		if cfg["rarities"] != nil {
-			want = []string{"102 179 255"}
+			want = []string{"68 85 102"}
 		}
 		if len(rules) != len(want) {
 			t.Fatalf("unexpected selected rarity rules: got %d want %d", len(rules), len(want))
 		}
 		for i, r := range rules {
 			styleCheck(r.render(), want[i])
+			if strings.Contains(r.render(), "Rarity == Normal") &&
+				(!strings.Contains(r.render(), "SetBackgroundColor 171 205 239") || !strings.Contains(r.render(), "SetFontSize 38")) {
+				t.Fatal("highlight must retain its own non-text styling", r.render())
+			}
 		}
 	}
 
@@ -77,7 +86,7 @@ func TestHighlightsKeepRarityStylesUnlessStyleModuleIsAdded(t *testing.T) {
 	} {
 		cfg := Object{"itemClasses": []any{"Test Weapons"}, "modules": []any{}, "style": Object{"text": "#123456"}}
 		output := makeOutput(cfg)
-		styleCheck(output, "217 255 255", "102 179 255", "255 255 0")
+		styleCheck(output, "17 34 51", "68 85 102", "119 136 153")
 		if strings.Contains(output, "SetTextColor 18 52 86") {
 			t.Fatalf("inactive style module overrode rarity styles: %s", output)
 		}

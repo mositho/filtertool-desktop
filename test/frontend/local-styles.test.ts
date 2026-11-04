@@ -7,6 +7,7 @@ import referenceData from "../../internal/data/reference.json"
 import styles from "../../internal/data/styles.json"
 import { fieldStyleKeys, usesRarityText } from "../../frontend/src/namedStyles"
 import { styleClipboard } from "../../frontend/src/styleClipboard"
+import { editColor } from "./colorFields"
 
 let app: App
 let root: HTMLDivElement
@@ -37,8 +38,8 @@ function mount(initial: FilterConfig = { buildProfile: {}, buildSpecificOptions:
   app.mount(root)
   return state
 }
-function gemShortcut() {
-  return root.querySelector<HTMLButtonElement>('[data-field-path="gemCallouts.gems"] [aria-haspopup="dialog"]')!
+function gemShortcut(field = "gems") {
+  return root.querySelector<HTMLButtonElement>(`[data-field-path="gemCallouts.${field}"] [aria-haspopup="dialog"]`)!
 }
 function dialog() {
   return document.querySelector<HTMLElement>('[role="dialog"]')!
@@ -76,33 +77,44 @@ it("edits in place, synchronizes the bottom panel, and resets to global rather t
   })
   root.querySelector<HTMLButtonElement>('[data-editor-group="styles"] > button')!.click()
   await settle()
-  ;[...root.querySelectorAll<HTMLButtonElement>("button")].find((button) => button.textContent?.trim() === "Expand all styles")!.click()
+  ;[...root.querySelectorAll<HTMLButtonElement>('[data-editor-group="styles"] button')]
+    .find((button) => button.textContent?.trim() === "Expand all")!
+    .click()
   await settle()
   root.scrollTop = 147
   gemShortcut().click()
   await settle()
   expect(dialog().textContent).toContain("Changes affect every rule in this filter")
-  expect(dialog().querySelector<HTMLInputElement>('[aria-label="gemHighlight text"]')!.value).toBe("#abcdef")
-  edit(dialog().querySelector('[aria-label="gemHighlight text"]')!, "#aabbcc")
+  expect(dialog().querySelector<HTMLButtonElement>('[aria-label="gemHighlight text"]')!.value).toBe("#abcdef")
+  dialog().querySelector<HTMLButtonElement>('[aria-label="gemHighlight text"]')!.click()
+  await settle()
+  const color = dialog().querySelector<HTMLInputElement>('[aria-label="gemHighlight text hex"]')!
+  color.value = "#aabbcc"
+  color.dispatchEvent(new Event("input", { bubbles: true }))
   await settle()
   expect(state.localStyles?.gemHighlight).toEqual({ text: "#aabbcc" })
   expect(state.localStyles?.gemCallout).toBeUndefined()
-  expect(root.querySelector<HTMLInputElement>('[aria-label="gemHighlight text"]')!.value).toBe("#aabbcc")
+  expect(root.querySelector<HTMLButtonElement>('[aria-label="gemHighlight text"]')!.value).toBe("#aabbcc")
   expect(root.scrollTop).toBe(147)
+  // Escape closes only the nested picker, not the surrounding style editor.
+  color.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))
+  await settle()
+  expect(dialog()).not.toBeNull()
+  expect(dialog().querySelector('[aria-label="gemHighlight text hex"]')).toBeNull()
   dialog().querySelector<HTMLButtonElement>('[title="Reset to global"]')!.click()
   await settle()
   expect(state.localStyles).toEqual({ currencyA: { border: "#123123" } })
-  expect(dialog().querySelector<HTMLInputElement>('[aria-label="gemHighlight text"]')!.value).toBe("#123456")
-  expect(root.querySelector<HTMLInputElement>('[aria-label="gemHighlight text"]')!.value).toBe("#123456")
+  expect(dialog().querySelector<HTMLButtonElement>('[aria-label="gemHighlight text"]')!.value).toBe("#123456")
+  expect(root.querySelector<HTMLButtonElement>('[aria-label="gemHighlight text"]')!.value).toBe("#123456")
   document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))
   await settle()
   expect(dialog()).toBeNull()
   expect(document.activeElement).toBe(gemShortcut())
 })
 
-it("keeps edits sparse, removes the last override on reset, and dismisses on outside click", async () => {
+it.each(["gems", "styleOnly"])("edits the highlight style for %s, resets it, and dismisses on outside click", async (field) => {
   const state = mount()
-  gemShortcut().click()
+  gemShortcut(field).click()
   await settle()
   edit(dialog().querySelector('[aria-label="gemHighlight opacity"]')!, "0.5")
   await settle()
@@ -123,6 +135,28 @@ it("previews ordinary rarity colors without offering highlight styles in a link 
   expect(dialog().querySelector('[aria-label="threeLink text"]')).toBeNull()
   expect(dialog().querySelector('[aria-label="Style to edit"]')).toBeNull()
   expect(dialog().querySelector<HTMLElement>('[data-rarity-preview="Magic"]')!.style.color).toBe("rgb(136, 136, 255)")
+})
+
+it.each(["Normal", "Magic", "Rare"])("inherits %s text for its equipment highlight preview", async (rarity) => {
+  const key = `highlightedEquipment${rarity}`
+  mount({
+    buildProfile: {},
+    buildSpecificOptions: {},
+    localStyles: { [rarity.toLowerCase()]: { text: "#123456" }, [key]: { text: "#ff0000" } },
+  })
+  root.querySelector<HTMLButtonElement>('[data-editor-group="styles"] > button')!.click()
+  await settle()
+  const equipment = [...root.querySelectorAll<HTMLButtonElement>('[data-editor-group="styles"] button')].find((button) =>
+    button.textContent?.includes("Equipment"),
+  )!
+  equipment.click()
+  await settle()
+  const row = root.querySelector<HTMLElement>(`[data-style-key="${key}"]`)!
+  expect(row).not.toBeNull()
+  expect(row.textContent).toContain("Rarities")
+  expect(row.querySelector(`[aria-label="${key} text"]`)).toBeNull()
+  expect(row.querySelectorAll("[data-rarity-preview]")).toHaveLength(1)
+  expect(row.querySelector<HTMLElement>(`[data-rarity-preview="${rarity}"]`)!.style.color).toBe("rgb(18, 52, 86)")
 })
 
 it("maps ordinary rarity rules to their own styles", () => {
@@ -157,10 +191,33 @@ it("shares complete style copies between cards and the bottom panel without reta
   await settle()
   root.querySelector<HTMLButtonElement>('[data-editor-group="styles"] > button')!.click()
   await settle()
-  ;[...root.querySelectorAll<HTMLButtonElement>("button")].find((button) => button.textContent?.trim() === "Expand all styles")!.click()
+  ;[...root.querySelectorAll<HTMLButtonElement>('[data-editor-group="styles"] button')]
+    .find((button) => button.textContent?.trim() === "Expand all")!
+    .click()
   await settle()
-  root.querySelector<HTMLButtonElement>('[aria-label="Paste currencyLow style"]')!.click()
+  root.querySelector<HTMLButtonElement>('[aria-label="Paste Low-value Currency style"]')!.click()
   await settle()
   expect(state.localStyles?.currencyLow).toMatchObject({ size: 45, text: "#123456" })
-  expect(root.querySelector<HTMLInputElement>('[aria-label="currencyLow size"]')!.value).toBe("45")
+  expect(root.querySelector<HTMLInputElement>('[aria-label="Low-value Currency size"]')!.value).toBe("45")
+})
+
+it.each([
+  { tier: "s", key: "currencyA", label: "Currency · S Tier" },
+  { tier: "a", key: "currencyB", label: "Currency · A Tier" },
+  { tier: "b", key: "currencyC", label: "Currency · B Tier" },
+])("uses the $tier tier label in its style popup and Styles panel while preserving saved overrides", async ({ tier, key, label }) => {
+  const state = mount()
+  root.querySelector<HTMLButtonElement>(`[data-currency-tier="${tier}"] [title="Edit style for this filter"]`)!.click()
+  await settle()
+  expect(dialog().getAttribute("aria-label")).toBe(`Edit ${label} style`)
+  expect(dialog().textContent).toContain(label)
+  expect(dialog().textContent).not.toContain(key)
+  await editColor(dialog().querySelector<HTMLButtonElement>(`[aria-label="${label} text"]`)!, "#123abc")
+  expect(state.localStyles).toEqual({ [key]: { text: "#123abc" } })
+  dialog().querySelector<HTMLButtonElement>(`[aria-label="Show ${label} in Styles"]`)!.click()
+  await settle()
+  const row = root.querySelector<HTMLElement>(`[data-editor-group="styles"] [data-style-key="${key}"]`)!
+  expect(document.activeElement).toBe(row)
+  expect(row.textContent).toContain(label)
+  expect(row.textContent).not.toContain(key)
 })

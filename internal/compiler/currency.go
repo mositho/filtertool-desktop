@@ -283,12 +283,20 @@ func (c *Compiler) gold(cfg Object) string {
 		return "# Gold\n\n" + base().hide().render()
 	}
 	minimum := Num(cfg["minStackSize"], 0)
+	stack := Num(cfg["stackSize"], 10)
 	high := Num(cfg["highStackSize"], 50)
+	if stack < minimum {
+		stack = minimum
+	}
 	if high < minimum {
 		high = minimum
 	}
+	if high < stack {
+		high = stack
+	}
 	rules := []*rule{
-		c.currencyPresentation(base().number("StackSize", ">=", high), Obj(cfg["highStack"]), "goldHighStack"),
+		c.currencyPresentation(base().number("StackSize", ">=", high), Obj(cfg["highStack"]), "goldStackLarge"),
+		c.currencyPresentation(base().number("StackSize", ">=", stack), Obj(cfg["stack"]), "goldStack"),
 		c.currencyPresentation(base().number("StackSize", ">=", minimum), cfg, "gold"),
 	}
 	if minimum > 0 {

@@ -1,7 +1,7 @@
 {
   "chromatic": {
     "background": "#000000",
-    "backgroundOpacity": 0.9019607843137255,
+    "backgroundOpacity": 0.94,
     "border": "#F789FF",
     "size": 40,
     "text": "#F789FF"
@@ -43,13 +43,13 @@
     "text": "#000000"
   },
   "fourLink": {
-    "background": "#000000",
-    "backgroundOpacity": 0.9019607843137255,
-    "border": "#00ff80",
+    "background": "#0c273d",
+    "backgroundOpacity": 0.94,
+    "border": "#00ffe5",
     "text": "#00ff80"
   },
   "fiveLink": {
-    "background": "#00A8FF",
+    "background": "#15163F",
     "border": "#FFFFFF",
     "text": "#FFFFFF"
   },
@@ -61,7 +61,8 @@
   "gem": {
     "background": "#000000",
     "border": "#000000",
-    "text": "#00FFFF"
+    "text": "#00FFFF",
+    "size": 30
   },
   "gemHighlight": {
     "background": "#002a2a",
@@ -70,21 +71,28 @@
   },
   "gold": {
     "background": "#000000",
-    "backgroundOpacity": 0.39215686274509803,
-    "border": "#000000",
-    "size": 25,
-    "text": "#DADADA"
-  },
-  "goldHighStack": {
-    "background": "#000000",
-    "backgroundOpacity": 0.7058823529411765,
+    "backgroundOpacity": 0.6,
     "border": "#000000",
     "size": 30,
     "text": "#DADADA"
   },
+  "goldStack": {
+    "background": "#000000",
+    "backgroundOpacity": 0.8,
+    "border": "#000000",
+    "size": 35,
+    "text": "#DADADA"
+  },
+  "goldStackLarge": {
+    "background": "#000000",
+    "backgroundOpacity": 0.94,
+    "border": "#FFFFFF",
+    "size": 40,
+    "text": "#DADADA"
+  },
   "sixLink": {
     "background": "#FFFFFF",
-    "border": "#00A8FF",
+    "border": "#00ffe5",
     "text": "#00A8FF"
   },
   "highlightedEquipmentMagic": {
@@ -110,7 +118,7 @@
   "leagueMechanic": {
     "background": "#102B2B",
     "border": "#40D9B0",
-    "size": 40,
+    "size": 45,
     "text": "#B0FFE8"
   },
   "lifeFlask": {
@@ -138,9 +146,15 @@
     "border": "#0055ff",
     "text": "#ffffff"
   },
-  "normal": { "text": "#c8c8c8" },
-  "magic": { "text": "#8888ff" },
-  "rare": { "text": "#ffff77" },
+  "normal": {
+    "text": "#c8c8c8"
+  },
+  "magic": {
+    "text": "#8888ff"
+  },
+  "rare": {
+    "text": "#ffff77"
+  },
   "maps": {
     "background": "#282828",
     "border": "#FFFFFF",
@@ -178,8 +192,8 @@
   },
   "threeLink": {
     "background": "#000000",
-    "backgroundOpacity": 0.9019607843137255,
-    "border": "#B9FF66",
+    "backgroundOpacity": 0.94,
+    "border": "#3fff0f",
     "text": "#B9FF66"
   },
   "tincture": {
@@ -189,9 +203,10 @@
   },
   "twoLink": {
     "background": "#000000",
-    "backgroundOpacity": 0.9019607843137255,
-    "border": "#fdfb4e",
-    "text": "#DADADA"
+    "backgroundOpacity": 0.94,
+    "border": "#c8c8c8",
+    "text": "#DADADA",
+    "size": 40
   },
   "unique": {
     "background": "#000000",
@@ -210,7 +225,7 @@
   },
   "whetstoneRecipe": {
     "background": "#000000",
-    "backgroundOpacity": 0.96,
+    "backgroundOpacity": 0.94,
     "border": "#999999",
     "text": "#9e9e9e"
   },
