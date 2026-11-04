@@ -7,6 +7,8 @@ const emit = defineEmits<{ "update:classes": [value: string[]]; "update:bases": 
 const search = ref("")
 const classSearch = ref("")
 const selectedClass = ref("")
+const classesOpen = ref(false)
+const basesOpen = ref(false)
 
 const classes = computed(() =>
   props.weaponOnly ? [...(props.reference.weaponClasses ?? []), "Shields"] : (props.reference.itemClasses ?? []),
@@ -23,24 +25,40 @@ function compareBases(a: string, b: string): number {
   return (dropLevel(a) ?? Infinity) - (dropLevel(b) ?? Infinity) || a.localeCompare(b)
 }
 const selectedBaseNames = computed(() => new Set(props.bases))
+const selectedClassNames = computed(() => new Set(props.classes))
+const baseIndex = computed(() => {
+  const byClass = new Map<string, string[]>()
+  const classByBase = new Map<string, string>()
+  for (const itemClass of classes.value) {
+    const bases = [...new Set(props.reference.baseTypesByClass[itemClass] ?? [])]
+    byClass.set(itemClass, bases)
+    for (const base of bases) {
+      // Preserve the first matching class if a name appears in multiple classes.
+      if (!classByBase.has(base)) classByBase.set(base, itemClass)
+    }
+  }
+  return { byClass, classByBase }
+})
 function classBases(itemClass: string): string[] {
-  return [...new Set(props.reference.baseTypesByClass[itemClass] ?? [])]
+  return baseIndex.value.byClass.get(itemClass) ?? []
 }
 function classForBase(base: string): string | undefined {
-  return classes.value.find((itemClass) => classBases(itemClass).includes(base))
+  return baseIndex.value.classByBase.get(base)
 }
 function baseSelected(base: string): boolean {
   const itemClass = classForBase(base)
-  return selectedBaseNames.value.has(base) || Boolean(itemClass && props.classes.includes(itemClass))
+  return selectedBaseNames.value.has(base) || Boolean(itemClass && selectedClassNames.value.has(itemClass))
 }
 function baseIsCovered(base: string): boolean {
   const itemClass = classForBase(base)
-  return Boolean(itemClass && props.classes.includes(itemClass))
+  return Boolean(itemClass && selectedClassNames.value.has(itemClass))
 }
 const selectedBases = computed(() => [...props.bases].filter((base) => !baseIsCovered(base)).sort(compareBases))
 function classFullySelected(itemClass: string): boolean {
   const itemBases = classBases(itemClass)
-  return props.classes.includes(itemClass) || Boolean(itemBases.length > 0 && itemBases.every((base) => selectedBaseNames.value.has(base)))
+  return (
+    selectedClassNames.value.has(itemClass) || Boolean(itemBases.length > 0 && itemBases.every((base) => selectedBaseNames.value.has(base)))
+  )
 }
 const visibleSelectionState = computed(() => {
   if (!bases.value.length) return "none"
@@ -48,9 +66,7 @@ const visibleSelectionState = computed(() => {
   return count === 0 ? "none" : count === bases.value.length ? "all" : "some"
 })
 const bases = computed(() => {
-  const candidates = selectedClass.value
-    ? (props.reference.baseTypesByClass[selectedClass.value] ?? [])
-    : classes.value.flatMap((itemClass) => props.reference.baseTypesByClass[itemClass] ?? [])
+  const candidates = selectedClass.value ? classBases(selectedClass.value) : [...baseIndex.value.classByBase.keys()]
   const query = search.value.trim().toLowerCase()
   return [...new Set(query ? candidates.filter((base) => base.toLowerCase().includes(query)) : candidates)].sort(compareBases)
 })
@@ -152,9 +168,9 @@ function toggleBase(base: string) {
         {{ base }} <span class="ml-1 whitespace-nowrap text-neutral-400">Lvl {{ dropLevel(base) ?? "—" }}</span> ×
       </button>
     </div>
-    <details class="rounded border border-neutral-700">
+    <details class="rounded border border-neutral-700" @toggle="classesOpen = ($event.target as HTMLDetailsElement).open">
       <summary class="rounded px-3 py-2 text-xs text-neutral-300">Choose {{ weaponOnly ? "weapon" : "item" }} classes</summary>
-      <div class="space-y-2 px-2 pb-2">
+      <div v-if="classesOpen" class="space-y-2 px-2 pb-2">
         <input
           v-model="classSearch"
           type="search"
@@ -176,9 +192,9 @@ function toggleBase(base: string) {
         </div>
       </div>
     </details>
-    <details class="rounded border border-neutral-700">
+    <details class="rounded border border-neutral-700" @toggle="basesOpen = ($event.target as HTMLDetailsElement).open">
       <summary class="rounded px-3 py-2 text-xs text-neutral-300">Choose individual bases</summary>
-      <div class="space-y-2 px-2 pb-2">
+      <div v-if="basesOpen" class="space-y-2 px-2 pb-2">
         <div class="flex flex-col gap-2 sm:flex-row">
           <select
             v-model="selectedClass"

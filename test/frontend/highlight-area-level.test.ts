@@ -31,6 +31,9 @@ describe("highlight level inputs", () => {
     Array.from(summaries)
       .find((summary) => summary.textContent?.includes("Choose item classes"))!
       .click()
+    const classDetails = container.querySelectorAll("details")[0]
+    classDetails.dispatchEvent(new Event("toggle"))
+    await nextTick()
     const classLabel = Array.from(container.querySelectorAll<HTMLLabelElement>("label")).find(
       (label) => label.textContent?.trim() === "Rings",
     )!
@@ -41,6 +44,9 @@ describe("highlight level inputs", () => {
     Array.from(summaries)
       .find((summary) => summary.textContent?.includes("Choose individual bases"))!
       .click()
+    const basesDetails = container.querySelectorAll("details")[1]
+    basesDetails.dispatchEvent(new Event("toggle"))
+    await nextTick()
     const classFilter = container.querySelector<HTMLSelectElement>('select[aria-label="Filter bases by class"]')!
     classFilter.value = "One Hand Axes"
     classFilter.dispatchEvent(new Event("change", { bubbles: true }))

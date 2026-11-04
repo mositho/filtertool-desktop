@@ -153,6 +153,8 @@ describe("editor view controls", () => {
       weaponOnly,
     })
     root.querySelector("summary")!.parentElement!.setAttribute("open", "")
+    root.querySelector("details")!.dispatchEvent(new Event("toggle"))
+    await nextTick()
     const search = root.querySelector<HTMLInputElement>('input[aria-label="Search item classes"]')!
     search.value = expected === "Rings" ? "ring" : "bow"
     search.dispatchEvent(new Event("input", { bubbles: true }))
