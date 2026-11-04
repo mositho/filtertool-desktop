@@ -20,6 +20,20 @@ func TestWebCompilerParity(t *testing.T) {
 	if err := json.Unmarshal(defaultsBytes, &referenceDefaults); err != nil {
 		t.Fatal(err)
 	}
+	// Historical style inputs from 16ef675, alongside the captured web output.
+	// Do not merge current styles: their colors, sizes and aliases evolve.
+	stylesBytes, err := os.ReadFile("testdata/data/styles.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var referenceStyles Object
+	if err := json.Unmarshal(stylesBytes, &referenceStyles); err != nil {
+		t.Fatal(err)
+	}
+	gemRules, err := os.ReadFile("testdata/data/gems.rules")
+	if err != nil {
+		t.Fatal(err)
+	}
 	// Compare both compilers against the same captured base data. Weekly CSV
 	// updates must not invalidate the oracle by changing only the Go inputs.
 	weaponBytes, err := os.ReadFile("testdata/data/weapons.json")
@@ -54,9 +68,9 @@ func TestWebCompilerParity(t *testing.T) {
 			compiler.legacyCurrency = true
 			compiler.legacyEquipmentSelections = true
 			compiler.Defaults = Merge(referenceDefaults, Obj(cfg["_defaults"]))
-			// The frozen web output predates the editable Gold High Stack size.
-			// Keep its historical value without constraining current source styles.
-			compiler.Styles = Merge(Merge(compiler.Styles, Object{"goldHighStack": Object{"size": float64(25)}}), Obj(cfg["_styles"]))
+			compiler.Styles = Merge(referenceStyles, Obj(cfg["_styles"]))
+			compiler.Styles["gemHighlight"] = Clone(Obj(compiler.Styles["gemCallout"]))
+			compiler.templates["gems"] = string(gemRules)
 			compiler.rarityDefaults = Object{}
 			for _, phase := range List(Obj(cfg["buildProfile"])["weaponPhases"]) {
 				p := Obj(phase)

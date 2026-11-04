@@ -70,9 +70,14 @@ func TestGenericLinkExtensionsOnlyAddShowRules(t *testing.T) {
 }
 
 func TestFiveAndSixLinksUseDedicatedStylesWithOrdinaryRarityTextColors(t *testing.T) {
-	defaultLinks := New(nil, nil, "").links(Object{}, Object{})
-	if !strings.Contains(defaultLinks, "LinkedSockets = 5\nRarity == Normal\nMinimapIcon 2 Orange Diamond\nSetTextColor 200 200 200\nSetBackgroundColor 0 168 255\nSetBorderColor 255 255 255") {
-		t.Fatal("default five-link style should use the blue background and white border")
+	defaults := New(nil, nil, "")
+	defaultLinks := defaults.links(Object{}, Object{})
+	fiveLink := Obj(defaults.Styles["fiveLink"])
+	wantDefault := "LinkedSockets = 5\nRarity == Normal\nMinimapIcon 2 Orange Diamond\nSetTextColor " +
+		rgb(Text(Obj(defaults.Styles["normal"])["text"])) + "\nSetBackgroundColor " +
+		rgb(Text(fiveLink["background"])) + "\nSetBorderColor " + rgb(Text(fiveLink["border"]))
+	if !strings.Contains(defaultLinks, wantDefault) {
+		t.Fatal("default five-link rule should use the dedicated style with ordinary rarity text")
 	}
 	c := New(nil, Object{
 		"fiveLink": Object{"background": "#123456", "border": "#654321", "text": "#abcdef"},

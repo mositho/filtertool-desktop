@@ -1,0 +1,22 @@
+### Gems
+
+Show
+Class "Skill Gems" "Support Gems"
+BaseType "Empower" "Enlighten" "Enhance"
+MinimapIcon 2 Red Star
+@style gem
+
+Show
+Class "Skill Gems"
+BaseType "Vaal"
+MinimapIcon 2 Cyan Triangle
+@style gem
+
+Show
+BaseType == "Heavy Strike" "Double Strike" "Burning Arrow" "Viper Strike" "Fireball" "Holy Strike" "Spectral Throw"
+@style gemCallout
+
+Show
+Class "Skill Gems" "Support Gems"
+@style gem
+SetFontSize 35
