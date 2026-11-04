@@ -401,7 +401,7 @@ func (s *Store) filters() ([]Object, error) {
 		}
 		for name := range templates {
 			out = append(out, Object{"name": name, "hasConfigJson": true})
-			templateNames[strings.ToLower(exportName(name))] = true
+			templateNames[strings.ToLower(filterNameKey(name))] = true
 		}
 	}
 	entries, err := os.ReadDir(filepath.Join(s.Root, "filters"))
@@ -411,7 +411,7 @@ func (s *Store) filters() ([]Object, error) {
 	for _, e := range entries {
 		if e.Type().IsRegular() && strings.HasSuffix(e.Name(), ".json") {
 			name := strings.TrimSuffix(e.Name(), ".json")
-			if s.DevMode && templateNames[strings.ToLower(exportName(name))] {
+			if s.DevMode && templateNames[strings.ToLower(filterNameKey(name))] {
 				continue
 			}
 			if checkName(name) == nil {
@@ -472,7 +472,7 @@ func (s *Store) deleteDevFilter(name string) error {
 			continue
 		}
 		other := strings.TrimSuffix(entry.Name(), ".json")
-		if strings.EqualFold(exportName(other), exportName(name)) {
+		if strings.EqualFold(filterNameKey(other), filterNameKey(name)) {
 			if err := os.Remove(filepath.Join(s.Root, "filters", entry.Name())); err != nil {
 				return err
 			}
@@ -481,6 +481,12 @@ func (s *Store) deleteDevFilter(name string) error {
 	return nil
 }
 func exportName(name string) string {
+	return name + ".filter"
+}
+
+// Keep the existing separator-insensitive identity checks independent of the
+// exported filename, which preserves the name exactly as entered.
+func filterNameKey(name string) string {
 	words := regexp.MustCompile(`[^a-z0-9]+`).Split(strings.ToLower(name), -1)
 	out := ""
 	for _, w := range words {
@@ -491,7 +497,7 @@ func exportName(name string) string {
 	if out == "" {
 		out = "Filter"
 	}
-	return out + ".filter"
+	return out
 }
 func (s *Store) available(name, except string) error {
 	if err := checkName(name); err != nil {
@@ -506,8 +512,8 @@ func (s *Store) available(name, except string) error {
 		if other == except {
 			continue
 		}
-		if strings.EqualFold(other, name) || strings.EqualFold(exportName(other), exportName(name)) {
-			return errors.New("a filter with that name or exported filename already exists")
+		if strings.EqualFold(other, name) || strings.EqualFold(filterNameKey(other), filterNameKey(name)) {
+			return errors.New("a filter with that name or an equivalent name already exists")
 		}
 	}
 	return nil

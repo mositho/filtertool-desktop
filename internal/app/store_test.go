@@ -480,3 +480,36 @@ func TestExportOfflineAndNoPartialGameWrite(t *testing.T) {
 		t.Fatal("failed export overwrote working game filter")
 	}
 }
+
+func TestExportPreservesSpacesAndCaseInFilterName(t *testing.T) {
+	s := testStore(t)
+	game := t.TempDir()
+	settings, _ := s.settings()
+	settings["filterPath"] = game
+	mustCall(t, s, "saveSettings", Object{"settings": settings})
+	s.FetchAudio = func(string, string) ([]byte, error) { return []byte("fake TTS"), nil }
+	s.AudioProcessor = func(b []byte, path string, _ float64) error { return os.WriteFile(path, b, 0600) }
+	mustCall(t, s, "createFilter", Object{"name": "test abc"})
+	// Existing game files must not be overwritten or removed through the old
+	// name normalization, even when they differ only by spaces and casing.
+	otherPath := filepath.Join(game, "TestAbc.filter")
+	if err := os.WriteFile(otherPath, []byte("unrelated filter"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	result := mustCall(t, s, "exportFilter", Object{"name": "test abc"}).(Object)
+	if result["fileName"] != "test abc.filter" {
+		t.Fatal("export changed the filter name", result)
+	}
+	path := filepath.Join(game, "test abc.filter")
+	if _, err := os.Stat(path); err != nil {
+		t.Fatal("missing export with the original name", err)
+	}
+	mustCall(t, s, "deleteFilter", Object{"name": "test abc", "deleteGameFile": true})
+	if _, err := os.Stat(path); !errors.Is(err, os.ErrNotExist) {
+		t.Fatal("delete left the named export behind", err)
+	}
+	other, err := os.ReadFile(otherPath)
+	if err != nil || string(other) != "unrelated filter" {
+		t.Fatal("export or deletion touched another game file", err)
+	}
+}
