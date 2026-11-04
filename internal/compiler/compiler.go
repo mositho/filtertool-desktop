@@ -140,7 +140,7 @@ func (c *Compiler) gems(cfg Object) string {
 		if contains(sounding, gem) {
 			continue
 		}
-		rules = append(rules, newRule().quoted("BaseType", true, gem).style(Obj(c.Styles["gem"])))
+		rules = append(rules, newRule().quoted("BaseType", true, gem).style(Obj(c.Styles["gemHighlight"])))
 	}
 	for _, gem := range c.starterSupports {
 		if contains(sounding, gem) || contains(Strings(cfg["styleOnly"]), gem) {
