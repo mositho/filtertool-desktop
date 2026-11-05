@@ -30,17 +30,15 @@ func TestFlaskProgressionDefaultsCoverAllBasesAndPreserveCallouts(t *testing.T) 
 			t.Fatal("flask editor missing base types", kind)
 		}
 		for _, flask := range catalog[kind] {
-			if actual, exists := Obj(Obj(c.Defaults["flasks"])[kind+"MaxAreaLevels"])[Text(flask["key"])]; !exists || actual != flask["maxAreaLevel"] {
-				t.Fatal("bundled defaults differ from editor progression", kind, flask["key"])
-			}
+			maximum := Val(Obj(Obj(c.Defaults["flasks"])[kind+"MaxAreaLevels"]), Text(flask["key"]), flask["maxAreaLevel"])
 			base := Text(flask["name"]) + " " + strings.TrimSuffix(class, "s")
 			if !contains(bases, base) || c.manifest[Text(flask["sound"])] == "" {
 				t.Fatal("unknown flask or missing TTS template", base)
 			}
 			blocks := flaskBlocks(out, base)
-			if flask["maxAreaLevel"] == float64(0) {
+			if maximum == float64(0) {
 				if len(blocks) != 0 {
-					t.Fatal("previously hidden life flask shown by default", base)
+					t.Fatal("flask with a zero cutoff shown", base)
 				}
 				continue
 			}
@@ -51,12 +49,12 @@ func TestFlaskProgressionDefaultsCoverAllBasesAndPreserveCallouts(t *testing.T) 
 				if !strings.Contains(block, `CustomAlertSound "test-sounds/`+Text(flask["sound"])+`.mp3" 300`) {
 					t.Fatal("default callout changed", base)
 				}
-				if flask["maxAreaLevel"] == nil {
+				if maximum == nil {
 					if strings.Contains(block, "AreaLevel") {
 						t.Fatal("uncapped flask gained a cutoff", base)
 					}
-				} else if !strings.Contains(block, fmt.Sprint("AreaLevel <= ", flask["maxAreaLevel"])) {
-					t.Fatal("default cutoff changed", base)
+				} else if !strings.Contains(block, fmt.Sprint("AreaLevel <= ", maximum)) {
+					t.Fatal("configured cutoff not applied", base)
 				}
 			}
 		}

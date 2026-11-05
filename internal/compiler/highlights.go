@@ -36,7 +36,7 @@ func unique(values []string) []string {
 func (c *Compiler) findWeapons(classes []string, min any) []string {
 	out := []string{}
 	for _, w := range c.weapons {
-		if (len(classes) == 0 || contains(classes, w.ItemClass)) && w.APS >= Num(min, 0) {
+		if contains(classes, w.ItemClass) && w.APS >= Num(min, 0) {
 			out = append(out, w.BaseType)
 		}
 	}
@@ -149,25 +149,24 @@ func (c *Compiler) highlightRules(cfg Object) []*rule {
 			nonclasses = append(nonclasses, s)
 		}
 	}
-	if cfg["weaponCutoffOverlap"] == nil {
-		if cfg["minAps"] != nil {
-			classes = nonclasses
-			bases = unique(append(bases, c.findWeapons(wclasses, cfg["minAps"])...))
-		}
+	if cfg["weaponCutoffOverlap"] == nil && cfg["minAps"] == nil {
 		return targets(bases, classes)
 	}
 	wbases, nonbases := []string{}, []string{}
 	for _, s := range bases {
-		if _, ok := c.weaponBase(s); ok {
-			wbases = append(wbases, s)
+		if w, ok := c.weaponBase(s); ok {
+			if w.APS >= Num(cfg["minAps"], 0) {
+				wbases = append(wbases, s)
+			}
 		} else {
 			nonbases = append(nonbases, s)
 		}
 	}
-	if len(wclasses) > 0 || cfg["minAps"] != nil {
-		wbases = append(wbases, c.findWeapons(wclasses, cfg["minAps"])...)
-	}
+	wbases = append(wbases, c.findWeapons(wclasses, cfg["minAps"])...)
 	wbases = unique(wbases)
+	if cfg["weaponCutoffOverlap"] == nil {
+		return targets(unique(append(nonbases, wbases...)), nonclasses)
+	}
 	maxima := []float64{}
 	grouped := map[float64][]string{}
 	for _, base := range wbases {

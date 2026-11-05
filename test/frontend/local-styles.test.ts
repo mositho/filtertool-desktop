@@ -181,12 +181,16 @@ it("maps ordinary rarity rules to their own styles", () => {
 })
 
 it("shares complete style copies between cards and the bottom panel without retaining the target's old size", async () => {
-  const state = mount()
+  const state = mount({
+    buildProfile: {},
+    buildSpecificOptions: {},
+    localStyles: { gemHighlight: { size: 32 }, currencyLow: { size: 41 } },
+  })
   gemShortcut().click()
   await settle()
   dialog().querySelector<HTMLButtonElement>('[title="Copy style"]')!.click()
   await settle()
-  expect(styleClipboard.value?.style.size).toBe(45)
+  expect(styleClipboard.value?.style.size).toBe(32)
   dialog().querySelector<HTMLButtonElement>('[aria-label="Close style editor"]')!.click()
   await settle()
   root.querySelector<HTMLButtonElement>('[data-editor-group="styles"] > button')!.click()
@@ -197,8 +201,8 @@ it("shares complete style copies between cards and the bottom panel without reta
   await settle()
   root.querySelector<HTMLButtonElement>('[aria-label="Paste Low-value Currency style"]')!.click()
   await settle()
-  expect(state.localStyles?.currencyLow).toMatchObject({ size: 45, text: "#123456" })
-  expect(root.querySelector<HTMLInputElement>('[aria-label="Low-value Currency size"]')!.value).toBe("45")
+  expect(state.localStyles?.currencyLow).toMatchObject({ size: 32, text: "#123456" })
+  expect(root.querySelector<HTMLInputElement>('[aria-label="Low-value Currency size"]')!.value).toBe("32")
 })
 
 it.each([

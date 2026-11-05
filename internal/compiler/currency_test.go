@@ -173,17 +173,21 @@ func TestGoldStackStyleTiers(t *testing.T) {
 }
 
 func TestScrollCutoffsAndRemovedVisibilityOverride(t *testing.T) {
-	out := compileCurrencyTest(t, Object{"currency": Object{"scrolls": Object{
+	c := New(nil, Object{"wisdom": Object{"text": "#123456"}}, "")
+	out, err := c.Compile(Object{"buildProfile": Object{}, "buildSpecificOptions": Object{"currency": Object{"scrolls": Object{
 		"wisdom": Object{"soundCutoffLevel": float64(12), "style": Object{"size": float64(30)}, "sound": Object{"enabled": true}},
 		"portal": Object{"visibility": "Hide"},
-	}}})
+	}}}})
+	if err != nil {
+		t.Fatal(err)
+	}
 	wisdom := currencyBlocks(out, "Scroll of Wisdom")
 	if len(wisdom) != 2 || !strings.Contains(wisdom[0], "AreaLevel <= 12") || !strings.Contains(wisdom[0], "CustomAlertSound") || strings.Contains(wisdom[1], "AlertSound") {
 		t.Fatal("scroll cutoff or inherited sound changed")
 	}
 	for _, block := range wisdom {
-		if !strings.Contains(block, "SetTextColor 255 125 78") || !strings.Contains(block, "SetFontSize 30") {
-			t.Fatal("scroll style did not retain default colours")
+		if !strings.Contains(block, "SetTextColor 18 52 86") || !strings.Contains(block, "SetFontSize 30") {
+			t.Fatal("scroll size override did not retain the preset text colour")
 		}
 	}
 	portal := currencyBlocks(out, "Portal Scroll")

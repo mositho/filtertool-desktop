@@ -1,13 +1,15 @@
 package compiler
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 )
 
-func TestOrdinaryRarityStylesReachEquipmentWithoutChangingSizesOrCutoffs(t *testing.T) {
+func TestOrdinaryRarityStylesReachEquipmentWithFallbackSizesAndExplicitCutoffs(t *testing.T) {
 	c := New(nil, Object{
-		"normal": Object{"text": "#112233"},
+		// Explicitly omit the size: this tests compiler fallbacks, not shipped tuning.
+		"normal": Object{"text": "#112233", "size": nil},
 		"magic":  Object{"text": "#445566"},
 		"rare":   Object{"text": "#778899"},
 	}, "")
@@ -31,7 +33,24 @@ func TestOrdinaryRarityStylesReachEquipmentWithoutChangingSizesOrCutoffs(t *test
 		}
 	}
 	if !strings.Contains(c.normal(Object{}), "SetFontSize 40") || !strings.Contains(c.normal(Object{}), "SetFontSize 45") {
-		t.Fatal("normal equipment and belts must retain their distinct default sizes")
+		t.Fatal("normal equipment and belts must retain their distinct fallback sizes when no style size is set")
+	}
+}
+
+func TestOrdinaryRarityStyleSizesReachEquipment(t *testing.T) {
+	for _, size := range []float64{28, 36, 42} {
+		for _, rarity := range []string{"Normal", "Magic", "Rare"} {
+			c := New(nil, Object{strings.ToLower(rarity): Object{"size": size}}, "")
+			out := c.equipment(rarity, Object{})
+			if rarity == "Normal" {
+				out = c.normal(Object{})
+			}
+			for _, block := range strings.Split(out, "\n\n") {
+				if strings.HasPrefix(block, "Show\n") && !strings.Contains(block, "SetFontSize "+fmt.Sprint(size)) {
+					t.Fatalf("%s equipment did not inherit style size %v: %s", rarity, size, block)
+				}
+			}
+		}
 	}
 }
 

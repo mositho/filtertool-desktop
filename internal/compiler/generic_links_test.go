@@ -8,7 +8,10 @@ import (
 
 func TestDisabledGenericLinkExtensionsFallThroughToEquipment(t *testing.T) {
 	// Explicit false must also override an enabled global default.
-	c := New(Object{"links": Object{"genericThreeLinksEnabled": true, "genericFourLinksEnabled": true}}, nil, "")
+	c := New(Object{"links": Object{
+		"genericThreeLinksEnabled": true, "genericFourLinksEnabled": true,
+		"threeLinkMaxAreaLevel": float64(50), "genericThreeLinkMaxAreaLevel": float64(12), "rules": nil,
+	}, "magicItems": Object{"rules": nil}, "normalItems": Object{"rules": nil}}, nil, "")
 	profile := Object{"preferredColors": []any{}, "preferredArmour": []any{}}
 	options := Object{
 		"links":       Object{"genericThreeLinksEnabled": false, "genericFourLinksEnabled": false},
@@ -46,7 +49,7 @@ func TestDisabledGenericLinkExtensionsFallThroughToEquipment(t *testing.T) {
 }
 
 func TestGenericLinkExtensionsOnlyAddShowRules(t *testing.T) {
-	c := New(Object{"links": Object{"rules": Object{
+	c := New(Object{"links": Object{"threeLinkMaxAreaLevel": float64(50), "genericThreeLinkMaxAreaLevel": float64(50), "rules": Object{
 		"3generic": Object{"maxAreaLevel": float64(33)},
 		"4generic": Object{"maxAreaLevel": float64(61)},
 	}}}, nil, "")
@@ -73,15 +76,28 @@ func TestFiveAndSixLinksUseDedicatedStylesWithOrdinaryRarityTextColors(t *testin
 	defaults := New(nil, nil, "")
 	defaultLinks := defaults.links(Object{}, Object{})
 	fiveLink := Obj(defaults.Styles["fiveLink"])
-	wantDefault := "LinkedSockets = 5\nRarity == Normal\nMinimapIcon 2 Orange Diamond\nSetTextColor " +
-		rgb(Text(Obj(defaults.Styles["normal"])["text"])) + "\nSetBackgroundColor " +
-		rgb(Text(fiveLink["background"])) + "\nSetBorderColor " + rgb(Text(fiveLink["border"]))
-	if !strings.Contains(defaultLinks, wantDefault) {
-		t.Fatal("default five-link rule should use the dedicated style with ordinary rarity text")
+	foundDefault := false
+	for _, block := range strings.Split(defaultLinks, "\n\n") {
+		if !strings.Contains(block, "LinkedSockets = 5\nRarity == Normal\n") {
+			continue
+		}
+		foundDefault = true
+		style := Merge(fiveLink, Object{"text": Obj(defaults.Styles["normal"])["text"]})
+		for _, line := range newRule().style(style).lines {
+			if !strings.Contains(block, line) {
+				t.Fatal("default five-link rule should use the current dedicated style with ordinary rarity text", block)
+			}
+		}
+	}
+	if !foundDefault {
+		t.Fatal("missing default normal five-link rule")
 	}
 	c := New(nil, Object{
-		"fiveLink": Object{"background": "#123456", "border": "#654321", "text": "#abcdef"},
-		"sixLink":  Object{"background": "#234567", "border": "#765432", "text": "#fedcba"},
+		"normal":   Object{"text": "#123456"},
+		"magic":    Object{"text": "#234567"},
+		"rare":     Object{"text": "#345678"},
+		"fiveLink": Object{"background": "#123456", "backgroundOpacity": nil, "border": "#654321", "text": "#abcdef"},
+		"sixLink":  Object{"background": "#234567", "backgroundOpacity": nil, "border": "#765432", "text": "#fedcba"},
 	}, "custom-sounds")
 	out := c.links(Object{}, Object{})
 	for _, link := range []struct {
@@ -91,7 +107,7 @@ func TestFiveAndSixLinksUseDedicatedStylesWithOrdinaryRarityTextColors(t *testin
 		bg      string
 		border  string
 	}{{5, "Orange", "five_link", "18 52 86", "101 67 33"}, {6, "Red", "six_link", "35 69 103", "118 84 50"}} {
-		for _, rarity := range []struct{ name, text string }{{"Normal", "200 200 200"}, {"Magic", "136 136 255"}, {"Rare", "255 255 119"}} {
+		for _, rarity := range []struct{ name, text string }{{"Normal", "18 52 86"}, {"Magic", "35 69 103"}, {"Rare", "52 86 120"}} {
 			want := []string{
 				fmt.Sprintf("LinkedSockets = %d", link.sockets),
 				"Rarity == " + rarity.name,

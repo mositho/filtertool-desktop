@@ -2,7 +2,14 @@
   "early": {
     "earlyBootsMaxAreaLevel": 21,
     "earlyMaxAreaLevel": 12,
-    "rules": {},
+    "rules": {
+      "armour2": {
+        "size": 35
+      },
+      "armour3": {
+        "size": 40
+      }
+    },
     "twoSocketMaxAreaLevel": 7
   },
   "flasks": {
@@ -73,7 +80,29 @@
   },
   "magicItems": {
     "bigMaxAreaLevel": 9,
-    "rules": {},
+    "rules": {
+      "1x1": {
+        "size": 42
+      },
+      "1x2": {
+        "size": 40
+      },
+      "1x3": {
+        "size": 37
+      },
+      "1x4": {
+        "size": 35
+      },
+      "2x1": {
+        "size": 40
+      },
+      "2x2": {
+        "size": 35
+      },
+      "2x3": {
+        "size": 32
+      }
+    },
     "smallMaxAreaLevel": 23
   },
   "misc": {
@@ -91,7 +120,28 @@
     "B"
   ],
   "rareItems": {
-    "rules": {}
+    "rules": {
+      "1x2": {
+        "size": 42
+      },
+      "1x4": {
+        "size": 38
+      },
+      "2x1": {
+        "size": 42
+      },
+      "2x2": {
+        "size": 38
+      },
+      "2x3": {
+        "maxAreaLevel": 45,
+        "size": 35
+      },
+      "2x4": {
+        "maxAreaLevel": 45,
+        "size": 32
+      }
+    }
   },
   "shieldProgression": "early",
   "tinctures": {

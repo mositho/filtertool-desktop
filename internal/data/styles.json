@@ -73,14 +73,14 @@
     "background": "#000000",
     "backgroundOpacity": 0.6,
     "border": "#000000",
-    "size": 30,
+    "size": 35,
     "text": "#DADADA"
   },
   "goldStack": {
     "background": "#000000",
     "backgroundOpacity": 0.8,
     "border": "#000000",
-    "size": 35,
+    "size": 38,
     "text": "#DADADA"
   },
   "goldStackLarge": {
@@ -147,10 +147,12 @@
     "text": "#ffffff"
   },
   "normal": {
-    "text": "#c8c8c8"
+    "text": "#c8c8c8",
+    "size": 35
   },
   "magic": {
-    "text": "#8888ff"
+    "text": "#8888ff",
+    "size": 40
   },
   "rare": {
     "text": "#ffff77"
