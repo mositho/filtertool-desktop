@@ -110,78 +110,30 @@ jobs:
   checks:
     needs: validate
     if: needs.validate.outputs.changed == 'false'
-    uses: ./.github/workflows/ci.yml
-
-  package:
-    needs: [validate, checks]
-    runs-on: windows-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version-file: .nvmrc
-          cache: npm
-      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
-        with:
-          go-version-file: go.mod
-      - run: npm ci --ignore-scripts
-      - run: npm run build
-      - run: ./scripts/package-windows.ps1
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: release-assets
-          retention-days: 7
-          if-no-files-found: error
-          path: |
-            bin/Filtertool.exe
-            bin/Filtertool-Setup.exe
-            bin/SHA256SUMS.txt
-
-  linux-package:
-    needs: [validate, checks]
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      run-id: ${{ steps.ci.outputs.run-id }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version-file: .nvmrc
-          cache: npm
-      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
-        with:
-          go-version-file: go.mod
-      - name: Install Linux desktop and Flatpak build dependencies
-        run: sudo apt-get update && sudo apt-get install --yes flatpak flatpak-builder libgtk-4-dev libwebkitgtk-6.0-dev
-      - name: Add Flathub runtime source
-        run: flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-      - run: npm ci --ignore-scripts
-      - name: Build Linux Flatpak bundle
-        run: |
-          npm run build:linux
-          mkdir -p bin/flatpak-stage
-          install -Dm755 bin/Filtertool bin/flatpak-stage/bin/Filtertool
-          install -Dm644 branding/logo.png bin/flatpak-stage/share/icons/hicolor/256x256/apps/io.github.mositho.filtertool-desktop.png
-          install -Dm644 flatpak/io.github.mositho.filtertool-desktop.desktop bin/flatpak-stage/share/applications/io.github.mositho.filtertool-desktop.desktop
-          flatpak-builder --user --install-deps-from=flathub --default-branch=stable --force-clean --repo=bin/flatpak-repo bin/flatpak-build flatpak.yml
-          flatpak build-bundle bin/flatpak-repo bin/Filtertool.flatpak io.github.mositho.filtertool-desktop stable --runtime-repo=https://dl.flathub.org/repo/flathub.flatpakrepo
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: release-assets-linux
-          retention-days: 7
-          if-no-files-found: error
-          path: bin/Filtertool.flatpak
+      - name: Wait for CI on the exact release commit
+        id: ci
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash scripts/wait-for-release-ci.sh
 
   draft:
-    needs: [validate, package, linux-package]
+    needs: [validate, checks]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
       contents: write
+      actions: read
     steps:
       # Fresh runner: no npm install, compiler, installer or artifact executable is run here.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -192,10 +144,14 @@ jobs:
         with:
           name: release-assets
           path: release-assets
+          run-id: ${{ needs.checks.outputs.run-id }}
+          github-token: ${{ github.token }}
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: release-assets-linux
           path: release-assets
+          run-id: ${{ needs.checks.outputs.run-id }}
+          github-token: ${{ github.token }}
       - name: Verify artifact checksums
         working-directory: release-assets
         run: sha256sum --check SHA256SUMS.txt
