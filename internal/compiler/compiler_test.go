@@ -64,7 +64,7 @@ func TestWebCompilerParity(t *testing.T) {
 			compiler := New(Obj(cfg["_defaults"]), Obj(cfg["_styles"]), "")
 			// Freeze the web compiler's historical behavior without changing its
 			// captured output. Current opt-in/default behavior has separate tests.
-			compiler.starterSupports = nil
+			compiler.starterGems = nil
 			compiler.legacyCurrency = true
 			compiler.legacyEquipmentSelections = true
 			compiler.Defaults = Merge(referenceDefaults, Obj(cfg["_defaults"]))

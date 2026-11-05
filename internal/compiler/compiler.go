@@ -20,7 +20,7 @@ type Compiler struct {
 	templates                 Object
 	weapons                   []Weapon
 	manifest                  map[string]string
-	starterSupports           []string
+	starterGems               []string
 	rarityDefaults            Object
 	legacyCurrency            bool // Only used by the frozen web parity tests.
 	legacyEquipmentSelections bool // Only used by the frozen web parity tests.
@@ -35,7 +35,7 @@ func New(defaults, styles Object, folder string) *Compiler {
 	for name := range data.Load[Object]("legacy-styles.json") {
 		_, c.legacyLinkStyles[name] = styles[name]
 	}
-	c.starterSupports = data.Load[[]string]("starter-supports.json")
+	c.starterGems = append(data.Load[[]string]("starter-skills.json"), data.Load[[]string]("starter-supports.json")...)
 	c.Defaults = CleanRuleDefaults(c.Defaults)
 	c.rarityDefaults = data.Load[Object]("highlight-defaults.json")
 	for _, s := range data.Load[[]Object]("manifest.json") {
@@ -146,7 +146,7 @@ func (c *Compiler) gems(cfg Object) string {
 		}
 		rules = append(rules, newRule().quoted("BaseType", true, gem).style(Obj(c.Styles[style])))
 	}
-	for _, gem := range c.starterSupports {
+	for _, gem := range c.starterGems {
 		if contains(sounding, gem) || contains(Strings(cfg["styleOnly"]), gem) {
 			continue
 		}

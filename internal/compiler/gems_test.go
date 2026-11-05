@@ -8,9 +8,12 @@ import (
 	"github.com/mositho/filtertool-desktop/internal/data"
 )
 
-func TestStarterSupportsAlwaysGetStyleAndAllowSoundOverride(t *testing.T) {
+func TestStarterGemsAlwaysGetStyleAndAllowSoundOverride(t *testing.T) {
 	c := New(nil, Object{"gemHighlight": Object{"text": "#123456"}}, "")
-	starters := []string{"Ruthless Support", "Chance to Bleed Support", "Momentum Support", "Chance to Poison Support", "Arcane Surge Support", "Hallow Support", "Prismatic Burst Support"}
+	starters := []string{
+		"Heavy Strike", "Double Strike", "Burning Arrow", "Viper Strike", "Fireball", "Holy Strike", "Spectral Throw",
+		"Ruthless Support", "Chance to Bleed Support", "Momentum Support", "Chance to Poison Support", "Arcane Surge Support", "Hallow Support", "Prismatic Burst Support",
+	}
 	output := c.gems(Object{})
 	for _, gem := range starters {
 		match := `BaseType == "` + gem + `"`
@@ -24,6 +27,9 @@ func TestStarterSupportsAlwaysGetStyleAndAllowSoundOverride(t *testing.T) {
 			if strings.Contains(block, match) && !strings.Contains(block, "SetTextColor 18 52 86") {
 				t.Fatalf("starter %s should use gemHighlight: %s", gem, block)
 			}
+		}
+		if strings.Count(c.gems(Object{"styleOnly": []any{gem}}), match) != 1 {
+			t.Fatalf("a saved starter selection must not create duplicate rules for %s", gem)
 		}
 		outputWithSound := c.gems(Object{"gems": []any{gem}})
 		if strings.Count(outputWithSound, match) != 1 {
@@ -74,8 +80,8 @@ func TestUnselectedGemsUseFullDefaultStyle(t *testing.T) {
 	if !strings.Contains(out, "Show\nClass == \"Skill Gems\" \"Support Gems\"\nSetTextColor 18 52 86") {
 		t.Fatal("missing catch-all for active and support gems", out)
 	}
-	if strings.Contains(out, `BaseType == "Heavy Strike"`) {
-		t.Fatal("unselected starter active gems must fall through to the default gem style")
+	if strings.Contains(out, `BaseType == "Freezing Pulse"`) {
+		t.Fatal("unselected non-starter gems must fall through to the default gem style")
 	}
 }
 
