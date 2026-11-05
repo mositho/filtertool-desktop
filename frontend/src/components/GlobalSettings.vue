@@ -691,6 +691,8 @@ function removeSaved(name: string) {
                 :key="sub.key"
                 :data-editor-subsection="sub.subsection.key"
                 class="editor-card mt-3"
+                :class="sub.depth > 0 ? 'border-l-2 border-l-neutral-700' : ''"
+                :style="{ marginInlineStart: `calc(${sub.depth} * clamp(0.5rem, 2vw, 1rem))` }"
               >
                 <div v-if="sub.visibilityField" class="mb-3 flex items-center justify-between gap-2">
                   <RuleHeader

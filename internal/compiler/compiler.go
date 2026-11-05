@@ -317,6 +317,18 @@ func (c *Compiler) equipment(rarity string, cfg Object) string {
 			style := Object{"size": float64(shape.size), "text": color}
 			if !c.legacyEquipmentSelections {
 				style = Merge(style, Obj(c.Styles[strings.ToLower(rarity)]))
+				earlyMaximum := Obj(c.Defaults["early"])["earlyMaxAreaLevel"]
+				early := &rule{lines: append([]string{}, r.lines...)}
+				if earlyMaximum != nil && (maximum == nil || Num(earlyMaximum, 0) < Num(maximum, 0)) {
+					early.number("AreaLevel", "<=", earlyMaximum)
+				}
+				// Keep the same visibility bounds, but defer footprint sizing until after early levels.
+				early.style(Obj(c.Styles[strings.ToLower(rarity)]))
+				rules = append(rules, early)
+				if earlyMaximum == nil || (maximum != nil && Num(maximum, 0) <= Num(earlyMaximum, 0)) {
+					continue
+				}
+				r.number("AreaLevel", ">", earlyMaximum)
 			}
 			c.presentation(r, rc, style)
 		}
@@ -348,9 +360,9 @@ func (c *Compiler) normal(cfg Object) string {
 			r = newRule().quoted("Class", false, "Belts").set("Rarity", "== Normal")
 			style = Obj(c.Styles["jewellery"])
 		}
-		if !c.legacyEquipmentSelections {
+		if !c.legacyEquipmentSelections && key == "equipment" {
 			style = Clone(Obj(c.Styles["normal"]))
-			if key == "equipment" && style["size"] == nil {
+			if style["size"] == nil {
 				style["size"] = float64(40)
 			}
 		}

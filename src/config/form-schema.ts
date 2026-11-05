@@ -294,7 +294,8 @@ const buildEarlyGeneric: SchemaField[] = [
     min: 0,
     integer: true,
     defaultValue: 12,
-    tooltip: "Shared default cutoff for early shields, three-socket items and generic three-links. Each can be overridden separately.",
+    tooltip:
+      "Default cutoff for early shields, three-socket items and generic three-links; each can be overridden. Rare/magic equipment uses rarity style sizes through this level, then footprint sizes. Visibility cutoffs still apply.",
   },
   {
     path: "early.twoSocketMaxAreaLevel",

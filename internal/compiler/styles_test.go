@@ -24,10 +24,10 @@ func TestOrdinaryRarityStylesReachEquipmentWithFallbackSizesAndExplicitCutoffs(t
 			out = c.equipment(item.rarity, cfg)
 		}
 		for _, block := range strings.Split(out, "\n\n") {
-			if !strings.HasPrefix(block, "Show\n") {
+			if !strings.HasPrefix(block, "Show\n") || strings.Contains(block, `Class "Belts"`) {
 				continue
 			}
-			if !strings.Contains(block, "SetTextColor "+item.color) || !strings.Contains(block, "AreaLevel <= 27") {
+			if !strings.Contains(block, "SetTextColor "+item.color) || (!strings.Contains(block, "AreaLevel <= 27") && !strings.Contains(block, "AreaLevel <= 12")) {
 				t.Fatal("ordinary rarity style or cutoff not applied", block)
 			}
 		}
@@ -46,8 +46,86 @@ func TestOrdinaryRarityStyleSizesReachEquipment(t *testing.T) {
 				out = c.normal(Object{})
 			}
 			for _, block := range strings.Split(out, "\n\n") {
-				if strings.HasPrefix(block, "Show\n") && !strings.Contains(block, "SetFontSize "+fmt.Sprint(size)) {
+				if strings.HasPrefix(block, "Show\n") && !strings.Contains(block, `Class "Belts"`) && !strings.Contains(block, "SetFontSize "+fmt.Sprint(size)) {
 					t.Fatalf("%s equipment did not inherit style size %v: %s", rarity, size, block)
+				}
+			}
+		}
+	}
+}
+
+func TestEquipmentFootprintSizesStartAfterGlobalEarlyMaximum(t *testing.T) {
+	for _, rarity := range []string{"Rare", "Magic"} {
+		section := strings.ToLower(rarity) + "Items"
+		for _, earlyMax := range []any{float64(12), float64(5), nil} {
+			for _, visibleMax := range []float64{7, 20} {
+				c := New(Object{
+					"early": Object{"earlyMaxAreaLevel": earlyMax},
+					section: Object{"rules": Object{"2x3": Object{"size": float64(30), "maxAreaLevel": visibleMax}}},
+				}, Object{strings.ToLower(rarity): Object{"size": float64(44)}}, "")
+				out := c.equipment(rarity, c.section(Object{}, section))
+				for _, area := range []int{5, 6, 7, 8, 12, 13, 20, 21} {
+					got := ""
+					for _, block := range strings.Split(out, "\n\n") {
+						if !strings.HasPrefix(block, "Show\n") || !strings.Contains(block, "Width == 2\nHeight == 3\n") {
+							continue
+						}
+						matches := true
+						for _, line := range strings.Split(block, "\n") {
+							var bound int
+							if _, err := fmt.Sscanf(line, "AreaLevel <= %d", &bound); err == nil && area > bound {
+								matches = false
+							}
+							if _, err := fmt.Sscanf(line, "AreaLevel > %d", &bound); err == nil && area <= bound {
+								matches = false
+							}
+						}
+						if matches {
+							got = block
+							break
+						}
+					}
+					if float64(area) > visibleMax {
+						if got != "" {
+							t.Fatalf("%s remained visible past cutoff: %s", rarity, got)
+						}
+						continue
+					}
+					size := 44
+					if earlyMax != nil && float64(area) > earlyMax.(float64) {
+						size = 30
+					}
+					if !strings.Contains(got, fmt.Sprintf("SetFontSize %d", size)) {
+						t.Fatalf("%s early=%v visible=%v area=%d: expected size %d, got %s", rarity, earlyMax, visibleMax, area, size, got)
+					}
+				}
+			}
+		}
+	}
+}
+
+func TestEarlyBeltsUseJewelleryStyleAndExplicitSize(t *testing.T) {
+	for _, override := range []any{nil, float64(39)} {
+		defaults := Object{}
+		if override != nil {
+			defaults["normalItems"] = Object{"rules": Object{"belts": Object{"size": override}}}
+		}
+		c := New(defaults, Object{
+			"normal":    Object{"size": float64(25), "text": "#112233"},
+			"jewellery": Object{"size": float64(43), "text": "#abcdef", "border": "#123456", "background": "#654321"},
+		}, "")
+		out := c.normal(c.section(Object{}, "normalItems"))
+		size := override
+		if size == nil {
+			size = float64(43)
+		}
+		for _, block := range strings.Split(out, "\n\n") {
+			if !strings.Contains(block, `Class "Belts"`) {
+				continue
+			}
+			for _, line := range []string{"AreaLevel <= 4", "Rarity == Normal", "SetFontSize " + fmt.Sprint(size), "SetTextColor 171 205 239", "SetBorderColor 18 52 86", "SetBackgroundColor 101 67 33"} {
+				if !strings.Contains(block, line) {
+					t.Fatal("belt jewellery styling or cutoff missing", block)
 				}
 			}
 		}
