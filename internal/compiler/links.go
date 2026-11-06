@@ -30,8 +30,7 @@ func (c *Compiler) links(p, o Object) string {
 			sound   string
 		}{{6, "sixLink", "Red", "six_link"}, {5, "fiveLink", "Orange", "five_link"}} {
 			for _, rarity := range []string{"Normal", "Magic", "Rare"} {
-				style := Clone(Obj(c.Styles[link.style]))
-				style["text"] = Obj(c.Styles[strings.ToLower(rarity)])["text"]
+				style := c.rarityStyle(Obj(c.Styles[link.style]), rarity)
 				r := newRule().set("LinkedSockets", fmt.Sprintf("= %d", link.sockets)).set("Rarity", "== "+rarity).icon(link.color, "Diamond", 2).style(style)
 				rules = append(rules, c.tts(r, link.sound))
 			}
@@ -95,7 +94,7 @@ func (c *Compiler) links(p, o Object) string {
 						}
 					}
 					r.set("Rarity", "== "+rarity)
-					if text := Obj(c.Styles[strings.ToLower(rarity)])["text"]; text != nil {
+					if text := c.sharedRarityText(rarity); text != nil {
 						r.set("SetTextColor", rgb(Text(text)))
 					}
 					result = append(result, r)

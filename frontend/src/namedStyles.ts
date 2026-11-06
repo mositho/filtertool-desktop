@@ -2,15 +2,32 @@ import type { ComputedRef, InjectionKey, Ref } from "vue"
 import type { SchemaField } from "@schema/form-schema"
 import { DEFAULT_STYLE_SETTINGS, MIN_STYLE_SIZE } from "../../src/style-defaults"
 import aliases from "../../internal/data/style-aliases.json"
+import rarityStyles from "../../internal/data/rarity-text-styles.json"
 import { CURRENCY_TIERS } from "../../src/config/currency"
 
 const currencyStyleLabels: Record<string, string> = Object.fromEntries(
-  CURRENCY_TIERS.map((tier) => [tier.style, tier.key === "low" ? tier.title : `Currency · ${tier.title}`]),
+  CURRENCY_TIERS.map((tier) => [tier.style, `Currency · ${tier.key === "low" ? "Low value" : tier.title}`]),
 )
 
 /** Keep saved preset keys stable while displaying the currency editor's tiers. */
 export function styleLabel(key: string): string {
+  if (["normal", "magic", "rare"].includes(key)) return `${key[0].toUpperCase()}${key.slice(1)}`
+  if (key === "highlightedEquipment") return "Highlighted Equipment"
+  if (isPaletteStyle(key)) return `Shared rarity text · ${key.slice("sharedRarity".length)}`
   return currencyStyleLabels[key] ?? key
+}
+
+export const PALETTE_KEYS = ["sharedRarityNormal", "sharedRarityMagic", "sharedRarityRare"]
+export function isPaletteStyle(key: string): boolean {
+  return PALETTE_KEYS.includes(key)
+}
+
+export function sharedRarityText(styles: StyleMap, rarity: string): unknown {
+  return styles[`sharedRarity${rarity}`]?.text
+}
+
+export function styleTextHelp(key: string): string {
+  return ["normal", "magic", "rare"].includes(key) ? "Used when no earlier equipment rule matches." : styleLabel(key)
 }
 
 export type Style = Record<string, unknown>
@@ -20,21 +37,39 @@ export function isLegacyStyle(key: string): boolean {
   return Object.hasOwn(STYLE_ALIASES, key)
 }
 
+export function canonicalStyleName(key: string): string {
+  const target = STYLE_ALIASES[key]
+  return target && !["twoLink", "threeLink", "fourLink"].includes(target) ? target : key
+}
+
+export function styleAliasesFor(key: string): string[] {
+  return Object.keys(STYLE_ALIASES).filter((old) => old !== key && canonicalStyleName(old) === key)
+}
+
+function normalizeStyles(styles: StyleMap): StyleMap {
+  const result = { ...styles }
+  const names = Object.keys(styles)
+    .filter((key) => canonicalStyleName(key) !== key)
+    .sort()
+  for (const old of names) {
+    const key = canonicalStyleName(old)
+    result[key] = { ...result[key], ...styles[old] }
+    delete result[old]
+  }
+  for (const old of names) {
+    const key = canonicalStyleName(old)
+    result[key] = { ...result[key], ...styles[key] }
+  }
+  return result
+}
+
 // Renames inherit old overrides; retired link-tier overrides remain separate.
 export function mergeStyles(base: StyleMap, overrides: StyleMap): StyleMap {
-  const result = { ...base }
-  for (const [key, style] of Object.entries(overrides)) result[key] = { ...base[key], ...style }
-  for (const old of ["gemCallout", "earlyShieldLink", "goldHighStack"]) {
-    if (overrides[old]) {
-      const key = STYLE_ALIASES[old]
-      result[key] = { ...base[key], ...overrides[old], ...overrides[key] }
-    }
-    if (base[old]) result[old] = { ...result[STYLE_ALIASES[old]] }
-  }
-  for (const rarity of ["Normal", "Magic", "Rare"]) {
-    const key = `highlightedEquipment${rarity}`
-    if (result[key] && result[rarity.toLowerCase()]) {
-      result[key] = { ...result[key], text: result[rarity.toLowerCase()].text }
+  const result = normalizeStyles(base)
+  for (const [key, style] of Object.entries(normalizeStyles(overrides))) result[key] = { ...result[key], ...style }
+  for (const [key, rarities] of Object.entries(rarityStyles)) {
+    if (rarities.length > 0 && result[key] && result[`sharedRarity${rarities[0]}`]) {
+      result[key] = { ...result[key], text: sharedRarityText(result, rarities[0]) }
     }
   }
   return result
@@ -54,24 +89,13 @@ export const STYLE_GRID_TEMPLATE = "minmax(7rem, 1fr) 2.75rem 2.75rem 2.75rem 3.
 export const STYLE_SECTIONS = [
   {
     title: "Equipment",
-    keys: [
-      "earlyShieldBase",
-      "jewellery",
-      "magicJewellery",
-      "rareJewellery",
-      "normal",
-      "magic",
-      "rare",
-      "highlightedEquipmentNormal",
-      "highlightedEquipmentMagic",
-      "highlightedEquipmentRare",
-    ],
+    keys: ["earlyShieldBase", "jewellery", "highlightedEquipment", "rareArmour", "normal", "magic", "rare"],
   },
   {
     title: "Links",
     keys: ["twoLink", "threeLink", "fourLink", "fiveLink", "sixLink"],
   },
-  { title: "Flasks & Tinctures", keys: ["lifeFlask", "magicLifeFlask", "manaFlask", "magicManaFlask", "utilityFlask", "tincture"] },
+  { title: "Flasks & Tinctures", keys: ["lifeFlask", "manaFlask", "utilityFlask", "tincture"] },
   {
     title: "Currency",
     keys: [
@@ -108,20 +132,16 @@ export const STYLE_SECTIONS = [
 
 export function groupStyleSections(keys: string[]) {
   const used = new Set(STYLE_SECTIONS.flatMap((section) => section.keys))
-  const other = keys.filter((key) => !used.has(key) && !isLegacyStyle(key)).sort()
+  const other = keys.filter((key) => !used.has(key) && !isLegacyStyle(key) && !isPaletteStyle(key)).sort()
   return STYLE_SECTIONS.map((section) => (section.title === "Miscellaneous" ? { ...section, keys: [...section.keys, ...other] } : section))
 }
 
 export function usesRarityText(key: string): boolean {
-  return (
-    /^highlightedEquipment(Normal|Magic|Rare)$/.test(key) ||
-    /^(?:(?:good|selected)?(?:Two|Three|Four)|two|three|four|five|six)Link$/.test(key)
-  )
+  return Object.hasOwn(rarityStyles, canonicalStyleName(key))
 }
 
 export function rarityTextPreviews(key: string): string[] {
-  const rarity = /^highlightedEquipment(Normal|Magic|Rare)$/.exec(key)?.[1]
-  return rarity ? [rarity] : ["Normal", "Magic", "Rare"]
+  return (rarityStyles as Record<string, string[]>)[canonicalStyleName(key)] ?? []
 }
 
 export function styleSwatch(style: Style): Record<string, string> {
@@ -144,13 +164,13 @@ const linkStyles = (word: string) => [word + "Link"]
 export function fieldStyleKeys(field: SchemaField, value?: unknown): string[] {
   if (field.control === "style") {
     const preset = (value as Style | undefined)?.preset ?? (field.defaultValue as Style | undefined)?.preset
-    return typeof preset === "string" ? [preset] : []
+    return typeof preset === "string" ? [canonicalStyleName(preset)] : []
   }
   if (field.sizePreset) return [STYLE_ALIASES[field.sizePreset] ?? field.sizePreset]
   const path = field.path
   if (path === "early.earlyMaxAreaLevel") return ["normal", "magic", "rare", "earlyShieldBase"]
   if (path === "early.twoSocketMaxAreaLevel" || path === "early.threeSocketMaxAreaLevel" || path.startsWith("early.rules.armour"))
-    return ["normal", "magic", "rare"]
+    return [...PALETTE_KEYS, "normal", "magic", "rare"]
   if (/^links\.(two|three|four)Link/.test(path)) return linkStyles(path.split(".")[1].match(/^(two|three|four)/)![0])
   if (path.startsWith("links.genericThree")) return ["threeLink"]
   if (path.startsWith("links.genericFour")) return ["fourLink"]
@@ -159,12 +179,12 @@ export function fieldStyleKeys(field: SchemaField, value?: unknown): string[] {
   if (path === "misc.whetstoneRecipe") return ["whetstoneRecipe"]
   if (path === "misc.showRusticSash") return ["jewellery"]
   if (path === "early.earlyBootsMaxAreaLevel") return ["rareArmour"]
-  if (path.startsWith("jewellery.")) return ["jewellery", "magicJewellery"]
+  if (path.startsWith("jewellery.")) return ["jewellery"]
   if (path === "normalItems.maxAreaLevel") return ["normal"]
   if (path.startsWith("magicItems.")) return ["magic"]
   if (path.startsWith("rareItems.")) return ["rare"]
-  if (path.startsWith("flasks.life")) return ["lifeFlask", "magicLifeFlask"]
-  if (path.startsWith("flasks.mana")) return ["manaFlask", "magicManaFlask"]
+  if (path.startsWith("flasks.life")) return ["lifeFlask"]
+  if (path.startsWith("flasks.mana")) return ["manaFlask"]
   if (path === "flasks.utilityFlasks") return ["utilityFlask"]
   if (path.startsWith("tinctures.")) return ["tincture"]
   if (path.startsWith("gemCallouts.")) return ["gemHighlight"]

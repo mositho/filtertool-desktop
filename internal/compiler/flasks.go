@@ -23,14 +23,11 @@ func (c *Compiler) flaskProgression(cfg Object) []*rule {
 				continue
 			}
 			for _, rarity := range []string{"Normal", "Magic"} {
-				preset := kind + "Flask"
-				if rarity == "Magic" {
-					preset = "magic" + strings.ToUpper(preset[:1]) + preset[1:]
-				}
+				style := c.rarityStyle(Obj(c.Styles[kind+"Flask"]), rarity)
 				r := newRule().quoted("Class", true, class).
 					quoted("BaseType", true, Text(flask["name"])+" "+strings.TrimSuffix(class, "s")).
 					set("Rarity", "== "+rarity).number("AreaLevel", "<=", maximum).
-					icon(color, "Raindrop", 2).style(Obj(c.Styles[preset]))
+					icon(color, "Raindrop", 2).style(style)
 				rules = append(rules, c.tts(r, Text(flask["sound"])))
 			}
 		}

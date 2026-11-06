@@ -1,4 +1,13 @@
 {
+  "sharedRarityNormal": {
+    "text": "#FFFFFF"
+  },
+  "sharedRarityMagic": {
+    "text": "#66B3FF"
+  },
+  "sharedRarityRare": {
+    "text": "#FFF34D"
+  },
   "chromatic": {
     "background": "#000000",
     "backgroundOpacity": 0.94,
@@ -38,8 +47,8 @@
     "text": "#8800ff"
   },
   "earlyShieldBase": {
-    "background": "#d2d2d2",
-    "border": "#000000",
+    "background": "#202020",
+    "border": "#D2D2D2",
     "text": "#000000"
   },
   "fourLink": {
@@ -91,24 +100,14 @@
     "text": "#DADADA"
   },
   "sixLink": {
-    "background": "#FFFFFF",
-    "border": "#00ffe5",
+    "background": "#15163f",
+    "border": "#ff0000",
     "text": "#00A8FF"
   },
-  "highlightedEquipmentMagic": {
-    "background": "#001515",
-    "border": "#00FFFF",
-    "text": "#66B3FF"
-  },
-  "highlightedEquipmentNormal": {
+  "highlightedEquipment": {
     "background": "#001515",
     "border": "#00FFFF",
     "text": "#D9FFFF"
-  },
-  "highlightedEquipmentRare": {
-    "background": "#001515",
-    "border": "#00FFFF",
-    "text": "#FFFF00"
   },
   "jewellery": {
     "background": "#320046",
@@ -116,7 +115,7 @@
     "text": "#F5D8FF"
   },
   "leagueMechanic": {
-    "background": "#2a102b",
+    "background": "#54204F",
     "border": "#d940cc",
     "size": 45,
     "text": "#ffb0da"
@@ -126,21 +125,6 @@
     "border": "#ff0000",
     "text": "#ffffff"
   },
-  "magicJewellery": {
-    "background": "#320046",
-    "border": "#C000FF",
-    "text": "#66B3FF"
-  },
-  "magicLifeFlask": {
-    "background": "#660200",
-    "border": "#ff0b00",
-    "text": "#66b4fb"
-  },
-  "magicManaFlask": {
-    "background": "#011572",
-    "border": "#065cf9",
-    "text": "#66b5f8"
-  },
   "manaFlask": {
     "background": "#000e75",
     "border": "#0055ff",
@@ -148,11 +132,11 @@
   },
   "normal": {
     "text": "#c8c8c8",
-    "size": 45
+    "size": 38
   },
   "magic": {
     "text": "#8888ff",
-    "size": 45
+    "size": 40
   },
   "rare": {
     "text": "#ffff77"
@@ -175,11 +159,6 @@
   "rareArmour": {
     "background": "#322800",
     "border": "#FFF34D",
-    "text": "#FFF34D"
-  },
-  "rareJewellery": {
-    "background": "#320046",
-    "border": "#C000FF",
     "text": "#FFF34D"
   },
   "relics": {
@@ -208,7 +187,7 @@
     "backgroundOpacity": 0.94,
     "border": "#c8c8c8",
     "text": "#DADADA",
-    "size": 45
+    "size": 40
   },
   "unique": {
     "background": "#000000",

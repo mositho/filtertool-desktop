@@ -75,6 +75,27 @@ it("inherits global rule size from the shared preset and global rule maxima from
   expect(fieldDefault(socketSize, {})).toBe(socketSize.defaultValue)
   expect(fieldDefault(field("early.rules.armour3.maxAreaLevel"), { early: { earlyMaxAreaLevel: 21 } })).toBe(21)
   expect(fieldDefault(field("links.rules.3generic.maxAreaLevel"), { links: { threeLinkMaxAreaLevel: 37 } })).toBe(37)
+  for (const key of ["1x1", "1x3", "2x2", "2x4"]) {
+    expect(fieldDefault(field(`magicItems.rules.${key}.maxAreaLevel`), { magicItems: { maxAreaLevel: 31 } })).toBe(31)
+  }
+})
+
+it("separates size falloff minima from visibility maxima and exposes one magic cutoff", () => {
+  const equipment = BUILD_SPECIFIC_SCHEMA.find((group) => group.key === "equipment")!
+  const maximum = equipment.subsections!.find((section) => section.title === "Max Area Level")!
+  const minimum = equipment.subsections!.find((section) => section.title === "Min Area Level")!
+  expect(maximum.fields.every((entry) => !entry.path.endsWith("footprintMinAreaLevel"))).toBe(true)
+  expect(maximum.fields.filter((entry) => entry.path.startsWith("magicItems.")).map((entry) => entry.path)).toEqual([
+    "magicItems.maxAreaLevel",
+  ])
+  expect(minimum.fields.map((entry) => entry.label)).toEqual(["Magic Items · Size Falloff", "Rare Items · Size Falloff"])
+  expect(minimum.fields.every((entry) => entry.tooltip === "From this area level, size depends on the inventory space of the item.")).toBe(
+    true,
+  )
+  const early = BUILD_SPECIFIC_SCHEMA.find((group) => group.key === "early")!
+  expect(early.subsections![0].title).toBe("Max Area Level")
+  expect(field("early.earlyMaxAreaLevel").label).toBe("Generic")
+  expect(field("early.shieldMaxAreaLevel").label).toBe("Shields")
 })
 
 it("keeps linked early cutoffs dynamic and restores inherited filter values", async () => {
@@ -88,6 +109,29 @@ it("keeps linked early cutoffs dynamic and restores inherited filter values", as
   row.querySelector<HTMLButtonElement>('button[title="Use default"]')!.click()
   await nextTick()
   expect(modelValue.buildSpecificOptions.early.threeSocketMaxAreaLevel).toBeUndefined()
+  expect(row.querySelector("input")?.placeholder).toBe("21")
+  modelValue.buildSpecificOptions.early.earlyMaxAreaLevel = 25
+  await nextTick()
+  expect(row.querySelector("input")?.placeholder).toBe("25")
+})
+
+it("exposes independent footprint minima and restores the linked rare minimum", async () => {
+  expect(fieldDefault(field("magicItems.footprintMinAreaLevel"), {})).toBe(0)
+  expect(fieldDefault(field("rareItems.footprintMinAreaLevel"), { early: { earlyMaxAreaLevel: 21 } })).toBe(21)
+  const modelValue = reactive({
+    buildProfile: {},
+    buildSpecificOptions: {
+      early: { earlyMaxAreaLevel: 21 },
+      rareItems: { footprintMinAreaLevel: 8 as number | undefined },
+    },
+  })
+  mount(ConfigForm, { modelValue, filterName: "footprint-minimum", reference: refData })
+  expect(root.querySelector('[data-field-path="magicItems.footprintMinAreaLevel"]')).not.toBeNull()
+  const row = root.querySelector('[data-field-path="rareItems.footprintMinAreaLevel"]')!
+  expect(row.querySelector("input")?.value).toBe("8")
+  row.querySelector<HTMLButtonElement>('button[title="Use default"]')!.click()
+  await nextTick()
+  expect(modelValue.buildSpecificOptions.rareItems.footprintMinAreaLevel).toBeUndefined()
   expect(row.querySelector("input")?.placeholder).toBe("21")
   modelValue.buildSpecificOptions.early.earlyMaxAreaLevel = 25
   await nextTick()

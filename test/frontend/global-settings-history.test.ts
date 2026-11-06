@@ -8,7 +8,7 @@ vi.mock("../../frontend/src/api", () => ({
   api: {
     getSettings: async () => ({ filterPath: "", soundsFolder: "", tts: { locale: "en-US", speed: 1.6 } }),
     getDefaults: async () => ({ userDefaults: {}, baseDefaults: {}, defaults: {} }),
-    getStyles: async () => ({ baseStyles: { lifeFlask: { text: originalColor } }, userStyles: {} }),
+    getStyles: async () => ({ baseStyles: { lifeFlask: { background: originalColor } }, userStyles: {} }),
     reference: async () => ({
       ttsLocales: [],
       ttsSpeed: { min: 0.5, max: 2 },
@@ -170,11 +170,11 @@ describe("global settings style history", () => {
       input.dispatchEvent(new Event("input", { bubbles: true }))
       await nextTick()
     }
-    await setNumber("Early Max Area Level", "22")
+    await setNumber("Generic", "22")
     expect(row("Three Sockets").querySelector("input")?.value).toBe("22")
-    expect(row("Early Shields · Max Area Level").querySelector("input")?.value).toBe("22")
+    expect(row("Shields").querySelector("input")?.value).toBe("22")
     await setNumber("Three Sockets", "16")
-    await setNumber("Early Max Area Level", "24")
+    await setNumber("Generic", "24")
     expect(row("Three Sockets").querySelector("input")?.value).toBe("16")
     row("Three Sockets").querySelector<HTMLButtonElement>('button[title="Use default"]')!.click()
     await nextTick()
@@ -197,14 +197,14 @@ describe("global settings style history", () => {
     flaskSection.click()
     await nextTick()
 
-    const getLifeFlaskTextColor = () => {
+    const getLifeFlaskBackgroundColor = () => {
       const name = [...container!.querySelectorAll<HTMLElement>("span")].find((span) => span.textContent?.trim() === "lifeFlask")!
-      return name.parentElement!.querySelector<HTMLButtonElement>('[aria-label="lifeFlask text"]')!
+      return name.parentElement!.querySelector<HTMLButtonElement>('[aria-label="lifeFlask background"]')!
     }
-    const color = getLifeFlaskTextColor()
+    const color = getLifeFlaskBackgroundColor()
     color.click()
     await nextTick()
-    const hex = container.querySelector<HTMLInputElement>('[aria-label="lifeFlask text hex"]')!
+    const hex = container.querySelector<HTMLInputElement>('[aria-label="lifeFlask background hex"]')!
     hex.value = "#aabbcc"
     hex.dispatchEvent(new Event("input", { bubbles: true }))
     await nextTick()
@@ -213,14 +213,14 @@ describe("global settings style history", () => {
     await nextTick()
     ;(exposed.value as unknown as { undo: () => void }).undo()
     await nextTick()
-    expect(getLifeFlaskTextColor().value).toBe(originalColor)
+    expect(getLifeFlaskBackgroundColor().value).toBe(originalColor)
     expect(exposed.value?.dirty).toBe(false)
 
-    await editColor(getLifeFlaskTextColor(), "#445566")
+    await editColor(getLifeFlaskBackgroundColor(), "#445566")
     expect(exposed.value?.dirty).toBe(true)
     ;(exposed.value as unknown as { discard: () => void }).discard()
     await nextTick()
-    expect(getLifeFlaskTextColor().value).toBe(originalColor)
+    expect(getLifeFlaskBackgroundColor().value).toBe(originalColor)
     expect(exposed.value?.dirty).toBe(false)
   })
 })

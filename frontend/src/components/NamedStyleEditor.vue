@@ -1,10 +1,21 @@
 <script setup lang="ts">
 import { computed, inject } from "vue"
 import { DEFAULT_STYLE_SETTINGS } from "../../../src/style-defaults"
-import { namedStylesKey, rarityTextPreviews, STYLE_GRID_TEMPLATE, styleLabel, styleSwatch, usesRarityText } from "../namedStyles"
+import {
+  isPaletteStyle,
+  namedStylesKey,
+  rarityTextPreviews,
+  sharedRarityText,
+  STYLE_GRID_TEMPLATE,
+  styleLabel,
+  styleTextHelp,
+  styleSwatch,
+  usesRarityText,
+} from "../namedStyles"
 import { styleClipboard } from "../styleClipboard"
 import NumberField from "./NumberField.vue"
 import ColorField from "./ColorField.vue"
+import RarityPalette from "./RarityPalette.vue"
 
 const props = defineProps<{ styleKey: string; card?: boolean }>()
 const context = inject(namedStylesKey)!
@@ -15,13 +26,25 @@ const previews = computed(() => (rarityText.value ? rarityTextPreviews(props.sty
 </script>
 
 <template>
+  <RarityPalette
+    v-if="isPaletteStyle(styleKey)"
+    :styles="context.styles.value"
+    :overrides="context.overrides.value"
+    :keys="[styleKey]"
+    reset-label="to global"
+    @set="(key, value) => context.set(key, 'text', value)"
+    @reset="context.reset"
+  />
   <div
+    v-else
     :class="['@container min-w-0 rounded focus:outline-2 focus:outline-offset-4 focus:outline-blue-500', card ? 'style-card' : '']"
     :data-style-key="styleKey"
     :tabindex="card ? undefined : -1"
   >
     <div class="style-controls grid grid-cols-3 items-center gap-3" :style="{ '--style-grid': STYLE_GRID_TEMPLATE }">
-      <span class="col-span-3 truncate text-sm font-medium text-neutral-200 style-name" :title="displayName">{{ displayName }}</span>
+      <span class="col-span-3 truncate text-sm font-medium text-neutral-200 style-name" :title="styleTextHelp(styleKey)">{{
+        displayName
+      }}</span>
       <div v-for="color in ['text', 'background', 'border'] as const" :key="color" class="flex min-w-0 flex-col gap-1">
         <span class="style-label block text-[10px] uppercase text-neutral-500">{{ color === "background" ? "Bg" : color }}</span>
         <ColorField
@@ -31,9 +54,15 @@ const previews = computed(() => (rarityText.value ? rarityTextPreviews(props.sty
           class="h-7 w-full cursor-pointer rounded border border-neutral-700 bg-transparent"
           @update:model-value="context.set(styleKey, color, $event)"
         />
-        <span v-else class="text-[10px] text-neutral-400" title="Text colors are inherited from Normal, Magic and Rare styles"
-          >Rarities</span
+        <button
+          v-else
+          type="button"
+          class="min-h-[34px] rounded text-[10px] leading-tight text-blue-300 hover:underline focus-visible:outline-2 focus-visible:outline-blue-500"
+          title="Text follows Shared rarity text colours, based on item rarity. Show shared colours."
+          @click="context.reveal(`sharedRarity${previews[0]}`)"
         >
+          Shared rarity colours
+        </button>
       </div>
       <div class="style-tuning col-span-3 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] items-end gap-2">
         <label class="min-w-0 space-y-1">
@@ -127,7 +156,7 @@ const previews = computed(() => (rarityText.value ? rarityTextPreviews(props.sty
           </button>
         </div>
       </div>
-      <div class="style-preview col-span-3 flex min-w-0 flex-wrap gap-1">
+      <div class="style-preview col-span-3 flex min-w-0 gap-1">
         <component
           :is="card ? 'button' : 'div'"
           v-for="label in previews"
@@ -138,7 +167,7 @@ const previews = computed(() => (rarityText.value ? rarityTextPreviews(props.sty
           :data-rarity-preview="rarityText ? label : undefined"
           class="flex min-w-0 flex-1 items-center justify-center overflow-hidden rounded border px-1 text-center"
           :style="{
-            ...styleSwatch(rarityText ? { ...style, text: context.styles.value[label.toLowerCase()]?.text } : style),
+            ...styleSwatch(rarityText ? { ...style, text: sharedRarityText(context.styles.value, label) } : style),
             ...(rarityText ? { fontSize: 'clamp(10px, 1.65cqi, 14px)' } : {}),
           }"
           @click="card && context.reveal(styleKey)"

@@ -174,7 +174,7 @@ const rarityValue = computed(() => (props.highlight.rarities as string[] | undef
 const styleKeys = computed(() => {
   const style = props.highlight.style as Record<string, unknown> | undefined
   if (typeof style?.preset === "string") return [style.preset]
-  return style && Object.keys(style).length ? [] : rarityValue.value.map((rarity) => `highlightedEquipment${rarity}`)
+  return style && Object.keys(style).length ? [] : ["highlightedEquipment"]
 })
 
 function setRarities(value: string[]) {

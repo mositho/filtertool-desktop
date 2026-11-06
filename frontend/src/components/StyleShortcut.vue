@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, inject, nextTick, onBeforeUnmount, ref, useId, watch } from "vue"
-import { namedStylesKey, styleLabel } from "../namedStyles"
+import { canonicalStyleName, namedStylesKey, styleLabel } from "../namedStyles"
 import NamedStyleEditor from "./NamedStyleEditor.vue"
 
 const props = defineProps<{ styleKeys: string[] }>()
@@ -11,7 +11,7 @@ const panel = ref<HTMLElement | null>(null)
 const selected = ref("")
 const position = ref({ top: "8px", left: "8px", width: "384px", maxHeight: "calc(100vh - 16px)" })
 const keys = computed(() => {
-  const available = props.styleKeys.filter((key) => context?.styles.value[key])
+  const available = props.styleKeys.map(canonicalStyleName).filter((key) => context?.styles.value[key])
   return [...new Set(available)]
 })
 const open = computed(() => context?.openPopover.value === id)
@@ -55,7 +55,7 @@ function listen(add: boolean) {
 watch(open, async (value) => {
   listen(value)
   if (!value) return
-  selected.value = props.styleKeys.find((key) => keys.value.includes(key)) ?? keys.value[0]
+  selected.value = keys.value[0]
   await nextTick()
   if (!open.value) return
   place()

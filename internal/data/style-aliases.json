@@ -1,4 +1,11 @@
 {
+  "magicJewellery": "jewellery",
+  "rareJewellery": "jewellery",
+  "magicLifeFlask": "lifeFlask",
+  "magicManaFlask": "manaFlask",
+  "highlightedEquipmentNormal": "highlightedEquipment",
+  "highlightedEquipmentMagic": "highlightedEquipment",
+  "highlightedEquipmentRare": "highlightedEquipment",
   "earlyShieldLink": "earlyShieldBase",
   "gemCallout": "gemHighlight",
   "goodTwoLink": "twoLink",

@@ -1,0 +1,22 @@
+{
+  "jewellery": ["Normal", "Magic", "Rare"],
+  "rareArmour": ["Rare"],
+  "lifeFlask": ["Normal", "Magic"],
+  "manaFlask": ["Normal", "Magic"],
+  "highlightedEquipment": ["Normal", "Magic", "Rare"],
+  "earlyShieldBase": ["Normal", "Magic", "Rare"],
+  "utilityFlask": ["Normal", "Magic"],
+  "tincture": ["Normal", "Magic"],
+  "leagueMechanic": ["Normal", "Magic", "Rare"],
+  "twoLink": ["Normal", "Magic", "Rare"],
+  "threeLink": ["Normal", "Magic", "Rare"],
+  "fourLink": ["Normal", "Magic", "Rare"],
+  "fiveLink": ["Normal", "Magic", "Rare"],
+  "sixLink": ["Normal", "Magic", "Rare"],
+  "goodTwoLink": ["Normal", "Magic", "Rare"],
+  "selectedTwoLink": ["Normal", "Magic", "Rare"],
+  "goodThreeLink": ["Normal", "Magic", "Rare"],
+  "selectedThreeLink": ["Normal", "Magic", "Rare"],
+  "goodFourLink": ["Normal", "Magic", "Rare"],
+  "selectedFourLink": ["Normal", "Magic", "Rare"]
+}

@@ -131,10 +131,10 @@ func TestReferenceSeparatesGlobalAndLocalStyles(t *testing.T) {
 		"localStyles": Object{"gemCallout": Object{"text": "#abcdef"}},
 	}})
 	ref := mustCall(t, s, "reference", Object{"name": "Local Styles"}).(Object)
-	if c.Obj(c.Obj(ref["styles"])["gemCallout"])["text"] != "#abcdef" {
+	if c.Obj(c.Obj(ref["styles"])["gemHighlight"])["text"] != "#abcdef" {
 		t.Fatal("effective reference must include local styles")
 	}
-	if c.Obj(c.Obj(ref["globalStyles"])["gemCallout"])["text"] != "#123456" {
+	if c.Obj(c.Obj(ref["globalStyles"])["gemHighlight"])["text"] != "#123456" {
 		t.Fatal("reset baseline must exclude local styles")
 	}
 	if c.Obj(c.Obj(ref["styles"])["gemHighlight"])["text"] != "#abcdef" {
@@ -383,7 +383,7 @@ func TestGlobalFlaskCutoffsAndStylesReachFilterPreviews(t *testing.T) {
 		"lifeMaxAreaLevels": Object{"small": float64(18)},
 		"manaMaxAreaLevels": Object{"eternal": float64(72)},
 	}}})
-	mustCall(t, s, "saveStyles", Object{"styles": Object{"lifeFlask": Object{"text": "#123456"}}})
+	mustCall(t, s, "saveStyles", Object{"styles": Object{"sharedRarityNormal": Object{"text": "#123456"}}})
 	blockFor := func(output, base string) string {
 		for _, block := range strings.Split(output, "\n\n") {
 			if strings.Contains(block, `BaseType == "`+base+`"`) {
@@ -400,11 +400,14 @@ func TestGlobalFlaskCutoffsAndStylesReachFilterPreviews(t *testing.T) {
 	if !strings.Contains(blockFor(out, "Eternal Mana Flask"), "AreaLevel <= 72") {
 		t.Fatal("global final-flask cutoff missing")
 	}
-	config := Object{"buildProfile": Object{}, "buildSpecificOptions": Object{"flasks": Object{"lifeMaxAreaLevels": Object{"small": nil}}}}
+	config := Object{"buildProfile": Object{}, "buildSpecificOptions": Object{"flasks": Object{"lifeMaxAreaLevels": Object{"small": nil}}}, "localStyles": Object{"sharedRarityNormal": Object{"text": "#654321"}}}
 	mustCall(t, s, "saveConfig", Object{"name": "Flask Cutoffs", "config": config})
 	out = c.Text(mustCall(t, s, "preview", Object{"name": "Flask Cutoffs"}).(Object)["output"])
 	if strings.Contains(blockFor(out, "Small Life Flask"), "AreaLevel") {
 		t.Fatal("saved explicit null must remove inherited cutoff")
+	}
+	if !strings.Contains(blockFor(out, "Small Life Flask"), "SetTextColor 101 67 33") {
+		t.Fatal("saved local palette must override shared global text")
 	}
 	if !strings.Contains(blockFor(out, "Eternal Mana Flask"), "AreaLevel <= 72") {
 		t.Fatal("filter override lost unrelated global cutoff")

@@ -79,7 +79,8 @@
     "twoLinkMaxAreaLevel": 9
   },
   "magicItems": {
-    "bigMaxAreaLevel": 9,
+    "footprintMinAreaLevel": 0,
+    "maxAreaLevel": 23,
     "rules": {
       "1x1": {
         "size": 42
@@ -88,9 +89,11 @@
         "size": 40
       },
       "1x3": {
+        "maxAreaLevel": 9,
         "size": 37
       },
       "1x4": {
+        "maxAreaLevel": 9,
         "size": 35
       },
       "2x1": {
@@ -100,10 +103,13 @@
         "size": 35
       },
       "2x3": {
+        "maxAreaLevel": 9,
         "size": 32
+      },
+      "2x4": {
+        "maxAreaLevel": 9
       }
-    },
-    "smallMaxAreaLevel": 23
+    }
   },
   "misc": {
     "showRusticSash": true,

@@ -51,15 +51,26 @@ func (c *Compiler) template(text string) []*rule {
 			continue
 		}
 		r := newRule()
+		styleName := ""
 		for _, line := range lines[1:] {
 			if strings.HasPrefix(line, "@style ") {
-				r.style(Obj(c.Styles[strings.TrimPrefix(line, "@style ")]))
+				styleName = strings.TrimPrefix(line, "@style ")
+				r.style(c.namedStyle(styleName))
 				continue
 			}
 			key, value, ok := strings.Cut(line, " ")
 			if ok {
 				value = strings.ReplaceAll(value, "poeft-sounds-v2/", c.SoundFolder+"/")
 				r.set(key, value)
+			}
+		}
+		if !c.legacyEquipmentSelections && len(rarityTextStyles[canonicalStyleName(styleName)]) > 0 {
+			for _, line := range r.lines {
+				for _, rarity := range []string{"Normal", "Magic", "Rare"} {
+					if line == "Rarity == "+rarity {
+						r.set("SetTextColor", rgb(Text(c.sharedRarityText(rarity))))
+					}
+				}
 			}
 		}
 		if lines[0] == "Hide" {
@@ -83,12 +94,25 @@ func (c *Compiler) fixed(key string) string {
 }
 func (c *Compiler) section(options Object, name string) Object {
 	base, override := Obj(c.Defaults[name]), Obj(options[name])
+	if name == "rareItems" {
+		if _, exists := base["footprintMinAreaLevel"]; !exists {
+			base = Clone(base)
+			base["footprintMinAreaLevel"] = Val(Obj(options["early"]), "earlyMaxAreaLevel", Obj(c.Defaults["early"])["earlyMaxAreaLevel"])
+		}
+	}
 	if !c.legacyEquipmentSelections {
 		for _, section := range globalRuleSections {
 			if name == section {
 				override = Clone(override)
 				delete(override, "rules")
-				return Merge(base, override)
+				out := Merge(base, override)
+				if name == "magicItems" {
+					if _, explicit := override["maxAreaLevel"]; explicit {
+						delete(out, "smallMaxAreaLevel")
+						delete(out, "bigMaxAreaLevel")
+					}
+				}
+				return out
 			}
 		}
 	}
@@ -201,13 +225,16 @@ func (c *Compiler) flasks(cfg Object) string {
 	// Preserve the canonical utility-flask order, independent of picker order.
 	for _, name := range []string{"Quicksilver", "Bismuth", "Stibnite", "Amethyst", "Ruby", "Sapphire", "Topaz", "Silver", "Aquamarine", "Granite", "Jade", "Quartz", "Diamond", "Gold", "Corundum", "Iron"} {
 		if contains(Strings(cfg["utilityFlasks"]), name) {
-			rules = append(rules, c.template(Text(Obj(c.templates["utilityFlasks"])[name]))...)
+			for _, r := range c.template(Text(Obj(c.templates["utilityFlasks"])[name])) {
+				rules = append(rules, c.rarityTextRules(r, "Normal", "Magic")...)
+			}
 		}
 	}
 	if !c.legacyEquipmentSelections {
 		for _, name := range []string{"Sulphur", "Basalt"} {
 			if contains(Strings(cfg["utilityFlasks"]), name) {
-				rules = append(rules, c.tts(newRule().quoted("Class", true, "Utility Flasks").quoted("BaseType", true, name+" Flask").icon("Green", "Raindrop", 2).style(Obj(c.Styles["utilityFlask"])), strings.ToLower(name)+"_flask"))
+				r := c.tts(newRule().quoted("Class", true, "Utility Flasks").quoted("BaseType", true, name+" Flask").icon("Green", "Raindrop", 2).style(Obj(c.Styles["utilityFlask"])), strings.ToLower(name)+"_flask")
+				rules = append(rules, c.rarityTextRules(r, "Normal", "Magic")...)
 			}
 		}
 		last = newRule().quoted("Class", true, "Utility Flasks").hide()
@@ -223,7 +250,7 @@ func (c *Compiler) tinctures(cfg Object) string {
 		} else {
 			c.tts(r, strings.ReplaceAll(strings.ToLower(base), " ", "_"))
 		}
-		rules = append(rules, r)
+		rules = append(rules, c.rarityTextRules(r, "Normal", "Magic")...)
 	}
 	return heading("Tinctures", append(rules, newRule().quoted("Class", false, "Tinctures").hide())...)
 }
@@ -243,19 +270,23 @@ func (c *Compiler) early(p, cfg Object) string {
 	mode := Text(Val(p, "shieldProgression", c.Defaults["shieldProgression"]))
 	max := Val(cfg, "shieldMaxAreaLevel", cfg["earlyMaxAreaLevel"])
 	if mode != "none" {
-		rules = append(rules, newRule().quoted("Class", false, "Shields").number("AreaLevel", "<=", max).style(Obj(c.Styles["earlyShieldBase"])))
+		r := newRule().quoted("Class", false, "Shields").number("AreaLevel", "<=", max).style(Obj(c.Styles["earlyShieldBase"]))
+		rules = append(rules, c.rarityTextRules(r, "Normal", "Magic", "Rare")...)
 	}
 	if mode == "full" {
 		for _, kind := range Strings(Val(p, "preferredArmour", c.Defaults["preferredArmour"])) {
 			style := Obj(c.Styles["rare"])
 			if c.legacyEquipmentSelections {
 				style = Obj(c.Styles["rareArmour"])
+			} else {
+				style = c.rarityStyle(style, "Rare")
 			}
 			rules = append(rules, defence(newRule().quoted("Class", false, "Shields").number("AreaLevel", ">", max).set("Rarity", "== Rare").style(style), kind))
 		}
 	}
 	if Val(Obj(p["misc"]), "showRusticSash", Obj(c.Defaults["misc"])["showRusticSash"]) == true {
-		rules = append(rules, c.tts(newRule().quoted("BaseType", false, "Rustic").quoted("Class", false, "Belts").set("AreaLevel", "<= 12").icon("White", "Pentagon", 2).style(Obj(c.Styles["jewellery"])), "rustic_sash"))
+		r := c.tts(newRule().quoted("BaseType", false, "Rustic").quoted("Class", false, "Belts").set("AreaLevel", "<= 12").icon("White", "Pentagon", 2).style(Obj(c.Styles["jewellery"])), "rustic_sash")
+		rules = append(rules, c.rarityTextRules(r, "Normal", "Magic", "Rare")...)
 	}
 	return heading("Early", rules...)
 }
@@ -279,7 +310,7 @@ func (c *Compiler) earlySockets(cfg Object) string {
 			continue
 		}
 		for _, rarity := range []string{"Normal", "Magic", "Rare"} {
-			rules = append(rules, c.presentation(base().set("Rarity", "== "+rarity), rc, Obj(c.Styles[strings.ToLower(rarity)])))
+			rules = append(rules, c.presentation(base().set("Rarity", "== "+rarity), rc, c.rarityStyle(Obj(c.Styles[strings.ToLower(rarity)]), rarity)))
 		}
 		// Keep the existing catch-all for unique items after the rarity variants.
 		rules = append(rules, c.presentation(base(), rc, Object{}))
@@ -300,13 +331,22 @@ func (c *Compiler) equipment(rarity string, cfg Object) string {
 			maximum = cfg["maxAreaLevel"]
 			color = "#FFFF77"
 		} else {
-			maximum = cfg["bigMaxAreaLevel"]
+			maximum = Val(cfg, "bigMaxAreaLevel", cfg["maxAreaLevel"])
 			if shape.h <= 2 {
-				maximum = cfg["smallMaxAreaLevel"]
+				maximum = Val(cfg, "smallMaxAreaLevel", cfg["maxAreaLevel"])
 			}
 			color = "#8888FF"
 		}
 		maximum = Val(rc, "maxAreaLevel", maximum)
+		// Imported filters can still carry the retired per-filter split. Those
+		// explicit cutoffs take precedence over the new shared size defaults.
+		if rarity == "Magic" && !c.legacyEquipmentSelections {
+			key := "bigMaxAreaLevel"
+			if shape.h <= 2 {
+				key = "smallMaxAreaLevel"
+			}
+			maximum = Val(cfg, key, maximum)
+		}
 		if rarity == "Rare" && cfg["maxAreaLevel"] != nil && Num(maximum, 1e9) > Num(cfg["maxAreaLevel"], 1e9) {
 			maximum = cfg["maxAreaLevel"]
 		}
@@ -317,18 +357,20 @@ func (c *Compiler) equipment(rarity string, cfg Object) string {
 			style := Object{"size": float64(shape.size), "text": color}
 			if !c.legacyEquipmentSelections {
 				style = Merge(style, Obj(c.Styles[strings.ToLower(rarity)]))
-				earlyMaximum := Obj(c.Defaults["early"])["earlyMaxAreaLevel"]
-				early := &rule{lines: append([]string{}, r.lines...)}
-				if earlyMaximum != nil && (maximum == nil || Num(earlyMaximum, 0) < Num(maximum, 0)) {
-					early.number("AreaLevel", "<=", earlyMaximum)
+				var minimum any = float64(0)
+				if rarity == "Rare" {
+					minimum = Obj(c.Defaults["early"])["earlyMaxAreaLevel"]
 				}
-				// Keep the same visibility bounds, but defer footprint sizing until after early levels.
-				early.style(Obj(c.Styles[strings.ToLower(rarity)]))
-				rules = append(rules, early)
-				if earlyMaximum == nil || (maximum != nil && Num(maximum, 0) <= Num(earlyMaximum, 0)) {
-					continue
+				minimum = Val(cfg, "footprintMinAreaLevel", minimum)
+				if minimum == nil || Num(minimum, 0) > 0 {
+					early := &rule{lines: append([]string{}, r.lines...)}
+					early.number("AreaLevel", "<", minimum).style(Obj(c.Styles[strings.ToLower(rarity)]))
+					rules = append(rules, early)
+					if minimum == nil || (maximum != nil && Num(maximum, 0) < Num(minimum, 0)) {
+						continue
+					}
+					r.number("AreaLevel", ">=", minimum)
 				}
-				r.number("AreaLevel", ">", earlyMaximum)
 			}
 			c.presentation(r, rc, style)
 		}
@@ -359,6 +401,9 @@ func (c *Compiler) normal(cfg Object) string {
 		} else {
 			r = newRule().quoted("Class", false, "Belts").set("Rarity", "== Normal")
 			style = Obj(c.Styles["jewellery"])
+			if !c.legacyEquipmentSelections {
+				style = c.rarityStyle(style, "Normal")
+			}
 		}
 		if !c.legacyEquipmentSelections && key == "equipment" {
 			style = Clone(Obj(c.Styles["normal"]))

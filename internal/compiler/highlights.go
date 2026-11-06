@@ -93,10 +93,16 @@ func (c *Compiler) highlightRules(cfg Object) []*rule {
 			if !contains([]string{"Normal", "Magic", "Rare"}, rarity) {
 				continue
 			}
-			style := Obj(c.Styles["highlightedEquipment"+rarity])
+			style := c.rarityStyle(Obj(c.Styles["highlightedEquipment"]), rarity)
+			if c.legacyEquipmentSelections {
+				style = Obj(c.Styles["highlightedEquipment"+rarity]) // Frozen web-output tests only.
+			}
 			if cfg["style"] != nil {
 				s := Obj(cfg["style"])
-				style = Merge(Obj(c.Styles[Text(s["preset"])]), s)
+				style = Merge(c.namedStyle(Text(s["preset"])), s)
+				if _, explicit := s["text"]; !explicit && len(rarityTextStyles[canonicalStyleName(Text(s["preset"]))]) > 1 {
+					style = c.rarityStyle(style, rarity)
+				}
 			}
 			r := newRule().style(style)
 			presentation := cfg

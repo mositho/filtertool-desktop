@@ -36,9 +36,6 @@ func TestOrdinaryRarityStylesReachEquipmentWithExplicitCutoffs(t *testing.T) {
 			}
 			assertRuleStyle(t, block, Obj(c.Styles[strings.ToLower(rarity)]))
 			cutoff := maximum
-			if rarity != "Normal" && !strings.Contains(block, "AreaLevel > "+fmt.Sprint(earlyMaximum)) {
-				cutoff = earlyMaximum
-			}
 			if !strings.Contains(block, "AreaLevel <= "+fmt.Sprint(cutoff)) {
 				t.Fatal("configured cutoff not applied", block)
 			}
@@ -63,15 +60,14 @@ func TestOrdinaryRarityStyleSizesReachEquipment(t *testing.T) {
 	}
 }
 
-func TestEquipmentFootprintSizesStartAfterGlobalEarlyMaximum(t *testing.T) {
+func TestEquipmentFootprintSizesStartAtTheirMinimumWithoutChangingVisibility(t *testing.T) {
 	raritySize, footprintSize := float64(44), float64(30)
 	for _, rarity := range []string{"Rare", "Magic"} {
 		section := strings.ToLower(rarity) + "Items"
-		for _, earlyMax := range []any{float64(12), float64(5), nil} {
+		for _, minimum := range []any{float64(0), float64(12), float64(7), float64(5), nil} {
 			for _, visibleMax := range []float64{7, 20} {
 				c := New(Object{
-					"early": Object{"earlyMaxAreaLevel": earlyMax},
-					section: Object{"maxAreaLevel": visibleMax, "rules": Object{"2x3": Object{"size": footprintSize, "maxAreaLevel": visibleMax}}},
+					section: Object{"footprintMinAreaLevel": minimum, "maxAreaLevel": visibleMax, "rules": Object{"2x3": Object{"size": footprintSize, "maxAreaLevel": visibleMax}}},
 				}, Object{strings.ToLower(rarity): Object{"size": raritySize}}, "")
 				out := c.equipment(rarity, c.section(Object{}, section))
 				for _, area := range []int{5, 6, 7, 8, 12, 13, 20, 21} {
@@ -86,7 +82,10 @@ func TestEquipmentFootprintSizesStartAfterGlobalEarlyMaximum(t *testing.T) {
 							if _, err := fmt.Sscanf(line, "AreaLevel <= %d", &bound); err == nil && area > bound {
 								matches = false
 							}
-							if _, err := fmt.Sscanf(line, "AreaLevel > %d", &bound); err == nil && area <= bound {
+							if _, err := fmt.Sscanf(line, "AreaLevel < %d", &bound); err == nil && area >= bound {
+								matches = false
+							}
+							if _, err := fmt.Sscanf(line, "AreaLevel >= %d", &bound); err == nil && area < bound {
 								matches = false
 							}
 						}
@@ -102,11 +101,11 @@ func TestEquipmentFootprintSizesStartAfterGlobalEarlyMaximum(t *testing.T) {
 						continue
 					}
 					size := raritySize
-					if earlyMax != nil && float64(area) > earlyMax.(float64) {
+					if minimum != nil && float64(area) >= minimum.(float64) {
 						size = footprintSize
 					}
 					if !strings.Contains(got, "SetFontSize "+fmt.Sprint(size)) {
-						t.Fatalf("%s early=%v visible=%v area=%d: expected size %v, got %s", rarity, earlyMax, visibleMax, area, size, got)
+						t.Fatalf("%s minimum=%v visible=%v area=%d: expected size %v, got %s", rarity, minimum, visibleMax, area, size, got)
 					}
 				}
 			}
@@ -126,7 +125,7 @@ func TestEarlyBeltsUseJewelleryStyleAndExplicitSize(t *testing.T) {
 			"jewellery": Object{"size": float64(43), "text": "#abcdef", "border": "#123456", "background": "#654321"},
 		}, "")
 		out := c.normal(c.section(Object{}, "normalItems"))
-		style := Clone(Obj(c.Styles["jewellery"]))
+		style := c.rarityStyle(Obj(c.Styles["jewellery"]), "Normal")
 		if override != nil {
 			style["size"] = override
 		}
@@ -158,7 +157,7 @@ func TestRetiredStyleOverridesRemainCompatible(t *testing.T) {
 	if !strings.Contains(c.gems(Object{"gems": []any{"Fireball"}}), "SetTextColor 18 52 86") {
 		t.Fatal("legacy gemCallout override was lost after the rename")
 	}
-	if Obj(c.Styles["earlyShieldBase"])["border"] != "#654321" || Obj(c.Styles["earlyShieldLink"])["border"] != "#654321" {
+	if Obj(c.Styles["earlyShieldBase"])["border"] != "#654321" || c.namedStyle("earlyShieldLink")["border"] != "#654321" {
 		t.Fatal("retired shield name must resolve to the base style with its overrides")
 	}
 	if c.linkStyle("three", "selected") != "selectedThreeLink" || c.linkStyle("three", "good") != "threeLink" {
@@ -173,7 +172,7 @@ func TestRetiredStyleOverridesRemainCompatible(t *testing.T) {
 	}
 }
 
-func TestEarlySocketsUseFullRarityStylesAndRetainCutoffs(t *testing.T) {
+func TestEarlySocketsUseSharedTextAndRetainOtherRarityStylePropertiesAndCutoffs(t *testing.T) {
 	c := New(nil, Object{
 		"normal": Object{"text": "#112233", "size": float64(28)},
 		"magic":  Object{"text": "#445566", "size": float64(32)},
@@ -187,7 +186,8 @@ func TestEarlySocketsUseFullRarityStylesAndRetainCutoffs(t *testing.T) {
 			for _, block := range strings.Split(out, "\n\n") {
 				if strings.Contains(block, "Sockets == "+sockets.count) && strings.Contains(block, "Rarity == "+rarity) {
 					found = true
-					assertRuleStyle(t, block, Obj(c.Styles[strings.ToLower(rarity)]))
+					style := Merge(Obj(c.Styles[strings.ToLower(rarity)]), Object{"text": c.sharedRarityText(rarity)})
+					assertRuleStyle(t, block, style)
 					if !strings.Contains(block, "AreaLevel <= "+fmt.Sprint(maximums[sockets.cutoff])) {
 						t.Fatal("socket rule did not retain its configured cutoff", block)
 					}
@@ -197,5 +197,55 @@ func TestEarlySocketsUseFullRarityStylesAndRetainCutoffs(t *testing.T) {
 				t.Fatal("missing socket rarity rule", sockets.count, rarity)
 			}
 		}
+	}
+}
+
+func TestConsolidatedStylesResolveAliasesOnlyAtTheBoundary(t *testing.T) {
+	for _, tc := range []struct{ old, name string }{
+		{"magicJewellery", "jewellery"}, {"rareJewellery", "jewellery"},
+		{"magicLifeFlask", "lifeFlask"}, {"magicManaFlask", "manaFlask"},
+		{"highlightedEquipmentNormal", "highlightedEquipment"},
+		{"highlightedEquipmentMagic", "highlightedEquipment"},
+		{"highlightedEquipmentRare", "highlightedEquipment"},
+	} {
+		t.Run(tc.old, func(t *testing.T) {
+			merged := MergeStyles(Object{tc.name: Object{"background": "#111111", "size": float64(31)}}, Object{
+				tc.old:  Object{"background": "#222222", "border": "#123456"},
+				tc.name: Object{"border": "#654321"},
+			})
+			style := Obj(merged[tc.name])
+			if style["background"] != "#222222" || style["border"] != "#654321" || style["size"] != float64(31) {
+				t.Fatal("local aliases must override base properties; explicit canonical properties win", merged)
+			}
+			c := New(nil, merged, "")
+			if _, exists := c.Styles[tc.old]; exists {
+				t.Fatal("alias must not remain an internal style", tc.old)
+			}
+			if c.namedStyle(tc.old)["border"] != "#654321" {
+				t.Fatal("old preset references must resolve to the canonical style")
+			}
+		})
+	}
+}
+
+func TestFootprintMinimumDefaultsAndOverrides(t *testing.T) {
+	c := New(Object{"early": Object{"earlyMaxAreaLevel": float64(17)}}, nil, "")
+	if got := c.section(Object{}, "magicItems")["footprintMinAreaLevel"]; got != float64(0) {
+		t.Fatal("magic footprint sizes must start immediately", got)
+	}
+	if got := c.section(Object{}, "rareItems")["footprintMinAreaLevel"]; got != float64(17) {
+		t.Fatal("rare footprint minimum must inherit Early Max Area Level", got)
+	}
+	options := Object{"early": Object{"earlyMaxAreaLevel": float64(23)}}
+	if got := c.section(options, "rareItems")["footprintMinAreaLevel"]; got != float64(23) {
+		t.Fatal("rare minimum must follow a filter's early cutoff", got)
+	}
+	options["rareItems"] = Object{"footprintMinAreaLevel": float64(0)}
+	if got := c.section(options, "rareItems")["footprintMinAreaLevel"]; got != float64(0) {
+		t.Fatal("explicit zero must override inheritance", got)
+	}
+	c = New(Object{"early": Object{"earlyMaxAreaLevel": float64(17)}, "rareItems": Object{"footprintMinAreaLevel": float64(9)}}, nil, "")
+	if got := c.section(Object{"early": Object{"earlyMaxAreaLevel": float64(23)}}, "rareItems")["footprintMinAreaLevel"]; got != float64(9) {
+		t.Fatal("explicit shared minimum must remain independent of the early cutoff", got)
 	}
 }

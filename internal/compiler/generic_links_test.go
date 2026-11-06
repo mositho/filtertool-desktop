@@ -72,7 +72,7 @@ func TestGenericLinkExtensionsOnlyAddShowRules(t *testing.T) {
 	}
 }
 
-func TestFiveAndSixLinksUseDedicatedStylesWithOrdinaryRarityTextColors(t *testing.T) {
+func TestFiveAndSixLinksUseDedicatedStylesWithSharedRarityTextColors(t *testing.T) {
 	defaults := New(nil, nil, "")
 	defaultLinks := defaults.links(Object{}, Object{})
 	fiveLink := Obj(defaults.Styles["fiveLink"])
@@ -82,10 +82,10 @@ func TestFiveAndSixLinksUseDedicatedStylesWithOrdinaryRarityTextColors(t *testin
 			continue
 		}
 		foundDefault = true
-		style := Merge(fiveLink, Object{"text": Obj(defaults.Styles["normal"])["text"]})
+		style := Merge(fiveLink, Object{"text": defaults.sharedRarityText("Normal")})
 		for _, line := range newRule().style(style).lines {
 			if !strings.Contains(block, line) {
-				t.Fatal("default five-link rule should use the current dedicated style with ordinary rarity text", block)
+				t.Fatal("default five-link rule should use the current dedicated style with shared rarity text", block)
 			}
 		}
 	}
@@ -93,11 +93,11 @@ func TestFiveAndSixLinksUseDedicatedStylesWithOrdinaryRarityTextColors(t *testin
 		t.Fatal("missing default normal five-link rule")
 	}
 	c := New(nil, Object{
-		"normal":   Object{"text": "#123456"},
-		"magic":    Object{"text": "#234567"},
-		"rare":     Object{"text": "#345678"},
-		"fiveLink": Object{"background": "#123456", "backgroundOpacity": nil, "border": "#654321", "text": "#abcdef"},
-		"sixLink":  Object{"background": "#234567", "backgroundOpacity": nil, "border": "#765432", "text": "#fedcba"},
+		"sharedRarityNormal": Object{"text": "#123456"},
+		"sharedRarityMagic":  Object{"text": "#234567"},
+		"sharedRarityRare":   Object{"text": "#345678"},
+		"fiveLink":           Object{"background": "#123456", "backgroundOpacity": nil, "border": "#654321", "text": "#abcdef"},
+		"sixLink":            Object{"background": "#234567", "backgroundOpacity": nil, "border": "#765432", "text": "#fedcba"},
 	}, "custom-sounds")
 	out := c.links(Object{}, Object{})
 	for _, link := range []struct {
@@ -140,9 +140,9 @@ func TestFiveAndSixLinksUseDedicatedStylesWithOrdinaryRarityTextColors(t *testin
 
 func TestTwoThroughFourLinksOnlyChangeTextForRarity(t *testing.T) {
 	styles := Object{
-		"normal": Object{"text": "#123456"},
-		"magic":  Object{"text": "#234567"},
-		"rare":   Object{"text": "#345678"},
+		"sharedRarityNormal": Object{"text": "#123456"},
+		"sharedRarityMagic":  Object{"text": "#234567"},
+		"sharedRarityRare":   Object{"text": "#345678"},
 	}
 	c := New(nil, styles, "custom-sounds")
 	profile := Object{"preferredColors": []any{"RGB"}, "preferredArmour": []any{"armour"}}
@@ -172,7 +172,7 @@ func TestTwoThroughFourLinksOnlyChangeTextForRarity(t *testing.T) {
 			}
 			for j, rarity := range []string{"Normal", "Magic", "Rare"} {
 				variant := blocks[i-3+j]
-				text := "SetTextColor " + rgb(Text(Obj(c.Styles[strings.ToLower(rarity)])["text"]))
+				text := "SetTextColor " + rgb(Text(c.sharedRarityText(rarity)))
 				if !strings.Contains(variant, "Rarity == "+rarity) || !strings.Contains(variant, text) {
 					t.Fatalf("missing rarity text in rule: %s", variant)
 				}

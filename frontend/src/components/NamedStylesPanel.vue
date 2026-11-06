@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed, inject, nextTick, ref } from "vue"
-import { groupStyleSections, namedStylesKey, STYLE_ALIASES, STYLE_GRID_TEMPLATE } from "../namedStyles"
+import { groupStyleSections, isPaletteStyle, namedStylesKey, STYLE_ALIASES, STYLE_GRID_TEMPLATE } from "../namedStyles"
 import { useCollapsedState } from "../viewState"
 import NamedStyleEditor from "./NamedStyleEditor.vue"
+import RarityPalette from "./RarityPalette.vue"
 
 const props = defineProps<{ filterName: string }>()
 const context = inject(namedStylesKey)!
@@ -22,10 +23,10 @@ function setAll(value: boolean) {
 async function reveal(key: string) {
   const target = STYLE_ALIASES[key] ?? key
   const section = sections.value.find((section) => section.keys.includes(target))
-  if (!section) return
+  if (!section && !isPaletteStyle(target)) return
   context.openPopover.value = null
   collapsed.value.styles = false
-  collapsed.value[section.title] = false
+  if (section) collapsed.value[section.title] = false
   await nextTick()
   const row = [...(panel.value?.querySelectorAll<HTMLElement>("[data-style-key]") ?? [])].find((row) => row.dataset.styleKey === target)
   row?.focus({ preventScroll: true })
@@ -71,6 +72,13 @@ defineExpose({
           Expand all
         </button>
       </div>
+      <RarityPalette
+        :styles="context.styles.value"
+        :overrides="context.overrides.value"
+        reset-label="to global"
+        @set="(key, value) => context.set(key, 'text', value)"
+        @reset="context.reset"
+      />
       <div v-for="section in sections" :key="section.title" class="mb-3 rounded border border-neutral-800">
         <button
           type="button"

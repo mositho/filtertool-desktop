@@ -20,7 +20,7 @@ import starterSupports from "../../../internal/data/starter-supports.json"
 import CurrencyEditor from "./CurrencyEditor.vue"
 import { layoutFields } from "../formLayout"
 import { useCollapsedState } from "../viewState"
-import { isLegacyStyle, mergeStyles, namedStylesKey, STYLE_ALIASES, type StyleMap } from "../namedStyles"
+import { isLegacyStyle, isPaletteStyle, mergeStyles, namedStylesKey, styleAliasesFor, type StyleMap } from "../namedStyles"
 import NamedStylesPanel from "./NamedStylesPanel.vue"
 
 const props = defineProps<{ modelValue: FilterConfig; reference: ReferenceData; filterName: string; defaults?: Record<string, unknown> }>()
@@ -34,13 +34,13 @@ const effectiveReference = computed(() => {
     ...props.reference,
     styles,
     styleNames: Object.keys(styles)
-      .filter((key) => !isLegacyStyle(key))
+      .filter((key) => !isLegacyStyle(key) && !isPaletteStyle(key))
       .sort(),
   }
 })
 function setLocalStyle(key: string, value: Record<string, unknown> | undefined) {
   const next = { ...localStyles.value }
-  for (const old of ["gemCallout", "earlyShieldLink"]) if (STYLE_ALIASES[old] === key) delete next[old]
+  for (const old of styleAliasesFor(key)) delete next[old]
   if (value && Object.keys(value).length) next[key] = value
   else delete next[key]
   if (Object.keys(next).length) props.modelValue.localStyles = next

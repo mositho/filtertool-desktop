@@ -289,13 +289,12 @@ const earlyRusticSash: SchemaField[] = [
 const buildEarlyGeneric: SchemaField[] = [
   {
     path: "early.earlyMaxAreaLevel",
-    label: "Early Max Area Level",
+    label: "Generic",
     control: "number",
     min: 0,
     integer: true,
     defaultValue: 12,
-    tooltip:
-      "Default cutoff for early shields, three-socket items and generic three-links; each can be overridden. Rare/magic equipment uses rarity style sizes through this level, then footprint sizes. Visibility cutoffs still apply.",
+    tooltip: "Default cutoff for early shields, three-socket items and generic three-links; each can be overridden.",
   },
   {
     path: "early.twoSocketMaxAreaLevel",
@@ -312,9 +311,9 @@ const buildEarlyGeneric: SchemaField[] = [
     control: "number",
     min: 0,
     integer: true,
-    defaultFrom: { path: "early.earlyMaxAreaLevel", label: "Early Max Area Level", value: 12 },
+    defaultFrom: { path: "early.earlyMaxAreaLevel", label: "Early · Generic", value: 12 },
     previewSection: "Early Sockets",
-    tooltip: "Max Area Level for three-socket items, linked or unlinked. Follows Early Max Area Level unless overridden.",
+    tooltip: "Max Area Level for three-socket items, linked or unlinked. Follows Early · Generic unless overridden.",
   },
   {
     path: "early.earlyBootsMaxAreaLevel",
@@ -327,13 +326,13 @@ const buildEarlyGeneric: SchemaField[] = [
   },
   {
     path: "early.shieldMaxAreaLevel",
-    label: "Early Shields · Max Area Level",
+    label: "Shields",
     control: "number",
     min: 0,
     integer: true,
-    defaultFrom: { path: "early.earlyMaxAreaLevel", label: "Early Max Area Level", value: 12 },
+    defaultFrom: { path: "early.earlyMaxAreaLevel", label: "Early · Generic", value: 12 },
     tooltip:
-      "Ends early shield highlighting and starts preferred rare shields in Full progression mode. Follows Early Max Area Level unless overridden.",
+      "Ends early shield highlighting and starts preferred rare shields in Full progression mode. Follows Early · Generic unless overridden.",
   },
 ]
 
@@ -417,9 +416,9 @@ const linksGeneric: SchemaField[] = [
     control: "number",
     min: 0,
     integer: true,
-    defaultFrom: { path: "early.earlyMaxAreaLevel", label: "Early Max Area Level", value: 12 },
+    defaultFrom: { path: "early.earlyMaxAreaLevel", label: "Early · Generic", value: 12 },
     tooltip:
-      "Show generic three-links through this Area Level even when the extension toggle is off. Follows Early Max Area Level unless overridden; the three-link maximum still applies.",
+      "Show generic three-links through this Area Level even when the extension toggle is off. Follows Early · Generic unless overridden; the three-link maximum still applies.",
   },
   {
     path: "links.genericThreeLinksEnabled",
@@ -437,6 +436,29 @@ const linksGeneric: SchemaField[] = [
   },
 ]
 
+const equipmentSizeFalloff: SchemaField[] = [
+  {
+    path: "magicItems.footprintMinAreaLevel",
+    label: "Magic Items · Size Falloff",
+    control: "number",
+    min: 0,
+    integer: true,
+    defaultValue: 0,
+    previewSection: "Magic Items",
+    tooltip: "From this area level, size depends on the inventory space of the item.",
+  },
+  {
+    path: "rareItems.footprintMinAreaLevel",
+    label: "Rare Items · Size Falloff",
+    control: "number",
+    min: 0,
+    integer: true,
+    defaultFrom: { path: "early.earlyMaxAreaLevel", label: "Early · Generic", value: 12 },
+    previewSection: "Rare Items",
+    tooltip: "From this area level, size depends on the inventory space of the item.",
+  },
+]
+
 const equipmentRarityItems: SchemaField[] = [
   {
     path: "normalItems.maxAreaLevel",
@@ -449,26 +471,14 @@ const equipmentRarityItems: SchemaField[] = [
     tooltip: "Area level up to which normal items are shown. Only applies to items that don't match other rules.",
   },
   {
-    path: "magicItems.smallMaxAreaLevel",
-    label: "Small Magic Items",
+    path: "magicItems.maxAreaLevel",
+    label: "Magic Items",
     control: "number",
     min: 0,
     integer: true,
     defaultValue: 24,
     previewSection: "Magic Items",
-    tooltip:
-      "Small magic items fit within 2×2 in your inventory (jewellery, belts, gloves, boots, helmets, quivers). Shown up to this area level.",
-  },
-  {
-    path: "magicItems.bigMaxAreaLevel",
-    label: "Big Magic Items",
-    control: "number",
-    min: 0,
-    integer: true,
-    defaultValue: 9,
-    previewSection: "Magic Items",
-    tooltip:
-      "Big magic items are larger than 2×2 in your inventory (body armour, two-handed weapons, bows, staves). Shown up to this area level.",
+    tooltip: "Default area level up to which magic items are shown. Advanced rules can override this for individual inventory sizes.",
   },
   {
     path: "rareItems.maxAreaLevel",
@@ -693,11 +703,7 @@ const genericEquipment: FieldSubsection[] = [
           { size },
           rarity === "rare"
             ? { path: "rareItems.maxAreaLevel", label: "Rare Items" }
-            : {
-                path: `magicItems.${height <= 2 ? "small" : "big"}MaxAreaLevel`,
-                label: `${height <= 2 ? "Small" : "Big"} Magic Items`,
-                value: height <= 2 ? 24 : 9,
-              },
+            : { path: "magicItems.maxAreaLevel", label: "Magic Items", value: 24 },
         ),
       ),
     ],
@@ -887,7 +893,7 @@ export const BUILD_SPECIFIC_SCHEMA: FieldGroup[] = [
     previewSection: "Early",
     fields: [],
     subsections: [
-      { key: "generic", title: "Area level cutoffs", collapsed: true, previewSection: "Early", fields: buildEarlyGeneric },
+      { key: "generic", title: "Max Area Level", collapsed: true, previewSection: "Early", fields: buildEarlyGeneric },
       { key: "rusticSash", title: "Rustic Sash", collapsed: true, root: "buildProfile", previewSection: "Early", fields: earlyRusticSash },
       {
         key: "socketRules",
@@ -925,6 +931,7 @@ export const BUILD_SPECIFIC_SCHEMA: FieldGroup[] = [
     fields: [],
     subsections: [
       { key: "rarityItems", title: "Max Area Level", collapsed: true, fields: [...equipmentRarityItems, ...equipmentJewelleryCutoffs] },
+      { key: "sizeFalloff", title: "Min Area Level", collapsed: true, fields: equipmentSizeFalloff },
       {
         key: "jewellery",
         title: "Jewellery",

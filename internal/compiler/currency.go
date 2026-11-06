@@ -27,6 +27,9 @@ var leagueRules = data.Load[[]leagueRule]("league-mechanic.json")
 // MergeDefaults preserves atomic currency/league sound choices at every layer,
 // including imported local defaults, before the compiler resolves item rules.
 func MergeDefaults(base, override Object) Object {
+	base, override = Clone(base), Clone(override)
+	normalizeMagicCutoffs(base)
+	normalizeMagicCutoffs(override)
 	out := Merge(base, override)
 	for _, key := range []string{"currency", "leagueMechanic"} {
 		if value, ok := override[key].(map[string]any); ok {
@@ -368,7 +371,18 @@ func (c *Compiler) leagueMechanic(cfg Object) string {
 			if def.Stack {
 				r.number("StackSize", ">=", settings["minStackSize"])
 			}
-			rules = append(rules, c.currencyPresentation(r, settings, "leagueMechanic"))
+			r = c.currencyPresentation(r, settings, "leagueMechanic")
+			style := Obj(settings["style"])
+			preset := Text(style["preset"])
+			if _, explicitText := style["text"]; !explicitText && (preset == "" || preset == "leagueMechanic") {
+				rarities := []string{"Normal", "Magic", "Rare"}
+				if def.ItemClass == "Stackable Currency" {
+					rarities = rarities[:1]
+				}
+				rules = append(rules, c.rarityTextRules(r, rarities...)...)
+			} else {
+				rules = append(rules, r)
+			}
 			if def.Stack && Num(settings["minStackSize"], 0) > 0 {
 				rules = append(rules, base(selected).hide())
 			}

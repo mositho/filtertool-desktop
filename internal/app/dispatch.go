@@ -221,7 +221,7 @@ func (s *Store) Dispatch(action string, input Object) (any, error) {
 		ref["styles"] = c.ResolveStyles(styles)
 		styleNames := make([]string, 0, len(styles))
 		for key := range styles {
-			if !c.LegacyStyle(key) {
+			if !c.LegacyStyle(key) && !c.PaletteStyle(key) {
 				styleNames = append(styleNames, key)
 			}
 		}

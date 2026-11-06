@@ -4,7 +4,7 @@ import NumberField from "./NumberField.vue"
 import ColorField from "./ColorField.vue"
 import { styleClipboard } from "../styleClipboard"
 import { DEFAULT_STYLE_SETTINGS, MIN_STYLE_SIZE } from "../../../src/style-defaults"
-import { isLegacyStyle, styleLabel } from "../namedStyles"
+import { canonicalStyleName, isLegacyStyle, isPaletteStyle, styleLabel } from "../namedStyles"
 
 const props = defineProps<{
   modelValue: Record<string, unknown>
@@ -33,7 +33,9 @@ const OVERRIDE_KEYS = ["text", "background", "border", "size", "backgroundOpacit
 
 const GRID_TEMPLATE = "minmax(7rem, 1fr) 2.75rem 2.75rem 2.75rem 3.5rem 4rem 7rem minmax(10rem, 2fr)"
 const availableNames = computed(() =>
-  props.styleNames.filter((name) => !isLegacyStyle(name) && (props.allowHighlightPresets || !name.startsWith("highlightedEquipment"))),
+  props.styleNames.filter(
+    (name) => !isLegacyStyle(name) && !isPaletteStyle(name) && (props.allowHighlightPresets || !name.startsWith("highlightedEquipment")),
+  ),
 )
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
@@ -43,7 +45,7 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
   return { r: (value >> 16) & 255, g: (value >> 8) & 255, b: value & 255 }
 }
 
-const preset = computed(() => (typeof props.modelValue.preset === "string" ? props.modelValue.preset : ""))
+const preset = computed(() => (typeof props.modelValue.preset === "string" ? canonicalStyleName(props.modelValue.preset) : ""))
 
 function effectiveStyle(): Record<string, unknown> {
   const base = preset.value ? (props.styles[preset.value] ?? {}) : {}

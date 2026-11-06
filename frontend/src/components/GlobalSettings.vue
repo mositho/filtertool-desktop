@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from "vue"
+import { ref, onMounted, computed, watch, nextTick } from "vue"
 import { api, type AppSettings, type ReferenceData } from "../api"
 import {
   DEFAULTS_SCHEMA,
@@ -19,10 +19,12 @@ import { DEFAULT_STYLE_SETTINGS, MIN_STYLE_SIZE } from "../../../src/style-defau
 import {
   groupStyleSections,
   rarityTextPreviews,
+  sharedRarityText,
+  styleTextHelp,
   usesRarityText,
   mergeStyles,
   styleLabel,
-  STYLE_ALIASES,
+  styleAliasesFor,
   STYLE_GRID_TEMPLATE,
   STYLE_SECTIONS,
   type StyleMap,
@@ -32,6 +34,7 @@ import { layoutFields } from "../formLayout"
 import { useCollapsedState } from "../viewState"
 import WeaponPhaseTemplateEditor from "./WeaponPhaseTemplateEditor.vue"
 import { emptyWeaponHighlight } from "@schema/form-schema"
+import RarityPalette from "./RarityPalette.vue"
 
 const props = defineProps<{ devMode?: boolean }>()
 
@@ -357,7 +360,7 @@ function styleColor(style: Record<string, unknown>, prop: string): string {
 
 function setStyleProp(key: string, prop: string, value: unknown) {
   const entry = { ...styleOverrides.value[key] }
-  for (const old of ["gemCallout", "earlyShieldLink", "goldHighStack"]) if (STYLE_ALIASES[old] === key) delete userStyles.value[old]
+  for (const old of styleAliasesFor(key)) delete userStyles.value[old]
   if (value === "" || value === undefined || value === null) delete entry[prop]
   else entry[prop] = value
   if (Object.keys(entry).length === 0) delete userStyles.value[key]
@@ -366,7 +369,7 @@ function setStyleProp(key: string, prop: string, value: unknown) {
 
 function resetStyle(key: string) {
   delete userStyles.value[key]
-  for (const old of ["gemCallout", "earlyShieldLink", "goldHighStack"]) if (STYLE_ALIASES[old] === key) delete userStyles.value[old]
+  for (const old of styleAliasesFor(key)) delete userStyles.value[old]
 }
 function styleIsOverridden(key: string): boolean {
   return !!styleOverrides.value[key]
@@ -400,7 +403,15 @@ function stylePreviews(key: string): string[] {
 
 function swatchStyle(key: string, rarity: string): Record<string, string> {
   const style = effectiveStyle(key)
-  return swatchFrom(usesRarityText(key) ? { ...style, text: effectiveStyle(rarity.toLowerCase()).text } : style)
+  return swatchFrom(usesRarityText(key) ? { ...style, text: sharedRarityText(mergedStyles.value, rarity) } : style)
+}
+
+const palette = ref<InstanceType<typeof RarityPalette> | null>(null)
+async function revealPalette() {
+  await nextTick()
+  const target = palette.value?.$el.querySelector("[data-style-key]") as HTMLElement | undefined
+  target?.focus({ preventScroll: true })
+  target?.scrollIntoView?.({ block: "center", behavior: "smooth" })
 }
 
 const styleSections = computed(() => groupStyleSections(Object.keys(baseStyles.value)))
@@ -496,7 +507,7 @@ function copyStyle(key: string) {
 
 function pasteStyle(key: string) {
   if (!clipboard.value) return
-  for (const old of ["gemCallout", "earlyShieldLink"]) if (STYLE_ALIASES[old] === key) delete userStyles.value[old]
+  for (const old of styleAliasesFor(key)) delete userStyles.value[old]
   userStyles.value[key] = { ...clipboard.value.style }
 }
 
@@ -782,6 +793,15 @@ function removeSaved(name: string) {
         <div class="px-4 pb-4">
           <p class="mb-2 text-xs text-neutral-500">Colors, sizes and opacity for the built-in style names.</p>
 
+          <RarityPalette
+            ref="palette"
+            :styles="mergedStyles"
+            :overrides="styleOverrides"
+            reset-label="to default"
+            @set="(key, value) => setStyleProp(key, 'text', value)"
+            @reset="resetStyle"
+          />
+
           <div v-for="section in styleSections" :key="section.title" class="mb-3 rounded border border-neutral-800">
             <button
               type="button"
@@ -804,7 +824,7 @@ function removeSaved(name: string) {
 
               <div v-for="key in section.keys" :key="key" class="py-2" :data-style-key="key">
                 <div class="hidden items-center gap-3 @min-[48rem]:grid" :style="{ gridTemplateColumns: STYLE_GRID_TEMPLATE }">
-                  <span class="min-w-0 truncate text-xs text-neutral-300" :title="styleLabel(key)">{{ styleLabel(key) }}</span>
+                  <span class="min-w-0 truncate text-xs text-neutral-300" :title="styleTextHelp(key)">{{ styleLabel(key) }}</span>
                   <ColorField
                     v-if="!usesRarityText(key)"
                     :label="`${styleLabel(key)} text`"
@@ -812,9 +832,15 @@ function removeSaved(name: string) {
                     @update:model-value="setStyleProp(key, 'text', $event)"
                     class="h-7 w-full cursor-pointer rounded border border-neutral-700 bg-transparent"
                   />
-                  <span v-else class="text-[10px] text-neutral-400" title="Text colors are inherited from Normal, Magic and Rare styles"
-                    >Rarities</span
+                  <button
+                    v-else
+                    type="button"
+                    class="min-h-[34px] rounded text-[10px] leading-tight text-blue-300 hover:underline focus-visible:outline-2 focus-visible:outline-blue-500"
+                    title="Text follows Shared rarity text colours, based on item rarity. Show shared colours."
+                    @click="revealPalette"
                   >
+                    Shared rarity colours
+                  </button>
                   <ColorField
                     :label="`${styleLabel(key)} background`"
                     :model-value="styleColor(effectiveStyle(key), 'background')"
@@ -904,7 +930,7 @@ function removeSaved(name: string) {
                       </svg>
                     </button>
                   </div>
-                  <div class="flex min-w-0 flex-wrap justify-end gap-1">
+                  <div class="flex min-w-0 justify-end gap-1">
                     <div
                       v-for="preview in stylePreviews(key)"
                       :key="preview"
@@ -919,7 +945,7 @@ function removeSaved(name: string) {
 
                 <div class="rounded border border-neutral-800 p-2 @min-[48rem]:hidden">
                   <div class="mb-2 flex items-center justify-between gap-2">
-                    <span class="truncate text-sm font-medium text-neutral-200">{{ styleLabel(key) }}</span>
+                    <span class="truncate text-sm font-medium text-neutral-200" :title="styleTextHelp(key)">{{ styleLabel(key) }}</span>
                     <div class="flex shrink-0 items-center gap-0.5">
                       <button
                         type="button"
@@ -993,9 +1019,15 @@ function removeSaved(name: string) {
                         @update:model-value="setStyleProp(key, 'text', $event)"
                         class="h-8 w-full cursor-pointer rounded border border-neutral-700 bg-transparent"
                       />
-                      <span v-else class="text-xs text-neutral-400" title="Text colors are inherited from Normal, Magic and Rare styles"
-                        >Rarities</span
+                      <button
+                        v-else
+                        type="button"
+                        class="min-h-[34px] rounded text-xs text-blue-300 hover:underline focus-visible:outline-2 focus-visible:outline-blue-500"
+                        title="Text follows Shared rarity text colours, based on item rarity. Show shared colours."
+                        @click="revealPalette"
                       >
+                        Shared rarity colours
+                      </button>
                     </div>
                     <div class="flex flex-col gap-1">
                       <span class="text-[10px] uppercase text-neutral-500">Bg</span>

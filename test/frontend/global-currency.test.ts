@@ -121,7 +121,7 @@ it("uses the current currency/league editors and keeps styles in the Styles pane
     ["currencyB", "Currency · A Tier"],
     ["currencyC", "Currency · B Tier"],
     ["currencyLeaguestart", "Currency · Leaguestart"],
-    ["currencyLow", "Low-value Currency"],
+    ["currencyLow", "Currency · Low value"],
   ]) {
     const row = stylePanel.querySelector(`[data-style-key="${key}"]`)!
     expect(row.textContent).toContain(label)
@@ -233,8 +233,8 @@ it("rebases saved dev defaults and styles so reset uses the newly authored sourc
     return {}
   })
   mock.saveStyles.mockImplementation(async (value) => {
-    const next = getPath(value, "lifeFlask.text")
-    if (typeof next === "string") diskStyles.lifeFlask.text = next
+    const next = getPath(value, "lifeFlask.background")
+    if (typeof next === "string") diskStyles.lifeFlask.background = next
     return {}
   })
   await mount(true)
@@ -248,7 +248,7 @@ it("rebases saved dev defaults and styles so reset uses the newly authored sourc
     .click()
   await nextTick()
   const row = () => stylePanel.querySelector('span[title="lifeFlask"]')!.parentElement!
-  const color = row().querySelector<HTMLButtonElement>('[aria-label="lifeFlask text"]')!
+  const color = row().querySelector<HTMLButtonElement>('[aria-label="lifeFlask background"]')!
   await editColor(color, "#123456")
   expect(field.querySelector('button[title="Use default"]')).not.toBeNull()
   expect(row().querySelector<HTMLButtonElement>('[title="Reset style"]')!.disabled).toBe(false)
@@ -323,7 +323,7 @@ it("exposes every bundled style preset including flask and tincture styles", asy
   }
 })
 
-it("shows inherited ordinary rarity text in link style controls and previews", async () => {
+it("shows inherited shared rarity text in link style controls and previews", async () => {
   await mount()
   const panel = [...root.querySelectorAll("section")].find((section) => section.querySelector("h2")?.textContent === "Styles")!
   for (const button of panel.querySelectorAll<HTMLButtonElement>("button[aria-expanded]")) button.click()
@@ -337,11 +337,25 @@ it("shows inherited ordinary rarity text in link style controls and previews", a
       const previews = row.querySelectorAll<HTMLElement>(`[data-rarity-preview="${rarity}"]`)
       expect(previews).toHaveLength(2)
       const expected = document.createElement("span")
-      expected.style.color = styles[rarity.toLowerCase() as "normal" | "magic" | "rare"].text
+      expected.style.color = styles[`sharedRarity${rarity}` as "sharedRarityNormal" | "sharedRarityMagic" | "sharedRarityRare"].text
       for (const preview of previews) expect(preview.style.color).toBe(expected.style.color)
     }
   }
   expect(panel.querySelector('[data-style-key="sixSocket"]')!.querySelectorAll('button[aria-haspopup="dialog"][value]')).toHaveLength(6)
+})
+
+it("saves shared rarity colours independently and resets them to the bundled palette", async () => {
+  await mount()
+  const color = root.querySelector<HTMLButtonElement>('[aria-label="Shared rarity text Magic"]')!
+  await editColor(color, "#123456")
+  await nextTick()
+  await exposed.value!.save()
+  expect(mock.saveStyles).toHaveBeenLastCalledWith({ sharedRarityMagic: { text: "#123456" } })
+  root.querySelector<HTMLButtonElement>('[aria-label="Reset shared Magic text to default"]')!.click()
+  await nextTick()
+  expect(color.value).toBe(styles.sharedRarityMagic.text.toLowerCase())
+  await exposed.value!.save()
+  expect(mock.saveStyles).toHaveBeenLastCalledWith({})
 })
 
 it("persists global defaults, nested disclosures, Settings and Styles without marking edits", async () => {

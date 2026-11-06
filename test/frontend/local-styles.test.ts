@@ -5,7 +5,15 @@ import ConfigForm from "../../frontend/src/components/ConfigForm.vue"
 import type { FilterConfig, ReferenceData } from "../../frontend/src/api"
 import referenceData from "../../internal/data/reference.json"
 import styles from "../../internal/data/styles.json"
-import { fieldStyleKeys, usesRarityText } from "../../frontend/src/namedStyles"
+import {
+  fieldStyleKeys,
+  groupStyleSections,
+  mergeStyles,
+  PALETTE_KEYS,
+  rarityTextPreviews,
+  styleLabel,
+  usesRarityText,
+} from "../../frontend/src/namedStyles"
 import { styleClipboard } from "../../frontend/src/styleClipboard"
 import { editColor } from "./colorFields"
 
@@ -127,22 +135,28 @@ it.each(["gems", "styleOnly"])("edits the highlight style for %s, resets it, and
   expect(dialog()).toBeNull()
 })
 
-it("previews ordinary rarity colors without offering highlight styles in a link card", async () => {
+it("previews shared rarity colors without offering highlight styles in a link card", async () => {
   mount()
   root.querySelector<HTMLButtonElement>('[data-field-path="links.threeLinkMaxAreaLevel"] [aria-haspopup="dialog"]')!.click()
   await settle()
   expect(dialog().querySelectorAll("[data-rarity-preview]")).toHaveLength(3)
   expect(dialog().querySelector('[aria-label="threeLink text"]')).toBeNull()
   expect(dialog().querySelector('[aria-label="Style to edit"]')).toBeNull()
-  expect(dialog().querySelector<HTMLElement>('[data-rarity-preview="Magic"]')!.style.color).toBe("rgb(136, 136, 255)")
+  const expected = document.createElement("span")
+  expected.style.color = styles.sharedRarityMagic.text
+  expect(dialog().querySelector<HTMLElement>('[data-rarity-preview="Magic"]')!.style.color).toBe(expected.style.color)
 })
 
 it.each(["Normal", "Magic", "Rare"])("inherits %s text for its equipment highlight preview", async (rarity) => {
-  const key = `highlightedEquipment${rarity}`
+  const key = "highlightedEquipment"
   mount({
     buildProfile: {},
     buildSpecificOptions: {},
-    localStyles: { [rarity.toLowerCase()]: { text: "#123456" }, [key]: { text: "#ff0000" } },
+    localStyles: {
+      [`sharedRarity${rarity}`]: { text: "#123456" },
+      [rarity.toLowerCase()]: { text: "#abcdef" },
+      [key]: { text: "#ff0000" },
+    },
   })
   root.querySelector<HTMLButtonElement>('[data-editor-group="styles"] > button')!.click()
   await settle()
@@ -153,10 +167,70 @@ it.each(["Normal", "Magic", "Rare"])("inherits %s text for its equipment highlig
   await settle()
   const row = root.querySelector<HTMLElement>(`[data-style-key="${key}"]`)!
   expect(row).not.toBeNull()
-  expect(row.textContent).toContain("Rarities")
+  expect(row.textContent).toContain("Shared rarity colours")
   expect(row.querySelector(`[aria-label="${key} text"]`)).toBeNull()
-  expect(row.querySelectorAll("[data-rarity-preview]")).toHaveLength(1)
+  expect(row.querySelectorAll("[data-rarity-preview]")).toHaveLength(3)
   expect(row.querySelector<HTMLElement>(`[data-rarity-preview="${rarity}"]`)!.style.color).toBe("rgb(18, 52, 86)")
+})
+
+it.each([
+  ["earlyShieldBase", ["Normal", "Magic", "Rare"]],
+  ["leagueMechanic", ["Normal", "Magic", "Rare"]],
+  ["utilityFlask", ["Normal", "Magic"]],
+  ["tincture", ["Normal", "Magic"]],
+] as const)("uses the applicable rarity text previews for %s", (key, rarities) => {
+  expect(usesRarityText(key)).toBe(true)
+  expect(rarityTextPreviews(key)).toEqual(rarities)
+})
+
+it("edits and resets shared text locally without changing the ordinary fallback style", async () => {
+  const state = mount()
+  root.querySelector<HTMLButtonElement>('[data-editor-group="styles"] > button')!.click()
+  await settle()
+  const palette = root.querySelector<HTMLButtonElement>('[aria-label="Shared rarity text Magic"]')!
+  await editColor(palette, "#123456")
+  await settle()
+  expect(state.localStyles).toEqual({ sharedRarityMagic: { text: "#123456" } })
+  const panel = root.querySelector('[data-editor-group="styles"]')!
+  for (const section of ["Equipment", "Flasks & Tinctures", "Links"]) {
+    ;[...panel.querySelectorAll<HTMLButtonElement>("button[aria-expanded]")]
+      .find((button) => button.textContent?.includes(section))!
+      .click()
+  }
+  await settle()
+  for (const key of ["jewellery", "lifeFlask", "manaFlask", "threeLink", "highlightedEquipment"]) {
+    expect(panel.querySelector<HTMLElement>(`[data-style-key="${key}"] [data-rarity-preview="Magic"]`)!.style.color).toBe("rgb(18, 52, 86)")
+  }
+  expect(panel.querySelector<HTMLButtonElement>('[aria-label="Magic text"]')!.value).toBe(styles.magic.text)
+  panel.querySelector<HTMLButtonElement>('[aria-label="Reset shared Magic text to global"]')!.click()
+  await settle()
+  expect(state.localStyles).toBeUndefined()
+  expect(palette.value).toBe(styles.sharedRarityMagic.text.toLowerCase())
+})
+
+it("keeps the palette separate and puts labelled fallback styles last in Equipment", () => {
+  const sections = groupStyleSections(Object.keys(styles))
+  expect(sections.find((section) => section.title === "Equipment")!.keys.slice(-3)).toEqual(["normal", "magic", "rare"])
+  expect(sections.flatMap((section) => section.keys).some((key) => PALETTE_KEYS.includes(key))).toBe(false)
+  expect(styleLabel("normal")).toBe("Normal")
+})
+
+it.each([
+  ["magicJewellery", "jewellery"],
+  ["rareJewellery", "jewellery"],
+  ["magicLifeFlask", "lifeFlask"],
+  ["magicManaFlask", "manaFlask"],
+  ["highlightedEquipmentNormal", "highlightedEquipment"],
+  ["highlightedEquipmentMagic", "highlightedEquipment"],
+  ["highlightedEquipmentRare", "highlightedEquipment"],
+])("resolves %s overrides into the single %s style", (old, key) => {
+  const result = mergeStyles(
+    { [key]: { background: "#111111", size: 31 } },
+    { [old]: { background: "#222222", border: "#123456" }, [key]: { border: "#654321" } },
+  )
+  expect(result[key]).toEqual({ background: "#222222", border: "#654321", size: 31 })
+  expect(result[old]).toBeUndefined()
+  expect(groupStyleSections(Object.keys(styles)).flatMap((section) => section.keys)).not.toContain(old)
 })
 
 it("maps ordinary rarity rules to their own styles", () => {
@@ -166,6 +240,9 @@ it("maps ordinary rarity rules to their own styles", () => {
   expect(fieldStyleKeys({ path: "magicItems.bigMaxAreaLevel", label: "Big", control: "number" })).toEqual(["magic"])
   expect(fieldStyleKeys({ path: "normalItems.maxAreaLevel", label: "Normal", control: "number" })).toEqual(["normal"])
   expect(fieldStyleKeys({ path: "early.twoSocketMaxAreaLevel", label: "Two Sockets", control: "number" })).toEqual([
+    "sharedRarityNormal",
+    "sharedRarityMagic",
+    "sharedRarityRare",
     "normal",
     "magic",
     "rare",
@@ -199,10 +276,10 @@ it("shares complete style copies between cards and the bottom panel without reta
     .find((button) => button.textContent?.trim() === "Expand all")!
     .click()
   await settle()
-  root.querySelector<HTMLButtonElement>('[aria-label="Paste Low-value Currency style"]')!.click()
+  root.querySelector<HTMLButtonElement>('[aria-label="Paste Currency · Low value style"]')!.click()
   await settle()
   expect(state.localStyles?.currencyLow).toMatchObject({ size: 32, text: "#123456" })
-  expect(root.querySelector<HTMLInputElement>('[aria-label="Low-value Currency size"]')!.value).toBe("32")
+  expect(root.querySelector<HTMLInputElement>('[aria-label="Currency · Low value size"]')!.value).toBe("32")
 })
 
 it.each([

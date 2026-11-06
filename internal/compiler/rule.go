@@ -147,7 +147,7 @@ func (c *Compiler) sound(r *rule, s Object) *rule {
 }
 func (c *Compiler) presentation(r *rule, cfg, base Object) *rule {
 	s := Obj(cfg["style"])
-	style := Merge(base, Obj(c.Styles[Text(s["preset"])]))
+	style := Merge(base, c.namedStyle(Text(s["preset"])))
 	for k, v := range s {
 		if k != "preset" {
 			style[k] = v

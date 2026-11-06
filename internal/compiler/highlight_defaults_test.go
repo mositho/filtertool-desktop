@@ -51,9 +51,9 @@ func TestPerRarityDefaultsAndExplicitOverrides(t *testing.T) {
 
 func TestHighlightsKeepRarityStylesUnlessStyleModuleIsAdded(t *testing.T) {
 	c := New(nil, Object{
-		"normal":                     Object{"text": "#112233"},
-		"magic":                      Object{"text": "#445566"},
-		"rare":                       Object{"text": "#778899"},
+		"sharedRarityNormal":         Object{"text": "#112233"},
+		"sharedRarityMagic":          Object{"text": "#445566"},
+		"sharedRarityRare":           Object{"text": "#778899"},
 		"highlightedEquipmentNormal": Object{"text": "#ff0000", "background": "#abcdef", "size": float64(38)},
 	}, "")
 	styleCheck := func(output string, colors ...string) {
