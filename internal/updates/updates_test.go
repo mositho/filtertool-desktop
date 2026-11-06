@@ -32,6 +32,25 @@ func TestMajorUpgrade(t *testing.T) {
 	}
 }
 
+func TestReleaseDescription(t *testing.T) {
+	for _, tc := range []struct{ name, notes, want string }{
+		{"description and downloads", "- Fixed weapon selection.\n\n## Download\n\n- Installer\n", "- Fixed weapon selection."},
+		{"downloads only", "## Download\n\n- Installer", ""},
+		{"whitespace before downloads", "\n \n## Download\n- Installer", ""},
+		{"empty", "", ""},
+		{"whitespace", " \r\n\t", ""},
+		{"no downloads heading", "\n- Fixes\n\n## Compatibility\nDetails\n", "- Fixes\n\n## Compatibility\nDetails"},
+		{"heading formatting", "- Fixes\r\n\r\n  ## download ##\r\nInstaller", "- Fixes"},
+		{"ordinary download text", "- Download handling fixed.\n## Download progress\nDetails", "- Download handling fixed.\n## Download progress\nDetails"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := releaseDescription(tc.notes); got != tc.want {
+				t.Fatalf("got %q, want %q", got, tc.want)
+			}
+		})
+	}
+}
+
 type releaseProvider struct {
 	updater.Provider
 	release *updater.Release

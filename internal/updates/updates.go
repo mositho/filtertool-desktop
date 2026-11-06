@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -82,6 +83,15 @@ func majorUpgrade(current, next string) bool {
 	return major(next) > major(current)
 }
 
+var downloadHeading = regexp.MustCompile(`(?im)^ {0,3}##[\t ]+Download[\t ]*#*[\t ]*\r?$`)
+
+func releaseDescription(notes string) string {
+	if heading := downloadHeading.FindStringIndex(notes); heading != nil {
+		notes = notes[:heading[0]]
+	}
+	return strings.TrimSpace(notes)
+}
+
 func (m *Manager) Check() (Status, error) {
 	if !m.mu.TryLock() {
 		return Status{}, errors.New("an update operation is already in progress")
@@ -98,7 +108,7 @@ func (m *Manager) Check() (Status, error) {
 	}
 	m.status.Release = nil
 	if r != nil {
-		m.status.Release = &Release{Version: r.Version, Notes: r.Notes, Major: majorUpgrade(m.status.Version, r.Version)}
+		m.status.Release = &Release{Version: r.Version, Notes: releaseDescription(r.Notes), Major: majorUpgrade(m.status.Version, r.Version)}
 	}
 	return m.status, nil
 }

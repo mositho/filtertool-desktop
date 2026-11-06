@@ -122,3 +122,12 @@ it("dismisses only on backdrop clicks or Return, including while a download cont
   expect(root.querySelector('[role="dialog"]')).toBeNull()
   expect(button("Update ready")).toBeTruthy()
 })
+
+it.each(["", "- Fixed weapon selection."])("keeps update actions available with description %j", async (notes) => {
+  await mount({ ...major, release: { version: "1.0.1", notes, major: false } })
+  button("Version 1.0.1").click()
+  await settle()
+  expect(root.textContent).toContain(notes || "No release description provided.")
+  expect(button("Download update").disabled).toBe(false)
+  expect(button("Read release notes on GitHub")).toBeTruthy()
+})

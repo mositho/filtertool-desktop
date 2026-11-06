@@ -127,7 +127,7 @@ onMounted(() => void check())
         </button>
         <pre
           class="mb-4 max-h-52 overflow-auto whitespace-pre-wrap break-words rounded bg-neutral-950 p-3 font-sans text-sm text-neutral-300"
-          >{{ status.release.notes || "No release notes provided. Review the release on GitHub before updating." }}</pre>
+          >{{ status.release.notes || "No release description provided." }}</pre>
         <label v-if="status.release.major && !status.ready" class="mb-4 flex items-start gap-2 text-sm text-amber-200">
           <input v-model="acceptedMajor" type="checkbox" class="mt-1" :disabled="working" />
           I have backed up my data and understand that my filters may need migration or recreation.
