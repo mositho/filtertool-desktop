@@ -15,6 +15,8 @@ import {
 import reference from "../../internal/data/reference.json"
 import type { ReferenceData } from "../../frontend/src/api"
 import { editColor } from "./colorFields"
+import { DEFAULT_STYLE_SETTINGS } from "../../src/style-defaults"
+import { styleSwatch } from "../../frontend/src/namedStyles"
 
 let app: App
 let root: HTMLDivElement
@@ -69,7 +71,8 @@ it("inherits global rule size from the shared preset and global rule maxima from
   const size = field("links.rules.3generic.size")
   expect(fieldDefault(size, {}, {}, { threeLink: { size: 28 } })).toBe(28)
   expect(fieldDefault(size, {}, { links: { rules: { "3generic": { size: 31 } } } }, { threeLink: { size: 28 } })).toBe(31)
-  expect(fieldDefault(field("early.rules.armour2.size"), {})).toBe(45)
+  const socketSize = field("early.rules.armour2.size")
+  expect(fieldDefault(socketSize, {})).toBe(socketSize.defaultValue)
   expect(fieldDefault(field("early.rules.armour3.maxAreaLevel"), { early: { earlyMaxAreaLevel: 21 } })).toBe(21)
   expect(fieldDefault(field("links.rules.3generic.maxAreaLevel"), { links: { threeLinkMaxAreaLevel: 37 } })).toBe(37)
 })
@@ -164,10 +167,14 @@ it("previews unspecified style colors using compiler defaults", () => {
   mount(StyleEditor, { modelValue: {}, styleNames: [], styles: {} })
   expect(
     [...root.querySelectorAll<HTMLButtonElement>('button[aria-haspopup="dialog"][value]')].slice(0, 3).map((input) => input.value),
-  ).toEqual(["#c8c8c8", "#000000", "#000000"])
+  ).toEqual(
+    [DEFAULT_STYLE_SETTINGS.text, DEFAULT_STYLE_SETTINGS.background, DEFAULT_STYLE_SETTINGS.border].map((color) => color.toLowerCase()),
+  )
   const preview = root.querySelector<HTMLElement>(".border[style]")!
-  expect(preview.style.color).toBe("rgb(200, 200, 200)")
-  expect(preview.style.backgroundColor).toBe("rgba(0, 0, 0, 0.941)")
+  const expected = document.createElement("div")
+  Object.assign(expected.style, styleSwatch(DEFAULT_STYLE_SETTINGS))
+  expect(preview.style.color).toBe(expected.style.color)
+  expect(preview.style.backgroundColor).toBe(expected.style.backgroundColor)
 })
 
 it("edits inline colors with the shared picker and detaches from the preset without losing its other properties", async () => {

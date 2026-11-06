@@ -7,6 +7,12 @@ import (
 
 func TestPerRarityDefaultsAndExplicitOverrides(t *testing.T) {
 	c := New(nil, nil, "")
+	// Deliberate test settings: exercise inheritance without freezing shipped icon/sound choices.
+	c.rarityDefaults = Object{
+		"normal": Object{"iconColor": "Grey", "iconShape": "Star", "iconSize": float64(2), "soundEnabled": false},
+		"magic":  Object{"iconColor": "Blue", "iconShape": "Star", "iconSize": float64(2), "soundEnabled": false},
+		"rare":   Object{"iconColor": "Yellow", "iconShape": "Star", "iconSize": float64(2), "soundId": float64(3)},
+	}
 	cfg := Object{"itemClasses": []any{"Boots"}, "perRarityCustomization": true}
 	rules := c.highlight(cfg)
 	for i, color := range []string{"Grey", "Blue", "Yellow"} {

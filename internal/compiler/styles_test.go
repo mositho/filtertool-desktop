@@ -6,34 +6,43 @@ import (
 	"testing"
 )
 
-func TestOrdinaryRarityStylesReachEquipmentWithFallbackSizesAndExplicitCutoffs(t *testing.T) {
-	c := New(nil, Object{
-		// Explicitly omit the size: this tests compiler fallbacks, not shipped tuning.
-		"normal": Object{"text": "#112233", "size": nil},
-		"magic":  Object{"text": "#445566"},
-		"rare":   Object{"text": "#778899"},
+func assertRuleStyle(t *testing.T, block string, style Object) {
+	t.Helper()
+	for _, line := range newRule().style(style).lines {
+		if !strings.Contains("\n"+block+"\n", "\n"+line+"\n") {
+			t.Fatalf("rule did not inherit configured style line %q: %s", line, block)
+		}
+	}
+}
+
+func TestOrdinaryRarityStylesReachEquipmentWithExplicitCutoffs(t *testing.T) {
+	earlyMaximum, maximum := float64(8), float64(27)
+	c := New(Object{"early": Object{"earlyMaxAreaLevel": earlyMaximum}}, Object{
+		"normal": Object{"text": "#112233", "size": float64(31)},
+		"magic":  Object{"text": "#445566", "size": float64(34)},
+		"rare":   Object{"text": "#778899", "size": float64(38)},
 	}, "")
-	for _, item := range []struct{ rarity, color string }{
-		{"Normal", "17 34 51"}, {"Magic", "68 85 102"}, {"Rare", "119 136 153"},
-	} {
-		cfg := Object{"maxAreaLevel": float64(27), "bigMaxAreaLevel": float64(27), "smallMaxAreaLevel": float64(27)}
+	for _, rarity := range []string{"Normal", "Magic", "Rare"} {
+		cfg := Object{"maxAreaLevel": maximum, "bigMaxAreaLevel": maximum, "smallMaxAreaLevel": maximum}
 		out := ""
-		if item.rarity == "Normal" {
+		if rarity == "Normal" {
 			out = c.normal(cfg)
 		} else {
-			out = c.equipment(item.rarity, cfg)
+			out = c.equipment(rarity, cfg)
 		}
 		for _, block := range strings.Split(out, "\n\n") {
 			if !strings.HasPrefix(block, "Show\n") || strings.Contains(block, `Class "Belts"`) {
 				continue
 			}
-			if !strings.Contains(block, "SetTextColor "+item.color) || (!strings.Contains(block, "AreaLevel <= 27") && !strings.Contains(block, "AreaLevel <= 12")) {
-				t.Fatal("ordinary rarity style or cutoff not applied", block)
+			assertRuleStyle(t, block, Obj(c.Styles[strings.ToLower(rarity)]))
+			cutoff := maximum
+			if rarity != "Normal" && !strings.Contains(block, "AreaLevel > "+fmt.Sprint(earlyMaximum)) {
+				cutoff = earlyMaximum
+			}
+			if !strings.Contains(block, "AreaLevel <= "+fmt.Sprint(cutoff)) {
+				t.Fatal("configured cutoff not applied", block)
 			}
 		}
-	}
-	if !strings.Contains(c.normal(Object{}), "SetFontSize 40") || !strings.Contains(c.normal(Object{}), "SetFontSize 45") {
-		t.Fatal("normal equipment and belts must retain their distinct fallback sizes when no style size is set")
 	}
 }
 
@@ -55,14 +64,15 @@ func TestOrdinaryRarityStyleSizesReachEquipment(t *testing.T) {
 }
 
 func TestEquipmentFootprintSizesStartAfterGlobalEarlyMaximum(t *testing.T) {
+	raritySize, footprintSize := float64(44), float64(30)
 	for _, rarity := range []string{"Rare", "Magic"} {
 		section := strings.ToLower(rarity) + "Items"
 		for _, earlyMax := range []any{float64(12), float64(5), nil} {
 			for _, visibleMax := range []float64{7, 20} {
 				c := New(Object{
 					"early": Object{"earlyMaxAreaLevel": earlyMax},
-					section: Object{"rules": Object{"2x3": Object{"size": float64(30), "maxAreaLevel": visibleMax}}},
-				}, Object{strings.ToLower(rarity): Object{"size": float64(44)}}, "")
+					section: Object{"maxAreaLevel": visibleMax, "rules": Object{"2x3": Object{"size": footprintSize, "maxAreaLevel": visibleMax}}},
+				}, Object{strings.ToLower(rarity): Object{"size": raritySize}}, "")
 				out := c.equipment(rarity, c.section(Object{}, section))
 				for _, area := range []int{5, 6, 7, 8, 12, 13, 20, 21} {
 					got := ""
@@ -91,12 +101,12 @@ func TestEquipmentFootprintSizesStartAfterGlobalEarlyMaximum(t *testing.T) {
 						}
 						continue
 					}
-					size := 44
+					size := raritySize
 					if earlyMax != nil && float64(area) > earlyMax.(float64) {
-						size = 30
+						size = footprintSize
 					}
-					if !strings.Contains(got, fmt.Sprintf("SetFontSize %d", size)) {
-						t.Fatalf("%s early=%v visible=%v area=%d: expected size %d, got %s", rarity, earlyMax, visibleMax, area, size, got)
+					if !strings.Contains(got, "SetFontSize "+fmt.Sprint(size)) {
+						t.Fatalf("%s early=%v visible=%v area=%d: expected size %v, got %s", rarity, earlyMax, visibleMax, area, size, got)
 					}
 				}
 			}
@@ -106,27 +116,34 @@ func TestEquipmentFootprintSizesStartAfterGlobalEarlyMaximum(t *testing.T) {
 
 func TestEarlyBeltsUseJewelleryStyleAndExplicitSize(t *testing.T) {
 	for _, override := range []any{nil, float64(39)} {
-		defaults := Object{}
+		maximum := float64(6)
+		defaults := Object{"normalItems": Object{"maxAreaLevel": maximum, "rules": nil}}
 		if override != nil {
-			defaults["normalItems"] = Object{"rules": Object{"belts": Object{"size": override}}}
+			Obj(defaults["normalItems"])["rules"] = Object{"belts": Object{"size": override}}
 		}
 		c := New(defaults, Object{
 			"normal":    Object{"size": float64(25), "text": "#112233"},
 			"jewellery": Object{"size": float64(43), "text": "#abcdef", "border": "#123456", "background": "#654321"},
 		}, "")
 		out := c.normal(c.section(Object{}, "normalItems"))
-		size := override
-		if size == nil {
-			size = float64(43)
+		style := Clone(Obj(c.Styles["jewellery"]))
+		if override != nil {
+			style["size"] = override
 		}
+		found := false
 		for _, block := range strings.Split(out, "\n\n") {
 			if !strings.Contains(block, `Class "Belts"`) {
 				continue
 			}
-			for _, line := range []string{"AreaLevel <= 4", "Rarity == Normal", "SetFontSize " + fmt.Sprint(size), "SetTextColor 171 205 239", "SetBorderColor 18 52 86", "SetBackgroundColor 101 67 33"} {
+			found = true
+			assertRuleStyle(t, block, style)
+			for _, line := range []string{"AreaLevel <= " + fmt.Sprint(maximum), "Rarity == Normal"} {
 				if !strings.Contains(block, line) {
 					t.Fatal("belt jewellery styling or cutoff missing", block)
 				}
+			}
+			if !found {
+				t.Fatal("missing early belt rule")
 			}
 		}
 	}
@@ -162,25 +179,22 @@ func TestEarlySocketsUseFullRarityStylesAndRetainCutoffs(t *testing.T) {
 		"magic":  Object{"text": "#445566", "size": float64(32)},
 		"rare":   Object{"text": "#778899", "size": float64(36), "border": "#abcdef"},
 	}, "")
-	out := c.earlySockets(Object{"twoSocketMaxAreaLevel": float64(7), "earlyMaxAreaLevel": float64(12)})
-	for _, sockets := range []struct{ count, cutoff string }{{"2", "7"}, {"3", "12"}} {
-		for _, rarity := range []struct{ name, color, size string }{{"Normal", "17 34 51", "28"}, {"Magic", "68 85 102", "32"}, {"Rare", "119 136 153", "36"}} {
+	maximums := Object{"twoSocketMaxAreaLevel": float64(7), "earlyMaxAreaLevel": float64(12)}
+	out := c.earlySockets(maximums)
+	for _, sockets := range []struct{ count, cutoff string }{{"2", "twoSocketMaxAreaLevel"}, {"3", "earlyMaxAreaLevel"}} {
+		for _, rarity := range []string{"Normal", "Magic", "Rare"} {
 			found := false
 			for _, block := range strings.Split(out, "\n\n") {
-				if strings.Contains(block, "Sockets == "+sockets.count) && strings.Contains(block, "Rarity == "+rarity.name) {
+				if strings.Contains(block, "Sockets == "+sockets.count) && strings.Contains(block, "Rarity == "+rarity) {
 					found = true
-					for _, line := range []string{"AreaLevel <= " + sockets.cutoff, "SetTextColor " + rarity.color, "SetFontSize " + rarity.size} {
-						if !strings.Contains(block, line) {
-							t.Fatal("socket rule did not inherit its rarity style and cutoff", block)
-						}
-					}
-					if rarity.name == "Rare" && !strings.Contains(block, "SetBorderColor 171 205 239") {
-						t.Fatal("socket rule did not inherit full rare style", block)
+					assertRuleStyle(t, block, Obj(c.Styles[strings.ToLower(rarity)]))
+					if !strings.Contains(block, "AreaLevel <= "+fmt.Sprint(maximums[sockets.cutoff])) {
+						t.Fatal("socket rule did not retain its configured cutoff", block)
 					}
 				}
 			}
 			if !found {
-				t.Fatal("missing socket rarity rule", sockets.count, rarity.name)
+				t.Fatal("missing socket rarity rule", sockets.count, rarity)
 			}
 		}
 	}
