@@ -14,6 +14,31 @@ permissions:
   contents: read
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      version-only: ${{ steps.diff.outputs.version-only || 'false' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: github.event_name == 'pull_request'
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        if: github.event_name == 'pull_request'
+        with:
+          node-version-file: .nvmrc
+      - name: Verify version-only PR changes
+        if: github.event_name == 'pull_request'
+        id: diff
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: node scripts/version-only-change.mjs
+      - name: Keep full CI for main pushes and manual runs
+        if: github.event_name != 'pull_request'
+        run: echo "Full CI required for this event."
   dependency-review:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
@@ -27,10 +52,12 @@ jobs:
           fail-on-severity: moderate
           comment-summary-in-pr: never
   checks:
+    needs: changes
+    if: needs.changes.outputs.version-only != 'true'
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-24.04, windows-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 25
     steps:
@@ -45,27 +72,51 @@ jobs:
         with:
           go-version-file: go.mod
           cache: true
+      - name: Configure Linux package downloads
+        if: runner.os == 'Linux'
+        run: |
+          # Avoid the Azure mirror that has stalled hosted-runner downloads.
+          for source in /etc/apt/apt-mirrors.txt /etc/apt/sources.list /etc/apt/sources.list.d/ubuntu.sources; do
+            if [[ -f "$source" ]]; then
+              sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g; s|https://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' "$source"
+            fi
+          done
+          printf '%s\n' 'Acquire::Retries "2";' 'Acquire::http::Timeout "30";' 'Acquire::https::Timeout "30";' | sudo tee /etc/apt/apt.conf.d/80filtertool-ci
+      - name: Update Linux package indexes
+        if: runner.os == 'Linux'
+        timeout-minutes: 3
+        run: sudo apt-get update --error-on=any
       - name: Install Linux desktop and Flatpak build dependencies
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install --yes flatpak flatpak-builder libgtk-4-dev libwebkitgtk-6.0-dev
+        timeout-minutes: 7
+        run: sudo env DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends flatpak flatpak-builder libgtk-4-dev libwebkitgtk-6.0-dev
       - name: Add Flathub runtime source
         if: runner.os == 'Linux'
+        timeout-minutes: 5
         run: flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
       - run: npm ci --ignore-scripts
-      - run: npm run frontend:build
-      - run: npm run check
+      - name: Build Windows executable
+        if: runner.os == 'Windows'
+        run: npm run build
+      # Shared checks run once, while Go tests and native builds cover both OSes.
+      # Build first on Windows: Go tests embed the frontend assets there.
+      - name: Shared checks and Linux Go tests
+        if: runner.os == 'Linux'
+        run: npm run check
+      - name: Windows Go tests
+        if: runner.os == 'Windows'
+        run: go test ./...
       - run: go vet ./...
       - name: Check Go vulnerabilities
         run: go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...
       - run: npm audit --audit-level=high
+        if: runner.os == 'Linux'
       - name: Check generated base data
+        if: runner.os == 'Linux'
         shell: bash
         run: |
           npm run generate-data
           git diff --exit-code -- internal/data/reference.json internal/data/weapons.json
-      - name: Build Windows executable
-        if: runner.os == 'Windows'
-        run: npm run build
       - name: Build Linux Flatpak
         if: runner.os == 'Linux'
         run: |
