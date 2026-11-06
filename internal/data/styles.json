@@ -116,10 +116,10 @@
     "text": "#F5D8FF"
   },
   "leagueMechanic": {
-    "background": "#102B2B",
-    "border": "#40D9B0",
+    "background": "#2a102b",
+    "border": "#d940cc",
     "size": 45,
-    "text": "#B0FFE8"
+    "text": "#ffb0da"
   },
   "lifeFlask": {
     "background": "#630401",
@@ -148,11 +148,11 @@
   },
   "normal": {
     "text": "#c8c8c8",
-    "size": 35
+    "size": 45
   },
   "magic": {
     "text": "#8888ff",
-    "size": 40
+    "size": 45
   },
   "rare": {
     "text": "#ffff77"
@@ -208,7 +208,7 @@
     "backgroundOpacity": 0.94,
     "border": "#c8c8c8",
     "text": "#DADADA",
-    "size": 40
+    "size": 45
   },
   "unique": {
     "background": "#000000",
