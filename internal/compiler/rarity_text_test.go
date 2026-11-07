@@ -21,7 +21,7 @@ func TestNamedHighlightsInheritRarityText(t *testing.T) {
 		name, output, match, sound string
 		rarities                   []string
 	}{
-		{"shield", c.early(Object{"shieldProgression": "early"}, Object{"shieldMaxAreaLevel": float64(12)}), `Class "Shields"`, "", []string{"Magic", "Rare", "Normal"}},
+		{"shield", c.early(Object{"shieldProgression": "early"}, Object{"shieldMaxAreaLevel": float64(12)}), `Class "Shields"`, "shield", []string{"Magic", "Rare", "Normal"}},
 		{"utility template", c.flasks(Object{"utilityFlasks": []any{"Quicksilver"}}), `BaseType == "Quicksilver Flask"`, "quicksilver_flask", []string{"Magic", "Normal"}},
 		{"utility generated", c.flasks(Object{"utilityFlasks": []any{"Sulphur"}}), `BaseType == "Sulphur Flask"`, "sulphur_flask", []string{"Magic", "Normal"}},
 		{"tincture", c.tinctures(Object{"baseTypes": []any{"Prismatic Tincture"}}), `BaseType == "Prismatic Tincture"`, "prismatic_tincture", []string{"Magic", "Normal"}},

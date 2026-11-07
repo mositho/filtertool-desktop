@@ -271,6 +271,9 @@ func (c *Compiler) early(p, cfg Object) string {
 	max := Val(cfg, "shieldMaxAreaLevel", cfg["earlyMaxAreaLevel"])
 	if mode != "none" {
 		r := newRule().quoted("Class", false, "Shields").number("AreaLevel", "<=", max).style(Obj(c.Styles["earlyShieldBase"]))
+		if !c.legacyEquipmentSelections {
+			c.tts(r, "shield")
+		}
 		rules = append(rules, c.rarityTextRules(r, "Normal", "Magic", "Rare")...)
 	}
 	if mode == "full" {

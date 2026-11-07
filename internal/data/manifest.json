@@ -541,5 +541,10 @@
     "id": "rare_boots",
     "text": "Rare Boots",
     "name": "Rare Boots"
+  },
+  {
+    "id": "shield",
+    "text": "Shield",
+    "name": "Shield"
   }
 ]
