@@ -47,8 +47,8 @@
     "text": "#8800ff"
   },
   "earlyShieldBase": {
-    "background": "#202020",
-    "border": "#D2D2D2",
+    "background": "#c8c8c8",
+    "border": "#ffffff",
     "text": "#000000"
   },
   "fourLink": {

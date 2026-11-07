@@ -172,7 +172,7 @@ func TestRetiredStyleOverridesRemainCompatible(t *testing.T) {
 	}
 }
 
-func TestEarlySocketsUseSharedTextAndRetainOtherRarityStylePropertiesAndCutoffs(t *testing.T) {
+func TestEarlySocketsOnlyMatchNormalItemsAndRetainStyleAndCutoffs(t *testing.T) {
 	c := New(nil, Object{
 		"normal": Object{"text": "#112233", "size": float64(28)},
 		"magic":  Object{"text": "#445566", "size": float64(32)},
@@ -180,22 +180,25 @@ func TestEarlySocketsUseSharedTextAndRetainOtherRarityStylePropertiesAndCutoffs(
 	}, "")
 	maximums := Object{"twoSocketMaxAreaLevel": float64(7), "earlyMaxAreaLevel": float64(12)}
 	out := c.earlySockets(maximums)
+	for _, block := range strings.Split(out, "\n\n") {
+		if strings.HasPrefix(block, "Show\n") && !strings.Contains(block, "\nRarity == Normal\n") {
+			t.Fatal("early socket rule must exclude magic, rare and unique items", block)
+		}
+	}
 	for _, sockets := range []struct{ count, cutoff string }{{"2", "twoSocketMaxAreaLevel"}, {"3", "earlyMaxAreaLevel"}} {
-		for _, rarity := range []string{"Normal", "Magic", "Rare"} {
-			found := false
-			for _, block := range strings.Split(out, "\n\n") {
-				if strings.Contains(block, "Sockets == "+sockets.count) && strings.Contains(block, "Rarity == "+rarity) {
-					found = true
-					style := Merge(Obj(c.Styles[strings.ToLower(rarity)]), Object{"text": c.sharedRarityText(rarity)})
-					assertRuleStyle(t, block, style)
-					if !strings.Contains(block, "AreaLevel <= "+fmt.Sprint(maximums[sockets.cutoff])) {
-						t.Fatal("socket rule did not retain its configured cutoff", block)
-					}
+		found := false
+		for _, block := range strings.Split(out, "\n\n") {
+			if strings.Contains(block, "Sockets == "+sockets.count) && strings.Contains(block, "Rarity == Normal") {
+				found = true
+				style := Merge(Obj(c.Styles["normal"]), Object{"text": c.sharedRarityText("Normal")})
+				assertRuleStyle(t, block, style)
+				if !strings.Contains(block, "AreaLevel <= "+fmt.Sprint(maximums[sockets.cutoff])) {
+					t.Fatal("socket rule did not retain its configured cutoff", block)
 				}
 			}
-			if !found {
-				t.Fatal("missing socket rarity rule", sockets.count, rarity)
-			}
+		}
+		if !found {
+			t.Fatal("missing normal socket rule", sockets.count)
 		}
 	}
 }

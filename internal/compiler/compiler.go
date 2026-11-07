@@ -309,11 +309,7 @@ func (c *Compiler) earlySockets(cfg Object) string {
 			rules = append(rules, c.presentation(base(), rc, Object{"size": float64(40 + i*5)}))
 			continue
 		}
-		for _, rarity := range []string{"Normal", "Magic", "Rare"} {
-			rules = append(rules, c.presentation(base().set("Rarity", "== "+rarity), rc, c.rarityStyle(Obj(c.Styles[strings.ToLower(rarity)]), rarity)))
-		}
-		// Keep the existing catch-all for unique items after the rarity variants.
-		rules = append(rules, c.presentation(base(), rc, Object{}))
+		rules = append(rules, c.presentation(base().set("Rarity", "== Normal"), rc, c.rarityStyle(Obj(c.Styles["normal"]), "Normal")))
 	}
 	return heading("Early Sockets", rules...)
 }
