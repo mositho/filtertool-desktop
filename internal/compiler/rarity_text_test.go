@@ -14,7 +14,7 @@ func TestNamedHighlightsInheritRarityText(t *testing.T) {
 		"magic":              Object{"text": "#445566", "size": float64(22)},
 		"rare":               Object{"text": "#778899", "size": float64(23)},
 	}, "test-sounds")
-	for _, key := range []string{"earlyShieldBase", "utilityFlask", "tincture", "leagueMechanic"} {
+	for _, key := range []string{"earlyShieldBase", "utilityFlask", "tincture"} {
 		c.Styles[key] = Object{"text": "#FF0000", "background": "#123456", "border": "#654321", "size": float64(39)}
 	}
 	for _, tc := range []struct {
@@ -25,9 +25,6 @@ func TestNamedHighlightsInheritRarityText(t *testing.T) {
 		{"utility template", c.flasks(Object{"utilityFlasks": []any{"Quicksilver"}}), `BaseType == "Quicksilver Flask"`, "quicksilver_flask", []string{"Magic", "Normal"}},
 		{"utility generated", c.flasks(Object{"utilityFlasks": []any{"Sulphur"}}), `BaseType == "Sulphur Flask"`, "sulphur_flask", []string{"Magic", "Normal"}},
 		{"tincture", c.tinctures(Object{"baseTypes": []any{"Prismatic Tincture"}}), `BaseType == "Prismatic Tincture"`, "prismatic_tincture", []string{"Magic", "Normal"}},
-		{"chart", c.leagueMechanic(Object{}), `Class == "Chart"`, "", []string{"Magic", "Rare", "Normal"}},
-		{"enshrouded", c.leagueMechanic(Object{}), `Class == "Enshrouded Items"`, "", []string{"Magic", "Rare", "Normal"}},
-		{"league currency", c.leagueMechanic(Object{}), `BaseType == "Dead Man's Sulphur"`, "", []string{"Normal"}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			blocks := []string{}
@@ -53,6 +50,35 @@ func TestNamedHighlightsInheritRarityText(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestLeagueMechanicUsesIndependentTextColor(t *testing.T) {
+	c := New(nil, Object{
+		"sharedRarityNormal": Object{"text": "#ABCDEF"},
+		"sharedRarityMagic":  Object{"text": "#FEDCBA"},
+		"sharedRarityRare":   Object{"text": "#123456"},
+		"leagueMechanic":     Object{"text": "#112233"},
+	}, "")
+	for _, cfg := range []Object{{}, {"style": Object{"text": "#445566"}}} {
+		want := "SetTextColor 17 34 51"
+		if len(cfg) > 0 {
+			want = "SetTextColor 68 85 102"
+		}
+		output := c.leagueMechanic(cfg)
+		shown := 0
+		for _, block := range strings.Split(output, "\n\n") {
+			if !strings.HasPrefix(block, "Show\n") {
+				continue
+			}
+			shown++
+			if !strings.Contains(block, want) || strings.Contains(block, "Rarity ") {
+				t.Fatal("league text must remain independent of rarity", block)
+			}
+		}
+		if shown != len(leagueRules) {
+			t.Fatalf("got %d shown rules, want %d: %s", shown, len(leagueRules), output)
+		}
 	}
 }
 

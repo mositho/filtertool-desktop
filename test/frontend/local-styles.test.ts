@@ -175,12 +175,20 @@ it.each(["Normal", "Magic", "Rare"])("inherits %s text for its equipment highlig
 
 it.each([
   ["earlyShieldBase", ["Normal", "Magic", "Rare"]],
-  ["leagueMechanic", ["Normal", "Magic", "Rare"]],
   ["utilityFlask", ["Normal", "Magic"]],
   ["tincture", ["Normal", "Magic"]],
 ] as const)("uses the applicable rarity text previews for %s", (key, rarities) => {
   expect(usesRarityText(key)).toBe(true)
   expect(rarityTextPreviews(key)).toEqual(rarities)
+})
+
+it("keeps league mechanic text editable and independent of shared rarity colors", () => {
+  expect(usesRarityText("leagueMechanic")).toBe(false)
+  const result = mergeStyles(styles, {
+    sharedRarityNormal: { text: "#abcdef" },
+    leagueMechanic: { text: "#123456" },
+  })
+  expect(result.leagueMechanic.text).toBe("#123456")
 })
 
 it("edits and resets shared text locally without changing the ordinary fallback style", async () => {

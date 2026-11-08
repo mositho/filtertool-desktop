@@ -115,10 +115,10 @@
     "text": "#F5D8FF"
   },
   "leagueMechanic": {
-    "background": "#54204F",
-    "border": "#d940cc",
+    "background": "#78c8a0",
+    "border": "#000000",
     "size": 45,
-    "text": "#ffb0da"
+    "text": "#000000"
   },
   "lifeFlask": {
     "background": "#630401",

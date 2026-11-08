@@ -372,17 +372,7 @@ func (c *Compiler) leagueMechanic(cfg Object) string {
 				r.number("StackSize", ">=", settings["minStackSize"])
 			}
 			r = c.currencyPresentation(r, settings, "leagueMechanic")
-			style := Obj(settings["style"])
-			preset := Text(style["preset"])
-			if _, explicitText := style["text"]; !explicitText && (preset == "" || preset == "leagueMechanic") {
-				rarities := []string{"Normal", "Magic", "Rare"}
-				if def.ItemClass == "Stackable Currency" {
-					rarities = rarities[:1]
-				}
-				rules = append(rules, c.rarityTextRules(r, rarities...)...)
-			} else {
-				rules = append(rules, r)
-			}
+			rules = append(rules, r)
 			if def.Stack && Num(settings["minStackSize"], 0) > 0 {
 				rules = append(rules, base(selected).hide())
 			}

@@ -44,12 +44,8 @@ func TestKnownCurrencyCoverageAndOwnership(t *testing.T) {
 	}
 	for _, def := range leagueRules {
 		for _, name := range def.BaseTypes {
-			want := 3
-			if def.ItemClass == "Stackable Currency" {
-				want = 1
-			}
-			if len(currencyBlocks(out, name)) != want {
-				t.Errorf("league item %s must have exactly one owner per rarity", name)
+			if len(currencyBlocks(out, name)) != 1 {
+				t.Errorf("league item %s must have exactly one owner", name)
 			}
 			if _, ok := currencyCatalog()[name]; ok {
 				t.Errorf("league item %s also appears in currency", name)
@@ -265,12 +261,8 @@ func TestLeagueSelectionsShowSelectedAndHideEverythingElse(t *testing.T) {
 				for _, name := range def.BaseTypes {
 					blocks := currencyBlocks(out, name)
 					shown := selected == nil || len(selected) > 0 && selected[0] == name
-					want := 1
-					if shown && def.ItemClass != "Stackable Currency" {
-						want = 3
-					}
-					if len(blocks) != want {
-						t.Fatalf("%s: expected %d rarity rules, got %d", name, want, len(blocks))
+					if len(blocks) != 1 {
+						t.Fatalf("%s: expected one rule, got %d", name, len(blocks))
 					}
 					for _, block := range blocks {
 						if shown != strings.HasPrefix(block, "Show\n") {
