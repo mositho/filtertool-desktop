@@ -1,6 +1,7 @@
 import { spawnSync } from "node:child_process"
-import { chmod, copyFile, mkdir, rm, writeFile, rename, access } from "node:fs/promises"
+import { chmod, copyFile, mkdir, rm, writeFile, rename, access, readFile, stat } from "node:fs/promises"
 import { constants } from "node:fs"
+import { createHash } from "node:crypto"
 import { delimiter, join, resolve } from "node:path"
 
 const run = (command, args, env = {}) => {
@@ -15,6 +16,8 @@ const run = (command, args, env = {}) => {
 const appId = "io.github.mositho.filtertool-desktop"
 const appDir = resolve("bin/Filtertool.AppDir")
 const appImage = resolve("bin/Filtertool-x86_64.AppImage")
+const toolVersion = "1.9.1"
+const toolSHA256 = "ed4ce84f0d9caff66f50bcca6ff6f35aae54ce8135408b3fa33abfc3cb384eb0"
 const appImageTool = await findAppImageTool()
 
 run("npm", ["run", "build:linux"])
@@ -40,6 +43,8 @@ run(appImageTool, [appDir, appImage], {
   ARCH: "x86_64",
   APPIMAGE_EXTRACT_AND_RUN: "1",
 })
+const output = await stat(appImage)
+if (!output.isFile() || output.size === 0) throw new Error(`Expected a nonempty AppImage at ${appImage}`)
 
 async function findAppImageTool() {
   if (process.env.APPIMAGETOOL) return process.env.APPIMAGETOOL
@@ -55,27 +60,36 @@ async function findAppImageTool() {
   }
 
   const directory = resolve("bin")
-  const candidate = join(directory, "appimagetool")
+  const candidate = join(directory, `appimagetool-${toolVersion}`)
   try {
-    await access(candidate, constants.X_OK)
+    verifyTool(await readFile(candidate))
     return candidate
-  } catch {
-    // Download a local copy if appimagetool is not already installed.
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error
+    // Download a checksum-pinned local copy if it is not already cached.
   }
 
   await mkdir(directory, { recursive: true })
   const temporary = `${candidate}.download`
   try {
-    const response = await fetch("https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage", {
+    const response = await fetch(`https://github.com/AppImage/appimagetool/releases/download/${toolVersion}/appimagetool-x86_64.AppImage`, {
       signal: AbortSignal.timeout(120_000),
     })
     if (!response.ok) throw new Error(`HTTP ${response.status} ${response.statusText}`)
-    await writeFile(temporary, Buffer.from(await response.arrayBuffer()))
+    const contents = Buffer.from(await response.arrayBuffer())
+    verifyTool(contents)
+    await writeFile(temporary, contents)
     await chmod(temporary, 0o755)
     await rename(temporary, candidate)
     return candidate
   } catch (error) {
     await rm(temporary, { force: true })
     throw new Error(`Could not download appimagetool. Install it on PATH or set APPIMAGETOOL to its path. ${error.message}`)
+  }
+}
+
+function verifyTool(contents) {
+  if (createHash("sha256").update(contents).digest("hex") !== toolSHA256) {
+    throw new Error(`appimagetool ${toolVersion} checksum mismatch`)
   }
 }
