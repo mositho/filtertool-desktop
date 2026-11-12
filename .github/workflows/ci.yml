@@ -86,14 +86,10 @@ jobs:
         if: runner.os == 'Linux'
         timeout-minutes: 3
         run: sudo apt-get update --error-on=any
-      - name: Install Linux desktop and Flatpak build dependencies
+      - name: Install Linux desktop build dependencies
         if: runner.os == 'Linux'
         timeout-minutes: 7
-        run: sudo env DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends flatpak flatpak-builder libgtk-4-dev libwebkitgtk-6.0-dev
-      - name: Add Flathub runtime source
-        if: runner.os == 'Linux'
-        timeout-minutes: 5
-        run: flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+        run: sudo env DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends libgtk-4-dev libwebkitgtk-6.0-dev
       - run: npm ci --ignore-scripts
       - name: Build Windows executable
         if: runner.os == 'Windows'
@@ -117,16 +113,9 @@ jobs:
         run: |
           npm run generate-data
           git diff --exit-code -- internal/data/reference.json internal/data/weapons.json
-      - name: Build Linux Flatpak
+      - name: Build Linux AppImage
         if: runner.os == 'Linux'
-        run: |
-          npm run build:linux
-          mkdir -p bin/flatpak-stage
-          install -Dm755 bin/Filtertool bin/flatpak-stage/bin/Filtertool
-          install -Dm644 branding/logo.png bin/flatpak-stage/share/icons/hicolor/256x256/apps/io.github.mositho.filtertool-desktop.png
-          install -Dm644 flatpak/io.github.mositho.filtertool-desktop.desktop bin/flatpak-stage/share/applications/io.github.mositho.filtertool-desktop.desktop
-          flatpak-builder --user --install-deps-from=flathub --default-branch=stable --force-clean --repo=bin/flatpak-repo bin/flatpak-build flatpak.yml
-          flatpak build-bundle bin/flatpak-repo bin/Filtertool.flatpak io.github.mositho.filtertool-desktop stable --runtime-repo=https://dl.flathub.org/repo/flathub.flatpakrepo
+        run: npm run package:appimage
       - name: Build Windows installer
         if: runner.os == 'Windows'
         run: ./scripts/package-windows.ps1
@@ -148,4 +137,4 @@ jobs:
           name: release-assets-linux
           retention-days: 7
           if-no-files-found: error
-          path: bin/Filtertool.flatpak
+          path: bin/Filtertool-x86_64.AppImage

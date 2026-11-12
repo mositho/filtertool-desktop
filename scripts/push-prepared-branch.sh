@@ -14,7 +14,12 @@ case "${1:-}" in
     message="chore: update PoE base data"
     paths=(internal/data/BaseTypes.csv internal/data/reference.json internal/data/weapons.json)
     ;;
-  *) echo "Expected release or basetypes" >&2; exit 1 ;;
+  toolchain)
+    branch=chore/update-go-patch
+    message="chore(deps): update Go patch version"
+    paths=(go.mod)
+    ;;
+  *) echo "Expected release, basetypes or toolchain" >&2; exit 1 ;;
 esac
 
 export GIT_CONFIG_COUNT=1

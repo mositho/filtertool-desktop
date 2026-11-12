@@ -1,6 +1,6 @@
 # Contributing
 
-Requires Go 1.26.10+ and Node.js 26 (see `.nvmrc`). Use `nvm install && nvm use`, or `fnm use --install-if-missing`, before installing dependencies. Windows desktop builds require Windows 10+ and WebView2. Linux desktop builds use GTK 4 and WebKitGTK 6.0; on Debian or Ubuntu install `libgtk-4-dev` and `libwebkitgtk-6.0-dev` before building.
+Requires the Go version in `go.mod` or newer and Node.js 26 (see `.nvmrc`). CI uses the exact Go version from `go.mod`. Use `nvm install && nvm use`, or `fnm use --install-if-missing`, before installing dependencies. Windows desktop builds require Windows 10+ and WebView2. Linux desktop builds use GTK 4 and WebKitGTK 6.0; on Debian or Ubuntu install `libgtk-4-dev` and `libwebkitgtk-6.0-dev` before building.
 
 ```sh
 npm ci
@@ -10,6 +10,8 @@ npm run build
 ```
 
 On Linux, build the native Linux executable with `npm run build:linux`; run it with `./bin/Filtertool`. `npm run dev` selects the native desktop runtime for Linux and the Windows executable in WSL.
+
+To build the Linux AppImage, run `npm run package:appimage`. It builds the Linux executable, downloads checksum-pinned `appimagetool` into `bin/` if it is not already installed, and verifies that it writes a nonempty `bin/Filtertool-x86_64.AppImage`; the AppImage requires GTK 4 and WebKitGTK 6.0 from the host distribution. An explicitly configured `APPIMAGETOOL` or a tool on `PATH` is trusted instead of downloading the pinned copy.
 
 Dev **Save** edits templates/defaults/styles in `internal/data/`, not personal data. Use `npm run dev:personal` for your personal profile. Windows builds produce `bin/Filtertool.exe`; Linux builds produce `bin/Filtertool`.
 
@@ -29,3 +31,5 @@ Use Conventional Commits. Keep personal data out of commits and tests. Test nati
 See [Releasing](RELEASING.md) for the release checklist.
 
 Dependency updates are reviewed manually. See [Security maintenance](SECURITY.md) for protected-branch rules, workflow permissions and supply-chain safeguards.
+
+The Update Go Patch workflow checks daily for stable patches within the current `go.mod` minor version. It prepares `chore/update-go-patch` and provides a link in the run summary to open a PR manually; it never merges changes or upgrades the Go minor version. An existing update branch is left untouched until reviewed and deleted. Run it manually from Actions to check immediately. Dependabot continues to maintain Go module dependencies, not the compiler version.
