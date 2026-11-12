@@ -182,10 +182,10 @@ jobs:
 
           - **[Filtertool-Setup.exe]($REPO_URL/releases/download/$TAG/Filtertool-Setup.exe)** — recommended; installs Filtertool and sets up WebView2 if needed.
           - **[Filtertool.exe]($REPO_URL/releases/download/$TAG/Filtertool.exe)** — run without installing (requires WebView2).
-          - **[Filtertool.flatpak]($REPO_URL/releases/download/$TAG/Filtertool.flatpak)** — Linux Flatpak bundle.
+          - **[Filtertool-x86_64.AppImage]($REPO_URL/releases/download/$TAG/Filtertool-x86_64.AppImage)** — Linux AppImage.
 
           For 64-bit Windows 10 or 11. TTS sound generation also needs a separate FFmpeg installation.
 
           **[Get started]($REPO_URL/blob/$TAG/README.md#get-started)** · [Quick guide]($REPO_URL/blob/$TAG/README.md#quick-guide) · [Changelog]($CHANGELOG_URL)
           EOF
-          gh release create "$TAG" release-assets/Filtertool.exe release-assets/Filtertool-Setup.exe release-assets/Filtertool.flatpak release-assets/SHA256SUMS.txt LICENSE docs/THIRD_PARTY.md --draft --verify-tag --title "Filtertool $TAG" --notes-file release-notes.md
+          gh release create "$TAG" release-assets/Filtertool.exe release-assets/Filtertool-Setup.exe release-assets/Filtertool-x86_64.AppImage release-assets/SHA256SUMS.txt LICENSE docs/THIRD_PARTY.md --draft --verify-tag --title "Filtertool $TAG" --notes-file release-notes.md

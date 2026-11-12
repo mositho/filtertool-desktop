@@ -37,7 +37,7 @@ Filtertool is a Windows and Linux desktop Path of Exile **1** leveling-filter bu
 - Test a shared behavior at its owning layer; add integration coverage only for wiring that could realistically fail. Do not duplicate the same assertions through every parent component.
 - Simple visual/layout changes usually need a build and manual inspection, not new automated UI tests. Do not remove useful existing regression tests solely to reduce the test count.
 - During development, run targeted tests. Before handing off code changes, run `npm run check` and `npm run frontend:build` once the changes are ready; rerun affected checks after subsequent edits. Documentation-only changes do not require the application suite.
-- Use Windows CI/manual testing for Windows-specific native dialogs, WebView2, installer and UI behavior; use Linux CI/manual testing for GTK/WebKitGTK, native dialogs, Flatpak and UI behavior. State what was verified and what still needs platform testing; do not claim unperformed checks.
+- Use Windows CI/manual testing for Windows-specific native dialogs, WebView2, installer and UI behavior; use Linux CI/manual testing for GTK/WebKitGTK, native dialogs, AppImage and UI behavior. State what was verified and what still needs platform testing; do not claim unperformed checks.
 
 ## Repository actions
 

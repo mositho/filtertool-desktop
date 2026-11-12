@@ -13,6 +13,7 @@
     "dev:personal": "node scripts/wails.mjs dev -config build/config.yml -port 5173",
     "build": "node scripts/build.mjs",
     "build:linux": "node scripts/build.mjs --linux",
+    "package:appimage": "node scripts/package-appimage.mjs",
     "frontend:dev": "vite --config frontend/vite.config.ts",
     "frontend:typecheck": "vue-tsc --noEmit -p frontend/tsconfig.json",
     "frontend:build": "vite build --config frontend/vite.config.ts",

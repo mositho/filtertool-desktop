@@ -11,6 +11,8 @@ npm run build
 
 On Linux, build the native Linux executable with `npm run build:linux`; run it with `./bin/Filtertool`. `npm run dev` selects the native desktop runtime for Linux and the Windows executable in WSL.
 
+To build the Linux AppImage, run `npm run package:appimage`. It builds the Linux executable, downloads `appimagetool` into `bin/` if it is not already installed, and writes `bin/Filtertool-x86_64.AppImage`; the AppImage requires GTK 4 and WebKitGTK 6.0 from the host distribution.
+
 Dev **Save** edits templates/defaults/styles in `internal/data/`, not personal data. Use `npm run dev:personal` for your personal profile. Windows builds produce `bin/Filtertool.exe`; Linux builds produce `bin/Filtertool`.
 
 To build the installer locally:
