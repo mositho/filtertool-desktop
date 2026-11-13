@@ -121,6 +121,7 @@
     "text": "#000000"
   },
   "fatedItems": {
+    "text": "#FFF34D",
     "background": "#10281F",
     "backgroundOpacity": 0.96,
     "border": "#78C8A0",

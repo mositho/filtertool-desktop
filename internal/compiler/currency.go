@@ -383,8 +383,7 @@ func (c *Compiler) leagueMechanic(cfg Object) string {
 		}
 		if def.Fated {
 			r := newRule().set("Fated", "True")
-			r = c.currencyPresentation(r, settings, "fatedItems")
-			rules = append(rules, c.rarityTextRules(r, "Normal", "Magic", "Rare")...)
+			rules = append(rules, c.currencyPresentation(r, settings, "fatedItems"))
 			continue
 		}
 		selection := def.BaseTypes

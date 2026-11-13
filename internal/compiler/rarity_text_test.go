@@ -53,38 +53,35 @@ func TestNamedHighlightsInheritRarityText(t *testing.T) {
 	}
 }
 
-func TestFatedItemsUseIndependentStyleWithSharedRarityText(t *testing.T) {
+func TestFatedItemsUseIndependentStyle(t *testing.T) {
 	c := New(nil, Object{
 		"sharedRarityNormal": Object{"text": "#ABCDEF"},
 		"sharedRarityMagic":  Object{"text": "#FEDCBA"},
 		"sharedRarityRare":   Object{"text": "#123456"},
-		"fatedItems":         Object{"background": "#102030", "border": "#405060", "size": float64(38)},
+		"fatedItems":         Object{"text": "#AABBCC", "background": "#102030", "border": "#405060", "size": float64(38)},
 	}, "")
-	for _, custom := range []Object{{}, {"background": "#203040", "size": float64(40)}} {
+	for _, custom := range []Object{{}, {"text": "#CCDDEE", "background": "#203040", "size": float64(40)}} {
 		cfg := Object{
 			"style": Object{"background": "#FF0000", "text": "#FF0000"},
 			"rules": Object{"fated": Object{"style": custom, "icon": Object{"iconColor": "Green", "iconShape": "Circle"}}},
 		}
-		seen := map[string]bool{}
+		seen := 0
 		for _, block := range strings.Split(c.leagueMechanic(cfg), "\n\n") {
 			if !strings.Contains(block, "Fated True") {
 				continue
 			}
-			rarity := "Normal"
-			for _, value := range []string{"Magic", "Rare"} {
-				if strings.Contains(block, "Rarity == "+value) {
-					rarity = value
-				}
+			seen++
+			if strings.Contains(block, "Rarity ") {
+				t.Fatal("Fated style must not split into rarity-specific rules", block)
 			}
-			seen[rarity] = true
-			want := c.rarityStyle(Merge(Obj(c.Styles["fatedItems"]), custom), rarity)
+			want := Merge(Obj(c.Styles["fatedItems"]), custom)
 			assertRuleStyle(t, block, want)
 			if !strings.HasPrefix(block, "Show\n") || !strings.Contains(block, "PlayAlertSound 2 240") || !strings.Contains(block, "MinimapIcon 2 Green Circle") {
 				t.Fatal("Fated condition, visibility, sound or icon lost", block)
 			}
 		}
-		if len(seen) != 3 {
-			t.Fatal("missing Fated rarity variants", seen)
+		if seen != 1 {
+			t.Fatal("expected one Fated rule", seen)
 		}
 	}
 	out := c.leagueMechanic(Object{"rules": Object{"fated": Object{"visibility": "Hide"}}})

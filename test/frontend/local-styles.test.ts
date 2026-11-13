@@ -176,7 +176,6 @@ it.each(["Normal", "Magic", "Rare"])("inherits %s text for its equipment highlig
 
 it.each([
   ["earlyShieldBase", ["Normal", "Magic", "Rare"]],
-  ["fatedItems", ["Normal", "Magic", "Rare"]],
   ["utilityFlask", ["Normal", "Magic"]],
   ["tincture", ["Normal", "Magic"]],
 ] as const)("uses the applicable rarity text previews for %s", (key, rarities) => {
@@ -193,7 +192,7 @@ it("keeps league mechanic text editable and independent of shared rarity colors"
   expect(result.leagueMechanic.text).toBe("#123456")
 })
 
-it("gives Fated items their own league style and shortcut with shared rarity text", () => {
+it("gives Fated items their own league style and shortcut with independent text", () => {
   const league = BUILD_SPECIFIC_SCHEMA.find((group) => group.key === "leagueMechanic")!
   const fated = league.subsections!.find((section) => section.key === "leagueMechanic.rules.fated")!
   const style = fated.subsections!.find((section) => section.title === "Style")!.fields[0]
@@ -202,8 +201,11 @@ it("gives Fated items their own league style and shortcut with shared rarity tex
   expect(fieldStyleKeys(style)).toEqual(["fatedItems"])
   expect(fieldStyleKeys(fated.fields[0])).toEqual(["fatedItems"])
   expect(groupStyleSections(Object.keys(styles)).find((section) => section.title === "League Mechanic")!.keys).toContain("fatedItems")
-  const result = mergeStyles(styles, { sharedRarityNormal: { text: "#123456" }, fatedItems: { background: "#203040" } })
-  expect(result.fatedItems.text).toBe("#123456")
+  expect(usesRarityText("fatedItems")).toBe(false)
+  expect(rarityTextPreviews("fatedItems")).toEqual([])
+  const result = mergeStyles(styles, { sharedRarityRare: { text: "#123456" }, fatedItems: { text: "#ABCDEF", background: "#203040" } })
+  expect(result.fatedItems.text).toBe("#ABCDEF")
+  expect(mergeStyles(styles, { sharedRarityRare: { text: "#123456" } }).fatedItems.text).toBe(styles.fatedItems.text)
   expect(result.fatedItems.background).toBe("#203040")
 })
 
