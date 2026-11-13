@@ -251,12 +251,12 @@ it("labels currency presets with the editor tiers without changing their saved v
   })
   const select = root.querySelector<HTMLSelectElement>("select")!
   expect([...select.options].slice(1).map((option) => [option.value, option.textContent])).toEqual([
-    ["currencyA", "Currency · S Tier"],
-    ["currencyB", "Currency · A Tier"],
-    ["currencyC", "Currency · B Tier"],
+    ["currencyA", "s tier"],
+    ["currencyB", "a tier"],
+    ["currencyC", "b tier"],
   ])
   expect(select.value).toBe("currencyB")
-  expect(root.textContent).toContain("Currency · A Tier")
+  expect(root.textContent).toContain("a tier")
   select.value = "currencyC"
   select.dispatchEvent(new Event("change", { bubbles: true }))
   expect(saved).toEqual({ preset: "currencyC" })

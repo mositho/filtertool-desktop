@@ -375,7 +375,7 @@ func (c *Compiler) leagueMechanic(cfg Object) string {
 	for _, def := range leagueRules {
 		style := cfg["style"]
 		if def.Fated {
-			style = Object{"preset": "fatedItems"}
+			style = Object{"preset": "fated"}
 		}
 		settings := mergeCurrencySettings(Object{"style": style, "sound": sharedSound}, Obj(Obj(cfg["rules"])[def.Key]))
 		if inheritsSound(Obj(settings["sound"])) {
@@ -383,7 +383,7 @@ func (c *Compiler) leagueMechanic(cfg Object) string {
 		}
 		if def.Fated {
 			r := newRule().set("Fated", "True")
-			rules = append(rules, c.currencyPresentation(r, settings, "fatedItems"))
+			rules = append(rules, c.currencyPresentation(r, settings, "fated"))
 			continue
 		}
 		selection := def.BaseTypes

@@ -6,13 +6,12 @@ import rarityStyles from "../../internal/data/rarity-text-styles.json"
 import { CURRENCY_TIERS } from "../../src/config/currency"
 
 const currencyStyleLabels: Record<string, string> = Object.fromEntries(
-  CURRENCY_TIERS.map((tier) => [tier.style, `Currency · ${tier.key === "low" ? "Low value" : tier.title}`]),
+  CURRENCY_TIERS.map((tier) => [tier.style, tier.key === "low" ? "low value" : tier.title.toLowerCase()]),
 )
 
 /** Keep saved preset keys stable while displaying the currency editor's tiers. */
 export function styleLabel(key: string): string {
   if (key === "highlightedEquipment") return "highlight"
-  if (key === "fatedItems") return "Fated Items"
   if (isPaletteStyle(key)) return `Shared rarity text · ${key.slice("sharedRarity".length)}`
   return currencyStyleLabels[key] ?? key
 }
@@ -128,7 +127,7 @@ export const STYLE_SECTIONS = [
     ],
   },
   { title: "Gems", keys: ["gem", "gemHighlight"] },
-  { title: "League Mechanic", keys: ["leagueMechanic", "fatedItems"] },
+  { title: "League Mechanic", keys: ["leagueMechanic", "fated"] },
   {
     title: "Miscellaneous",
     keys: [
@@ -206,7 +205,7 @@ export function fieldStyleKeys(field: SchemaField, value?: unknown): string[] {
   if (path === "flasks.utilityFlasks") return ["utilityFlask"]
   if (path.startsWith("tinctures.")) return ["tincture"]
   if (path.startsWith("gemCallouts.")) return ["gemHighlight"]
-  if (path.startsWith("leagueMechanic.rules.fated.")) return ["fatedItems"]
+  if (path.startsWith("leagueMechanic.rules.fated.")) return ["fated"]
   if (path.startsWith("leagueMechanic.")) return ["leagueMechanic"]
   if (path.startsWith("currency.gold.highStack")) return ["goldStackLarge"]
   if (path.startsWith("currency.gold.stack")) return ["goldStack"]

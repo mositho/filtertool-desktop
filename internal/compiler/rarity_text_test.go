@@ -58,7 +58,7 @@ func TestFatedItemsUseIndependentStyle(t *testing.T) {
 		"sharedRarityNormal": Object{"text": "#ABCDEF"},
 		"sharedRarityMagic":  Object{"text": "#FEDCBA"},
 		"sharedRarityRare":   Object{"text": "#123456"},
-		"fatedItems":         Object{"text": "#AABBCC", "background": "#102030", "border": "#405060", "size": float64(38)},
+		"fated":              Object{"text": "#AABBCC", "background": "#102030", "border": "#405060", "size": float64(38)},
 	}, "")
 	for _, custom := range []Object{{}, {"text": "#CCDDEE", "background": "#203040", "size": float64(40)}} {
 		cfg := Object{
@@ -74,7 +74,7 @@ func TestFatedItemsUseIndependentStyle(t *testing.T) {
 			if strings.Contains(block, "Rarity ") {
 				t.Fatal("Fated style must not split into rarity-specific rules", block)
 			}
-			want := Merge(Obj(c.Styles["fatedItems"]), custom)
+			want := Merge(Obj(c.Styles["fated"]), custom)
 			assertRuleStyle(t, block, want)
 			if !strings.HasPrefix(block, "Show\n") || !strings.Contains(block, "PlayAlertSound 2 240") || !strings.Contains(block, "MinimapIcon 2 Green Circle") {
 				t.Fatal("Fated condition, visibility, sound or icon lost", block)

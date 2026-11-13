@@ -954,7 +954,7 @@ function removeSaved(name: string) {
                       class="flex min-w-0 flex-1 items-center justify-center overflow-hidden rounded border px-1 text-center"
                       :style="{ ...swatchStyle(key, preview), borderWidth: '1px', borderStyle: 'solid' }"
                     >
-                      <span class="truncate">{{ preview }}</span>
+                      <span class="truncate">{{ preview.toLowerCase() }}</span>
                     </div>
                   </div>
                 </div>
@@ -1097,7 +1097,7 @@ function removeSaved(name: string) {
                       class="flex min-w-0 flex-1 items-center justify-center overflow-hidden rounded border"
                       :style="{ ...swatchStyle(key, preview), borderWidth: '1px', borderStyle: 'solid' }"
                     >
-                      <span class="truncate text-xs">{{ preview }}</span>
+                      <span class="truncate text-xs">{{ preview.toLowerCase() }}</span>
                     </div>
                   </div>
                 </div>

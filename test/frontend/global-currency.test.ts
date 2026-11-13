@@ -136,11 +136,11 @@ it("uses the current currency/league editors and keeps styles in the Styles pane
     await nextTick()
   }
   for (const [key, label] of [
-    ["currencyA", "Currency · S Tier"],
-    ["currencyB", "Currency · A Tier"],
-    ["currencyC", "Currency · B Tier"],
-    ["currencyLeaguestart", "Currency · Leaguestart"],
-    ["currencyLow", "Currency · Low value"],
+    ["currencyA", "s tier"],
+    ["currencyB", "a tier"],
+    ["currencyC", "b tier"],
+    ["currencyLeaguestart", "leaguestart"],
+    ["currencyLow", "low value"],
   ]) {
     const row = stylePanel.querySelector(`[data-style-key="${key}"]`)!
     expect(row.textContent).toContain(label)

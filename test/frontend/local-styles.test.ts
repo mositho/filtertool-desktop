@@ -196,17 +196,18 @@ it("gives Fated items their own league style and shortcut with independent text"
   const league = BUILD_SPECIFIC_SCHEMA.find((group) => group.key === "leagueMechanic")!
   const fated = league.subsections!.find((section) => section.key === "leagueMechanic.rules.fated")!
   const style = fated.subsections!.find((section) => section.title === "Style")!.fields[0]
-  expect(style.defaultValue).toEqual({ preset: "fatedItems" })
+  expect(style.defaultValue).toEqual({ preset: "fated" })
   expect(style.defaultFrom).toBeUndefined()
-  expect(fieldStyleKeys(style)).toEqual(["fatedItems"])
-  expect(fieldStyleKeys(fated.fields[0])).toEqual(["fatedItems"])
-  expect(groupStyleSections(Object.keys(styles)).find((section) => section.title === "League Mechanic")!.keys).toContain("fatedItems")
-  expect(usesRarityText("fatedItems")).toBe(false)
-  expect(rarityTextPreviews("fatedItems")).toEqual([])
-  const result = mergeStyles(styles, { sharedRarityRare: { text: "#123456" }, fatedItems: { text: "#ABCDEF", background: "#203040" } })
-  expect(result.fatedItems.text).toBe("#ABCDEF")
-  expect(mergeStyles(styles, { sharedRarityRare: { text: "#123456" } }).fatedItems.text).toBe(styles.fatedItems.text)
-  expect(result.fatedItems.background).toBe("#203040")
+  expect(fieldStyleKeys(style)).toEqual(["fated"])
+  expect(fieldStyleKeys(fated.fields[0])).toEqual(["fated"])
+  expect(groupStyleSections(Object.keys(styles)).find((section) => section.title === "League Mechanic")!.keys).toContain("fated")
+  expect(styleLabel("fated")).toBe("fated")
+  expect(usesRarityText("fated")).toBe(false)
+  expect(rarityTextPreviews("fated")).toEqual([])
+  const result = mergeStyles(styles, { sharedRarityRare: { text: "#123456" }, fated: { text: "#ABCDEF", background: "#203040" } })
+  expect(result.fated.text).toBe("#ABCDEF")
+  expect(mergeStyles(styles, { sharedRarityRare: { text: "#123456" } }).fated.text).toBe(styles.fated.text)
+  expect(result.fated.background).toBe("#203040")
 })
 
 it("edits and resets shared text locally without changing the ordinary fallback style", async () => {
@@ -315,16 +316,16 @@ it("shares complete style copies between cards and the bottom panel without reta
     .find((button) => button.textContent?.trim() === "Expand all")!
     .click()
   await settle()
-  root.querySelector<HTMLButtonElement>('[aria-label="Paste Currency · Low value style"]')!.click()
+  root.querySelector<HTMLButtonElement>('[aria-label="Paste low value style"]')!.click()
   await settle()
   expect(state.localStyles?.currencyLow).toMatchObject({ size: 32, text: "#123456" })
-  expect(root.querySelector<HTMLInputElement>('[aria-label="Currency · Low value size"]')!.value).toBe("32")
+  expect(root.querySelector<HTMLInputElement>('[aria-label="low value size"]')!.value).toBe("32")
 })
 
 it.each([
-  { tier: "s", key: "currencyA", label: "Currency · S Tier" },
-  { tier: "a", key: "currencyB", label: "Currency · A Tier" },
-  { tier: "b", key: "currencyC", label: "Currency · B Tier" },
+  { tier: "s", key: "currencyA", label: "s tier" },
+  { tier: "a", key: "currencyB", label: "a tier" },
+  { tier: "b", key: "currencyC", label: "b tier" },
 ])("uses the $tier tier label in its style popup and Styles panel while preserving saved overrides", async ({ tier, key, label }) => {
   const state = mount()
   root.querySelector<HTMLButtonElement>(`[data-currency-tier="${tier}"] [title="Edit style for this filter"]`)!.click()

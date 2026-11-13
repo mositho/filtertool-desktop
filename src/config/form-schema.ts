@@ -884,11 +884,7 @@ export const BUILD_SPECIFIC_SCHEMA: FieldGroup[] = [
       },
     ],
     subsections: LEAGUE_RULES.map((definition) => {
-      const rule = currencyRule(
-        `leagueMechanic.rules.${definition.key}`,
-        definition.title,
-        definition.fated ? "fatedItems" : "leagueMechanic",
-      )
+      const rule = currencyRule(`leagueMechanic.rules.${definition.key}`, definition.title, definition.fated ? "fated" : "leagueMechanic")
       rule.collapsed = true
       rule.fields = definition.fated
         ? rule.fields

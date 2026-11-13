@@ -228,7 +228,7 @@ function pasteStyle() {
         class="flex w-full items-center justify-center justify-self-end overflow-hidden rounded border px-1 text-center"
         :style="{ ...swatch, borderWidth: '1px', borderStyle: 'solid' }"
       >
-        <span class="truncate">{{ styleLabel(preset) || "Custom" }}</span>
+        <span class="truncate">{{ styleLabel(preset).toLowerCase() || "custom" }}</span>
       </div>
     </div>
 
@@ -361,7 +361,7 @@ function pasteStyle() {
         class="mt-2 flex items-center justify-center overflow-hidden rounded border"
         :style="{ ...swatch, borderWidth: '1px', borderStyle: 'solid' }"
       >
-        <span class="truncate text-xs">{{ styleLabel(preset) || "Custom" }}</span>
+        <span class="truncate text-xs">{{ styleLabel(preset).toLowerCase() || "custom" }}</span>
       </div>
     </div>
   </div>

@@ -172,7 +172,7 @@ const previews = computed(() => (rarityText.value ? rarityTextPreviews(props.sty
           }"
           @click="card && context.reveal(styleKey)"
         >
-          <span class="truncate">{{ label }}</span>
+          <span class="truncate">{{ label.toLowerCase() }}</span>
         </component>
       </div>
     </div>

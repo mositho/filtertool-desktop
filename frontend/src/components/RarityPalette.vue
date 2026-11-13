@@ -25,7 +25,7 @@ defineEmits<{ set: [key: string, value: string]; reset: [key: string] }>()
           class="h-8 w-10 rounded border border-neutral-700"
           @update:model-value="$emit('set', key, $event)"
         />
-        <span class="text-sm text-neutral-300">{{ key.slice("sharedRarity".length) }}</span>
+        <span class="text-sm text-neutral-300">{{ key.slice("sharedRarity".length).toLowerCase() }}</span>
         <button
           type="button"
           :aria-label="`Reset shared ${key.slice('sharedRarity'.length)} text ${resetLabel}`"

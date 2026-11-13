@@ -120,7 +120,7 @@
     "size": 45,
     "text": "#000000"
   },
-  "fatedItems": {
+  "fated": {
     "text": "#FFF34D",
     "background": "#10281F",
     "backgroundOpacity": 0.96,
