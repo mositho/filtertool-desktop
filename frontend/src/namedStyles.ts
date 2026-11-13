@@ -11,8 +11,8 @@ const currencyStyleLabels: Record<string, string> = Object.fromEntries(
 
 /** Keep saved preset keys stable while displaying the currency editor's tiers. */
 export function styleLabel(key: string): string {
-  if (["normal", "magic", "rare"].includes(key)) return `${key[0].toUpperCase()}${key.slice(1)}`
-  if (key === "highlightedEquipment") return "Highlighted Equipment"
+  if (key === "highlightedEquipment") return "highlight"
+  if (key === "fatedItems") return "Fated Items"
   if (isPaletteStyle(key)) return `Shared rarity text · ${key.slice("sharedRarity".length)}`
   return currencyStyleLabels[key] ?? key
 }
@@ -89,7 +89,23 @@ export const STYLE_GRID_TEMPLATE = "minmax(7rem, 1fr) 2.75rem 2.75rem 2.75rem 3.
 export const STYLE_SECTIONS = [
   {
     title: "Equipment",
-    keys: ["earlyShieldBase", "jewellery", "highlightedEquipment", "rareArmour", "normal", "magic", "rare"],
+    keys: [
+      "earlyShieldBase",
+      "jewellery",
+      "highlightedEquipment",
+      "rareArmour",
+      "normal",
+      "magic",
+      "magicTier2",
+      "magicTier3",
+      "magicTier4",
+      "magicTier5",
+      "rare",
+      "rareTier2",
+      "rareTier3",
+      "rareTier4",
+      "rareTier5",
+    ],
   },
   {
     title: "Links",
@@ -112,7 +128,7 @@ export const STYLE_SECTIONS = [
     ],
   },
   { title: "Gems", keys: ["gem", "gemHighlight"] },
-  { title: "League Mechanic", keys: ["leagueMechanic"] },
+  { title: "League Mechanic", keys: ["leagueMechanic", "fatedItems"] },
   {
     title: "Miscellaneous",
     keys: [
@@ -162,6 +178,8 @@ const linkStyles = (word: string) => [word + "Link"]
 
 /** Only map fields with a named compiler style; inline-only rules have no named target. */
 export function fieldStyleKeys(field: SchemaField, value?: unknown): string[] {
+  const tier = /^(magic|rare)Items\.tiers\.([2-5])\./.exec(field.path)
+  if (tier) return [`${tier[1]}Tier${tier[2]}`]
   if (field.control === "style") {
     const preset = (value as Style | undefined)?.preset ?? (field.defaultValue as Style | undefined)?.preset
     return typeof preset === "string" ? [canonicalStyleName(preset)] : []
@@ -188,6 +206,7 @@ export function fieldStyleKeys(field: SchemaField, value?: unknown): string[] {
   if (path === "flasks.utilityFlasks") return ["utilityFlask"]
   if (path.startsWith("tinctures.")) return ["tincture"]
   if (path.startsWith("gemCallouts.")) return ["gemHighlight"]
+  if (path.startsWith("leagueMechanic.rules.fated.")) return ["fatedItems"]
   if (path.startsWith("leagueMechanic.")) return ["leagueMechanic"]
   if (path.startsWith("currency.gold.highStack")) return ["goldStackLarge"]
   if (path.startsWith("currency.gold.stack")) return ["goldStack"]

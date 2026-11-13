@@ -120,6 +120,13 @@
     "size": 45,
     "text": "#000000"
   },
+  "fatedItems": {
+    "text": "#FFF34D",
+    "background": "#10281F",
+    "backgroundOpacity": 0.96,
+    "border": "#78C8A0",
+    "size": 45
+  },
   "lifeFlask": {
     "background": "#630401",
     "border": "#ff0000",
@@ -141,6 +148,14 @@
   "rare": {
     "text": "#ffff77"
   },
+  "rareTier2": { "text": "#ffff77", "size": 45 },
+  "rareTier3": { "text": "#ffff77", "size": 45 },
+  "rareTier4": { "text": "#ffff77", "size": 45 },
+  "rareTier5": { "text": "#ffff77", "size": 45 },
+  "magicTier2": { "text": "#8888ff", "size": 45 },
+  "magicTier3": { "text": "#8888ff", "size": 45 },
+  "magicTier4": { "text": "#8888ff", "size": 45 },
+  "magicTier5": { "text": "#8888ff", "size": 45 },
   "maps": {
     "background": "#282828",
     "border": "#FFFFFF",

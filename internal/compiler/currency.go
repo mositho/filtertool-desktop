@@ -19,10 +19,24 @@ type leagueRule struct {
 	Key, Title, ItemClass string
 	BaseTypes             []string
 	Stack                 bool
+	Fated                 bool
 }
 
-var currencyTiers = data.Load[struct{ Tiers []currencyTier }]("currency.json").Tiers
-var leagueRules = data.Load[[]leagueRule]("league-mechanic.json")
+var currencyDefinitions = data.Load[struct {
+	Tiers  []currencyTier
+	Sounds map[string]Object
+}]("currency.json")
+var currencyTiers = currencyDefinitions.Tiers
+var leagueRules = func() []leagueRule {
+	rules := data.Load[[]leagueRule]("league-mechanic.json")
+	ref := data.Load[struct{ BaseTypesByClass map[string][]string }]("reference.json")
+	for i := range rules {
+		if rules[i].ItemClass == "Viscera" {
+			rules[i].BaseTypes = ref.BaseTypesByClass["Viscera"]
+		}
+	}
+	return rules
+}()
 
 // MergeDefaults preserves atomic currency/league sound choices at every layer,
 // including imported local defaults, before the compiler resolves item rules.
@@ -106,6 +120,12 @@ func (c *Compiler) currencyCallouts() map[string][]string {
 		for _, name := range names {
 			out[name] = lines
 		}
+	}
+	for name, sound := range currencyDefinitions.Sounds {
+		r := &rule{lines: append([]string{}, out[name]...)}
+		stripLines(r, "PlayAlertSound", "CustomAlertSound")
+		c.sound(r, sound)
+		out[name] = r.lines
 	}
 	return out
 }
@@ -347,9 +367,25 @@ func (c *Compiler) scrolls(cfg Object) string {
 
 func (c *Compiler) leagueMechanic(cfg Object) string {
 	cfg = mergeCurrencySettings(Obj(c.Defaults["leagueMechanic"]), cfg)
+	sharedSound := Obj(cfg["sound"])
+	if inheritsSound(sharedSound) {
+		sharedSound = Obj(Obj(data.Load[Object]("defaults.json")["leagueMechanic"])["sound"])
+	}
 	rules := []*rule{}
 	for _, def := range leagueRules {
-		settings := Merge(Object{"style": cfg["style"]}, Obj(Obj(cfg["rules"])[def.Key]))
+		style := cfg["style"]
+		if def.Fated {
+			style = Object{"preset": "fatedItems"}
+		}
+		settings := mergeCurrencySettings(Object{"style": style, "sound": sharedSound}, Obj(Obj(cfg["rules"])[def.Key]))
+		if inheritsSound(Obj(settings["sound"])) {
+			settings["sound"] = sharedSound
+		}
+		if def.Fated {
+			r := newRule().set("Fated", "True")
+			rules = append(rules, c.currencyPresentation(r, settings, "fatedItems"))
+			continue
+		}
 		selection := def.BaseTypes
 		if value, exists := settings["baseTypes"]; exists {
 			selection = Strings(value)
@@ -382,4 +418,8 @@ func (c *Compiler) leagueMechanic(cfg Object) string {
 		}
 	}
 	return heading("League Mechanic", rules...)
+}
+
+func inheritsSound(sound Object) bool {
+	return len(sound) == 0 || sound["enabled"] == true && sound["soundEnabled"] != false && sound["soundId"] == nil && Text(sound["tts"]) == "" && Text(sound["soundFileName"]) == ""
 }

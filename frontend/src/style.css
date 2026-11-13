@@ -9,6 +9,12 @@
     padding: 0.75rem;
   }
 
+  .nested-section {
+    margin-inline-start: calc(var(--section-depth) * clamp(0.75rem, 2vw, 1.5rem));
+    margin-top: 0.5rem;
+    border-inline-start: 2px solid #525252;
+  }
+
   :where([aria-expanded], summary, .disclosure-header) {
     cursor: pointer;
     border-radius: 0.25rem;

@@ -15,6 +15,7 @@ import AdvancedOptions from "./AdvancedOptions.vue"
 import { areaLevelRangeError, itemLevelRangeError } from "@schema/range-validation"
 import rarityDefaults from "../../../internal/data/highlight-defaults.json"
 import StyleShortcut from "./StyleShortcut.vue"
+import { setEditedValue } from "../edits"
 
 const props = defineProps<{
   highlight: Record<string, unknown>
@@ -99,12 +100,12 @@ function readModules(): Set<ModuleId> {
 }
 
 function persistModules() {
-  if (active.value.size > 0) setPath(props.highlight, "modules", [...active.value])
-  else deletePath(props.highlight, "modules")
+  setEditedValue(props.highlight, "modules", active.value.size > 0 ? [...active.value] : undefined, initialModules, true)
   onChange()
 }
 
-const active = ref<Set<ModuleId>>(readModules())
+const initialModules = [...readModules()]
+const active = ref<Set<ModuleId>>(new Set(initialModules))
 
 watch(
   () => props.highlight,
@@ -161,8 +162,9 @@ function onChange() {
 }
 
 function setField(path: string, value: unknown) {
-  if (value === undefined) deletePath(props.highlight, path)
-  else setPath(props.highlight, path, value)
+  const inherited =
+    path === "rarities" ? [...HIGHLIGHT_RARITIES] : path === "perRarityCustomization" ? false : getPath(rarityDefaults, path)
+  setEditedValue(props.highlight, path, value, inherited, ["rarities", "baseTypes", "itemClasses"].includes(path))
   onChange()
 }
 
@@ -182,7 +184,7 @@ function setRarities(value: string[]) {
 }
 
 function setPerRarity(value: boolean) {
-  setField("perRarityCustomization", value || undefined)
+  setField("perRarityCustomization", value)
   active.value = new Set([...active.value, ...computeActive()].filter((id) => !value || (id !== "icon" && id !== "sound")))
   persistModules()
 }

@@ -29,9 +29,9 @@ describe("currency catalog", () => {
     expect(effectiveCurrencyAssignments(catalog, {}, { "Chaos Orb": "bad" })["Chaos Orb"]).toBe("a")
   })
 
-  it("keeps all three chart biomes backed by exact known base types", () => {
-    const charts = LEAGUE_RULES.filter((rule) => rule.itemClass === "Chart").flatMap((rule) => rule.baseTypes)
-    expect(charts.sort()).toEqual([...reference.baseTypesByClass.Chart].sort())
+  it("keeps viscera backed by exact known base types", () => {
+    const viscera = LEAGUE_RULES.filter((rule) => rule.itemClass === "Viscera").flatMap((rule) => rule.baseTypes)
+    expect(viscera.sort()).toEqual([...reference.baseTypesByClass.Viscera].sort())
   })
 
   it("keeps currency styles in Global Settings only", () => {

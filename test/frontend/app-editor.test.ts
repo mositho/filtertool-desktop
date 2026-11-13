@@ -43,6 +43,36 @@ async function settle() {
   for (let i = 0; i < 8; i++) await nextTick()
 }
 
+it("clears Discard after hiding and restoring a league item, while undo and redo remain usable", async () => {
+  vi.useFakeTimers()
+  vi.stubGlobal("matchMedia", () => ({ matches: true, addEventListener() {}, removeEventListener() {} }))
+  root = document.createElement("div")
+  document.body.append(root)
+  app = createApp(App)
+  app.mount(root)
+  await settle()
+  root.querySelector<HTMLButtonElement>("nav > button")!.click()
+  await settle()
+  const discard = () => [...root.querySelectorAll<HTMLButtonElement>("button")].find((button) => button.textContent?.trim() === "Discard")!
+  const item = root.querySelector<HTMLButtonElement>(
+    '[data-field-path="leagueMechanic.rules.poppet.baseTypes"] button[aria-label="Cursed Poppet"]',
+  )!
+  expect(discard().disabled).toBe(true)
+  item.click()
+  await settle()
+  expect(discard().disabled).toBe(false)
+  await vi.advanceTimersByTimeAsync(600)
+  item.click()
+  await settle()
+  expect(discard().disabled).toBe(true)
+  window.dispatchEvent(new KeyboardEvent("keydown", { key: "z", ctrlKey: true }))
+  await settle()
+  expect(discard().disabled).toBe(false)
+  window.dispatchEvent(new KeyboardEvent("keydown", { key: "y", ctrlKey: true }))
+  await settle()
+  expect(discard().disabled).toBe(true)
+})
+
 it.each([true, false])("has no output preview or background compilation in desktop=%s", async (desktop) => {
   vi.useFakeTimers()
   vi.stubGlobal("matchMedia", () => ({ matches: desktop, addEventListener() {}, removeEventListener() {} }))

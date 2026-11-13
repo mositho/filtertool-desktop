@@ -9,6 +9,7 @@ import ConfigForm from "../../frontend/src/components/ConfigForm.vue"
 import builtinReference from "../../internal/data/reference.json"
 import soundManifest from "../../internal/data/manifest.json"
 import { BUILD_SPECIFIC_SCHEMA } from "../../src/config/form-schema"
+import { LEAGUE_RULES } from "../../src/config/currency"
 
 vi.mock("../../frontend/src/api", () => ({
   api: {
@@ -31,7 +32,7 @@ function mount(defaults: Record<string, unknown> = {}, filterName = "currency-te
   document.body.append(container)
   const root = reactive<Record<string, unknown>>({})
   const reference = {
-    baseTypesByClass: { "Stackable Currency": ["Scroll Fragment", "Chaos Orb", "Chromatic Orb", "Dead Man's Sulphur", "Portal Scroll"] },
+    baseTypesByClass: { "Stackable Currency": ["Scroll Fragment", "Chaos Orb", "Chromatic Orb", "Cursed Poppet", "Portal Scroll"] },
     sounds: soundManifest.map((sound) => ({ ...sound, hasFile: true })),
     currencySounds: {
       "Chromatic Orb": { enabled: true, tts: "chromatic_orb" },
@@ -123,7 +124,7 @@ it("shows actual inherited item icons and preserves item TTS over tier fallback 
 
 it("moves selected currency once, resets to shared defaults, and excludes league items and scrolls", async () => {
   const root = mount({ currency: { assignments: { "Scroll Fragment": "b" } } })
-  expect(container.textContent).not.toContain("Dead Man's Sulphur")
+  expect(container.textContent).not.toContain("Cursed Poppet")
   expect(container.textContent).not.toContain("Portal Scroll")
   await select("Scroll Fragment")
   const tier = container.querySelector<HTMLSelectElement>('[aria-label="Currency tier"]')!
@@ -380,10 +381,10 @@ it("shows a dash for mixed visibility and applies the chosen state to the entire
   await setCurrencyVisibility("Show")
   expect(visibility.value).toBe("Show")
   expect(getPath(root, "currency.items.Chromatic Orb.visibility")).toBe("Show")
-  expect(getPath(root, "currency.items.Chaos Orb.visibility")).toBe("Show")
+  expect(getPath(root, "currency.items.Chaos Orb.visibility")).toBeUndefined()
   await setCurrencyVisibility("Hide")
   expect(visibility.value).toBe("Hide")
-  expect(getPath(root, "currency.items.Chromatic Orb.visibility")).toBe("Hide")
+  expect(getPath(root, "currency.items.Chromatic Orb.visibility")).toBeUndefined()
   expect(getPath(root, "currency.items.Chaos Orb.visibility")).toBe("Hide")
   await resetCurrency()
   expect(visibility.selectedOptions[0].textContent).toBe("—")
@@ -483,7 +484,9 @@ it.each(["preset", "tts", "file"])("keeps the %s sound editor open after switchi
   expect(sound).toEqual(
     mode === "file"
       ? { enabled: true, soundFileName: "chromatic-custom.mp3" }
-      : { enabled: true, tts: mode === "preset" ? "chromatic_orb" : "My chromatic callout" },
+      : mode === "preset"
+        ? undefined
+        : { enabled: true, tts: "My chromatic callout" },
   )
 })
 
@@ -551,39 +554,41 @@ it("groups league lists with every item selected by default, preserves an empty 
   })
   app.mount(container)
   const league = container.querySelector('[data-editor-group="leagueMechanic"]')!
-  expect(league.textContent).toContain("Curse of the Allflame")
+  expect(league.textContent).toContain("Covens of Umbra")
   expect(league.textContent).not.toContain("Chart room/reward")
-  for (const group of ["charts", "ducats", "crystals", "enshrouded", "sulphur", "bottle"]) {
+  for (const group of ["viscera", "poppet"]) {
     expect(league.querySelector(`[data-field-path="leagueMechanic.rules.${group}.baseTypes"]`)).not.toBeNull()
   }
   expect(league.querySelector('[data-field-path^="leagueMechanic.rules.coralForest."]')).toBeNull()
   expect(config.buildSpecificOptions).toEqual({})
-  const charts = league.querySelector('[data-field-path="leagueMechanic.rules.charts.baseTypes"]')!
-  expect(charts.querySelectorAll('button[aria-pressed="true"]')).toHaveLength(3)
+  const charts = league.querySelector('[data-field-path="leagueMechanic.rules.viscera.baseTypes"]')!
+  const count = LEAGUE_RULES.find((rule) => rule.key === "viscera")!.baseTypes.length
+  expect(charts.querySelectorAll('button[aria-pressed="true"]')).toHaveLength(count)
   expect(charts.querySelectorAll('button[aria-label^="Remove "]')).toHaveLength(0)
-  const chart = charts.querySelector<HTMLButtonElement>('button[aria-label="Sandy Seabed Chart"]')!
+  const chart = charts.querySelector<HTMLButtonElement>('button[aria-label="Scorched Arm"]')!
   chart.click()
   await nextTick()
   expect(chart.getAttribute("aria-pressed")).toBe("false")
   expect(chart.textContent).toContain("Hidden")
-  expect(charts.querySelectorAll("button[aria-pressed]")).toHaveLength(3)
+  expect(charts.querySelectorAll("button[aria-pressed]")).toHaveLength(count)
   chart.click()
   await nextTick()
   expect(chart.getAttribute("aria-pressed")).toBe("true")
   expect(chart.textContent).not.toContain("Hidden")
+  expect(getPath(config.buildSpecificOptions, "leagueMechanic.rules.viscera.baseTypes")).toBeUndefined()
   for (const toggle of charts.querySelectorAll<HTMLButtonElement>('button[aria-pressed="true"]')) {
     toggle.click()
     await nextTick()
   }
-  expect(getPath(config.buildSpecificOptions, "leagueMechanic.rules.charts.baseTypes")).toEqual([])
-  expect(charts.querySelectorAll('button[aria-pressed="false"]')).toHaveLength(3)
+  expect(getPath(config.buildSpecificOptions, "leagueMechanic.rules.viscera.baseTypes")).toEqual([])
+  expect(charts.querySelectorAll('button[aria-pressed="false"]')).toHaveLength(count)
   chart.click()
   await nextTick()
-  expect(getPath(config.buildSpecificOptions, "leagueMechanic.rules.charts.baseTypes")).toEqual(["Sandy Seabed Chart"])
+  expect(getPath(config.buildSpecificOptions, "leagueMechanic.rules.viscera.baseTypes")).toEqual(["Scorched Arm"])
   charts.querySelector<HTMLButtonElement>('button[title="Use default"]')!.click()
   await nextTick()
-  expect(getPath(config.buildSpecificOptions, "leagueMechanic.rules.charts.baseTypes")).toBeUndefined()
-  expect(charts.querySelectorAll('button[aria-pressed="true"]')).toHaveLength(3)
+  expect(getPath(config.buildSpecificOptions, "leagueMechanic.rules.viscera.baseTypes")).toBeUndefined()
+  expect(charts.querySelectorAll('button[aria-pressed="true"]')).toHaveLength(count)
   expect(charts.textContent).not.toContain("×")
   const currency = container.querySelector('[data-editor-group="currency"]')!
   expect(currency.querySelector('[data-field-path$=".style"]')).toBeNull()
@@ -594,10 +599,8 @@ it("groups league lists with every item selected by default, preserves an empty 
   expect(league.querySelector('[data-field-path^="leagueMechanic.rules."][data-field-path$=".style"]')).toBeNull()
   expect(league.querySelector('[data-field-path^="leagueMechanic.rules."][data-field-path$=".sound"]')).toBeNull()
   expect(currency.textContent).not.toContain("Styles are managed in Global Settings")
-  const sulphurItems = league.querySelector('[data-field-path="leagueMechanic.rules.sulphur.baseTypes"]')!
-  const sulphurStack = league.querySelector('[data-field-path="leagueMechanic.rules.sulphur.minStackSize"]')!
-  expect(sulphurItems.parentElement?.classList.contains("sm:col-span-2")).toBe(true)
-  expect(sulphurStack.parentElement?.classList.contains("sm:col-span-2")).toBe(true)
+  expect(charts.parentElement?.classList.contains("sm:col-span-2")).toBe(true)
+  expect(league.querySelector('[data-field-path="leagueMechanic.rules.fated.visibility"]')).not.toBeNull()
 })
 
 it("starts Gold and scrolls collapsed without visibility controls", async () => {

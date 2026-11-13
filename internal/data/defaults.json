@@ -41,25 +41,11 @@
       "divine": null,
       "eternal": null
     },
-    "utilityFlasks": [
-      "Jade",
-      "Quartz",
-      "Quicksilver",
-      "Silver",
-      "Granite"
-    ]
+    "utilityFlasks": ["Jade", "Quartz", "Quicksilver", "Silver", "Granite"]
   },
   "jewellery": {
     "amuletMaxAreaLevel": 23,
-    "amulets": [
-      "Amber",
-      "Jade",
-      "Lapis",
-      "Turquoise",
-      "Citrine",
-      "Agate",
-      "Onyx"
-    ],
+    "amulets": ["Amber", "Jade", "Lapis", "Turquoise", "Citrine", "Agate", "Onyx"],
     "basicRingMaxAreaLevel": 16,
     "beltMaxAreaLevel": 23,
     "elementalRingMaxAreaLevel": 33
@@ -79,6 +65,12 @@
     "twoLinkMaxAreaLevel": 9
   },
   "magicItems": {
+    "tiers": {
+      "2": { "enabled": false },
+      "3": { "enabled": false },
+      "4": { "enabled": false },
+      "5": { "enabled": false }
+    },
     "footprintMinAreaLevel": 0,
     "maxAreaLevel": 23,
     "rules": {
@@ -120,12 +112,14 @@
     "rules": {}
   },
   "preferredArmour": [],
-  "preferredColors": [
-    "R",
-    "G",
-    "B"
-  ],
+  "preferredColors": ["R", "G", "B"],
   "rareItems": {
+    "tiers": {
+      "2": { "enabled": true },
+      "3": { "enabled": true },
+      "4": { "enabled": true },
+      "5": { "enabled": true }
+    },
     "rules": {
       "1x2": {
         "size": 42
@@ -190,8 +184,6 @@
     }
   },
   "leagueMechanic": {
-    "rules": {
-      "sulphur": {}
-    }
+    "sound": { "enabled": true, "soundId": 2 }
   }
 }

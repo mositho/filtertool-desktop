@@ -144,22 +144,18 @@ func TestCurrencySoundDefaultsMatchCompiledCallouts(t *testing.T) {
 	}
 }
 
-func TestGoldSulphurAndChartControls(t *testing.T) {
+func TestGoldAndLeagueSelectionControls(t *testing.T) {
 	out := compileCurrencyTest(t, Object{
 		"currency":       Object{"gold": Object{"minStackSize": float64(100), "highStackSize": float64(50), "highStack": Object{"style": Object{"text": "#123456"}}}},
-		"leagueMechanic": Object{"style": Object{"text": "#654321"}, "rules": Object{"sulphur": Object{"minStackSize": float64(10)}, "charts": Object{"baseTypes": []any{"Sandy Seabed Chart", "Coral Reef Chart"}}}},
+		"leagueMechanic": Object{"style": Object{"text": "#654321"}, "rules": Object{"viscera": Object{"baseTypes": []any{"Scorched Arm"}}}},
 	})
 	if !strings.Contains(out, "StackSize >= 100") || !strings.Contains(out, "Hide\nClass == \"Gold\"") {
 		t.Fatal("gold minimum must explicitly hide small stacks")
 	}
-	sulphur := currencyBlocks(out, "Dead Man's Sulphur")
-	if len(sulphur) != 2 || !strings.Contains(sulphur[0], "StackSize >= 10") || !strings.HasPrefix(sulphur[1], "Hide\n") {
-		t.Fatal("sulphur minimum not enforced")
+	if !strings.HasPrefix(currencyBlocks(out, "Severed Rhoa Head")[0], "Hide\n") {
+		t.Fatal("deselected viscera not hidden")
 	}
-	if !strings.HasPrefix(currencyBlocks(out, "Coral Forest Chart")[0], "Hide\n") {
-		t.Fatal("chart not hidden")
-	}
-	if !strings.Contains(currencyBlocks(out, "Sandy Seabed Chart")[0], "SetTextColor 101 67 33") {
+	if !strings.Contains(currencyBlocks(out, "Scorched Arm")[0], "SetTextColor 101 67 33") {
 		t.Fatal("shared league style not inherited")
 	}
 }
@@ -251,6 +247,9 @@ func TestCurrencyItemSoundReplacesInheritedSoundChoice(t *testing.T) {
 
 func TestLeagueSelectionsShowSelectedAndHideEverythingElse(t *testing.T) {
 	for _, def := range leagueRules {
+		if def.Fated {
+			continue // Condition-based rule, covered separately.
+		}
 		t.Run(def.Key, func(t *testing.T) {
 			for _, selected := range [][]any{nil, {}, {def.BaseTypes[0]}} {
 				settings := Object{}
@@ -276,12 +275,12 @@ func TestLeagueSelectionsShowSelectedAndHideEverythingElse(t *testing.T) {
 }
 
 func TestLeagueEmptySelectionOverridesSharedDefaults(t *testing.T) {
-	c := New(Object{"leagueMechanic": Object{"rules": Object{"charts": Object{"baseTypes": []any{"Coral Forest Chart"}}}}}, nil, "")
-	out, err := c.Compile(Object{"buildProfile": Object{}, "buildSpecificOptions": Object{"leagueMechanic": Object{"rules": Object{"charts": Object{"baseTypes": []any{}}}}}})
+	c := New(Object{"leagueMechanic": Object{"rules": Object{"viscera": Object{"baseTypes": []any{"Scorched Arm"}}}}}, nil, "")
+	out, err := c.Compile(Object{"buildProfile": Object{}, "buildSpecificOptions": Object{"leagueMechanic": Object{"rules": Object{"viscera": Object{"baseTypes": []any{}}}}}})
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, name := range []string{"Sandy Seabed Chart", "Coral Forest Chart", "Coral Reef Chart"} {
+	for _, name := range leagueRules[0].BaseTypes {
 		blocks := currencyBlocks(out, name)
 		if len(blocks) != 1 || !strings.HasPrefix(blocks[0], "Hide\n") {
 			t.Fatalf("%s fell through after deselecting everything", name)

@@ -16,6 +16,7 @@ import {
 } from "../../frontend/src/namedStyles"
 import { styleClipboard } from "../../frontend/src/styleClipboard"
 import { editColor } from "./colorFields"
+import { BUILD_SPECIFIC_SCHEMA } from "../../src/config/form-schema"
 
 let app: App
 let root: HTMLDivElement
@@ -191,6 +192,23 @@ it("keeps league mechanic text editable and independent of shared rarity colors"
   expect(result.leagueMechanic.text).toBe("#123456")
 })
 
+it("gives Fated items their own league style and shortcut with independent text", () => {
+  const league = BUILD_SPECIFIC_SCHEMA.find((group) => group.key === "leagueMechanic")!
+  const fated = league.subsections!.find((section) => section.key === "leagueMechanic.rules.fated")!
+  const style = fated.subsections!.find((section) => section.title === "Style")!.fields[0]
+  expect(style.defaultValue).toEqual({ preset: "fatedItems" })
+  expect(style.defaultFrom).toBeUndefined()
+  expect(fieldStyleKeys(style)).toEqual(["fatedItems"])
+  expect(fieldStyleKeys(fated.fields[0])).toEqual(["fatedItems"])
+  expect(groupStyleSections(Object.keys(styles)).find((section) => section.title === "League Mechanic")!.keys).toContain("fatedItems")
+  expect(usesRarityText("fatedItems")).toBe(false)
+  expect(rarityTextPreviews("fatedItems")).toEqual([])
+  const result = mergeStyles(styles, { sharedRarityRare: { text: "#123456" }, fatedItems: { text: "#ABCDEF", background: "#203040" } })
+  expect(result.fatedItems.text).toBe("#ABCDEF")
+  expect(mergeStyles(styles, { sharedRarityRare: { text: "#123456" } }).fatedItems.text).toBe(styles.fatedItems.text)
+  expect(result.fatedItems.background).toBe("#203040")
+})
+
 it("edits and resets shared text locally without changing the ordinary fallback style", async () => {
   const state = mount()
   root.querySelector<HTMLButtonElement>('[data-editor-group="styles"] > button')!.click()
@@ -209,18 +227,31 @@ it("edits and resets shared text locally without changing the ordinary fallback 
   for (const key of ["jewellery", "lifeFlask", "manaFlask", "threeLink", "highlightedEquipment"]) {
     expect(panel.querySelector<HTMLElement>(`[data-style-key="${key}"] [data-rarity-preview="Magic"]`)!.style.color).toBe("rgb(18, 52, 86)")
   }
-  expect(panel.querySelector<HTMLButtonElement>('[aria-label="Magic text"]')!.value).toBe(styles.magic.text)
+  expect(panel.querySelector<HTMLButtonElement>('[aria-label="magic text"]')!.value).toBe(styles.magic.text)
   panel.querySelector<HTMLButtonElement>('[aria-label="Reset shared Magic text to global"]')!.click()
   await settle()
   expect(state.localStyles).toBeUndefined()
   expect(palette.value).toBe(styles.sharedRarityMagic.text.toLowerCase())
 })
 
-it("keeps the palette separate and puts labelled fallback styles last in Equipment", () => {
+it("keeps the palette separate and groups tier styles below their equipment rarity", () => {
   const sections = groupStyleSections(Object.keys(styles))
-  expect(sections.find((section) => section.title === "Equipment")!.keys.slice(-3)).toEqual(["normal", "magic", "rare"])
+  expect(sections.find((section) => section.title === "Equipment")!.keys.slice(-11)).toEqual([
+    "normal",
+    "magic",
+    "magicTier2",
+    "magicTier3",
+    "magicTier4",
+    "magicTier5",
+    "rare",
+    "rareTier2",
+    "rareTier3",
+    "rareTier4",
+    "rareTier5",
+  ])
   expect(sections.flatMap((section) => section.keys).some((key) => PALETTE_KEYS.includes(key))).toBe(false)
-  expect(styleLabel("normal")).toBe("Normal")
+  for (const key of ["normal", "magic", "rare"]) expect(styleLabel(key)).toBe(key)
+  expect(styleLabel("highlightedEquipment")).toBe("highlight")
 })
 
 it.each([

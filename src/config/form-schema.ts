@@ -710,6 +710,26 @@ const genericEquipment: FieldSubsection[] = [
   })),
 ]
 
+const tieredEquipment: FieldSubsection = {
+  key: "tiered",
+  title: "Tiered",
+  collapsed: true,
+  fields: [],
+  subsections: (["magic", "rare"] as const).map((rarity) => ({
+    key: `${rarity}Tiers`,
+    title: rarity === "rare" ? "Rare" : "Magic",
+    collapsed: true,
+    previewSection: rarity === "rare" ? "Rare Items" : "Magic Items",
+    fields: [2, 3, 4, 5].map((tier) => ({
+      path: `${rarity}Items.tiers.${tier}.enabled`,
+      label: `Tier ${tier}`,
+      control: "boolean" as const,
+      defaultValue: rarity === "rare",
+      tooltip: "On shows this tier regardless of equipment Max Area Level settings. Off uses ordinary rules, not an explicit hide.",
+    })),
+  })),
+}
+
 function currencyRule(path: string, title: string, preset?: string): FieldSubsection {
   return {
     key: path,
@@ -845,7 +865,7 @@ export const BUILD_SPECIFIC_SCHEMA: FieldGroup[] = [
   {
     key: "leagueMechanic",
     title: "League Mechanic",
-    description: "Curse of the Allflame",
+    description: "Covens of Umbra",
     previewSection: "League Mechanic",
     fields: [
       {
@@ -855,34 +875,40 @@ export const BUILD_SPECIFIC_SCHEMA: FieldGroup[] = [
         defaultValue: { preset: "leagueMechanic" },
         sharedOnly: true,
       },
+      {
+        path: "leagueMechanic.sound",
+        label: "Shared League Mechanic Sound",
+        control: "rule-sound",
+        defaultValue: { enabled: true, soundId: 2 },
+        sharedOnly: true,
+      },
     ],
     subsections: LEAGUE_RULES.map((definition) => {
-      const rule = currencyRule(`leagueMechanic.rules.${definition.key}`, definition.title, "leagueMechanic")
+      const rule = currencyRule(
+        `leagueMechanic.rules.${definition.key}`,
+        definition.title,
+        definition.fated ? "fatedItems" : "leagueMechanic",
+      )
       rule.collapsed = true
-      rule.fields = [
-        {
-          path: `leagueMechanic.rules.${definition.key}.baseTypes`,
-          label: definition.title,
-          control: "multiselect",
-          visibilityMode: true,
-          options: definition.baseTypes,
-          defaultValue: definition.baseTypes,
-        },
-      ]
-      rule.subsections![0].fields[0].defaultFrom = { path: "leagueMechanic.style", label: "Shared League Mechanic Style" }
+      rule.fields = definition.fated
+        ? rule.fields
+        : [
+            {
+              path: `leagueMechanic.rules.${definition.key}.baseTypes`,
+              label: definition.title,
+              control: "multiselect",
+              visibilityMode: true,
+              options: definition.baseTypes,
+              defaultValue: definition.baseTypes,
+            },
+          ]
+      if (!definition.fated) {
+        rule.subsections![0].fields[0].defaultFrom = { path: "leagueMechanic.style", label: "Shared League Mechanic Style" }
+      }
+      rule.subsections![2].fields[0].defaultFrom = { path: "leagueMechanic.sound", label: "Shared League Mechanic Sound" }
       rule.subsections?.forEach((module) => {
         module.sharedOnly = true
       })
-      if (definition.stack)
-        rule.fields.push({
-          path: `leagueMechanic.rules.${definition.key}.minStackSize`,
-          label: "Minimum Stack Size",
-          control: "number",
-          min: 0,
-          integer: true,
-          defaultValue: 0,
-          tooltip: "Smaller stacks are hidden.",
-        })
       return rule
     }),
   },
@@ -932,6 +958,7 @@ export const BUILD_SPECIFIC_SCHEMA: FieldGroup[] = [
     subsections: [
       { key: "rarityItems", title: "Max Area Level", collapsed: true, fields: [...equipmentRarityItems, ...equipmentJewelleryCutoffs] },
       { key: "sizeFalloff", title: "Min Area Level", collapsed: true, fields: equipmentSizeFalloff },
+      tieredEquipment,
       {
         key: "jewellery",
         title: "Jewellery",

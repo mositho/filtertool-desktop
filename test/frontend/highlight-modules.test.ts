@@ -6,6 +6,7 @@ import WeaponPhaseTemplateEditor from "../../frontend/src/components/WeaponPhase
 import type { ReferenceData } from "../../frontend/src/api"
 import { TEST_BASE_TYPE } from "../fixtures/base-types"
 import { emptyHighlight, emptyWeaponHighlight } from "../../src/config/form-schema"
+import { pruneEmpty } from "../../frontend/src/path"
 
 let app: App | undefined
 let container: HTMLDivElement | undefined
@@ -18,6 +19,32 @@ afterEach(() => {
 })
 
 describe("highlight modules", () => {
+  it("restores inherited highlight defaults and module metadata after a round trip", async () => {
+    const highlight = reactive<Record<string, unknown>>({ baseTypes: [TEST_BASE_TYPE] })
+    const reference = {
+      itemClasses: [],
+      weaponClasses: [],
+      baseTypesByClass: {},
+      sounds: [],
+      styles: {},
+      styleNames: [],
+    } as unknown as ReferenceData
+    container = document.createElement("div")
+    document.body.append(container)
+    app = createApp({ setup: () => () => h(HighlightCard, { highlight, reference }) })
+    app.mount(container)
+    const mode = container.querySelector<HTMLButtonElement>('[role="switch"]')!
+    mode.click()
+    await nextTick()
+    const rare = container.querySelector('[data-rarity="Rare"]')!
+    rare.querySelector<HTMLButtonElement>('[title="Square"]')!.click()
+    await nextTick()
+    rare.querySelector<HTMLButtonElement>('[title="Star"]')!.click()
+    await nextTick()
+    mode.click()
+    await nextTick()
+    expect(pruneEmpty(highlight)).toEqual({ baseTypes: [TEST_BASE_TYPE] })
+  })
   it.each([false, true])("offers every applicable phase module before selecting targets, perRarity=%s", async (perRarityCustomization) => {
     const modelValue = reactive<Record<string, unknown>>({ perRarityCustomization })
     const reference = {

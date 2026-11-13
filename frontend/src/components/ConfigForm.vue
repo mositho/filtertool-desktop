@@ -22,6 +22,8 @@ import { layoutFields } from "../formLayout"
 import { useCollapsedState } from "../viewState"
 import { isLegacyStyle, isPaletteStyle, mergeStyles, namedStylesKey, styleAliasesFor, type StyleMap } from "../namedStyles"
 import NamedStylesPanel from "./NamedStylesPanel.vue"
+import { setEditedValue } from "../edits"
+import { DEFAULT_STYLE_SETTINGS } from "../../../src/style-defaults"
 
 const props = defineProps<{ modelValue: FilterConfig; reference: ReferenceData; filterName: string; defaults?: Record<string, unknown> }>()
 const emit = defineEmits<{ "update:modelValue": [value: FilterConfig] }>()
@@ -52,10 +54,20 @@ provide(namedStylesKey, {
   styles: computed(() => effectiveReference.value.styles),
   overrides: localStyles,
   set(key, property, value) {
-    const next = { ...localStyles.value[key] }
-    if (value === undefined || value === null || value === "") delete next[property]
-    else next[property] = value
-    setLocalStyle(key, next)
+    if (styleAliasesFor(key).some((old) => Object.hasOwn(props.modelValue.localStyles ?? {}, old))) {
+      const next = { ...localStyles.value[key], [property]: value }
+      if (value === undefined || value === null || value === "") delete next[property]
+      setLocalStyle(key, next)
+      return
+    }
+    setEditedValue(
+      props.modelValue,
+      `localStyles.${key}.${property}`,
+      value === null || value === "" ? undefined : value,
+      (props.reference.globalStyles ?? props.reference.styles)[key]?.[property] ??
+        DEFAULT_STYLE_SETTINGS[property as keyof typeof DEFAULT_STYLE_SETTINGS],
+    )
+    emitChange()
   },
   reset: (key) => setLocalStyle(key, undefined),
   paste: setLocalStyle,
@@ -121,8 +133,12 @@ function displayValue(root: Record<string, unknown>, field: SchemaField): unknow
 
 function setFieldValue(root: Record<string, unknown>, field: SchemaField, value: unknown) {
   if (field.path === "shieldProgression" && value === defaultFor(root, field)) value = undefined
-  if (value === undefined) deletePath(root, field.path)
-  else setPath(root, field.path, value)
+  let inherited = defaultFor(root, field)
+  if (field.control === "style") {
+    const style = inherited as Record<string, unknown> | undefined
+    inherited = { ...DEFAULT_STYLE_SETTINGS, ...effectiveReference.value.styles[String(style?.preset)], ...style }
+  }
+  setEditedValue(root, field.path, value, inherited, field.control === "multiselect" || field.control === "link-colors")
   emitChange()
 }
 
@@ -367,6 +383,8 @@ function expandAll() {
               :key="sub.key"
               :data-editor-subsection="sub.subsection.key"
               class="editor-card mt-3"
+              :class="{ 'nested-section': sub.depth > 0 }"
+              :style="{ '--section-depth': sub.depth }"
             >
               <div v-if="sub.visibilityField" class="mb-3 flex items-center justify-between gap-2">
                 <RuleHeader

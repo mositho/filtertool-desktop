@@ -186,7 +186,7 @@ func (s *Store) importFolder(root string) (Object, error) {
 				err = s.available(entry.Name(), "")
 			}
 			if err == nil {
-				err = s.importLegacySounds(cfg, filepath.Join(root, "sounds"))
+				err = s.importFolderSounds(cfg, filepath.Join(root, "sounds"))
 			}
 			if err == nil {
 				err = s.writeFilter(entry.Name(), cfg)
