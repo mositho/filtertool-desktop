@@ -79,6 +79,7 @@ func write(path string, value any) error {
 	}
 	return os.WriteFile(path, append(b, '\n'), 0644)
 }
+
 func Generate() error {
 	b, err := os.ReadFile("internal/data/BaseTypes.csv")
 	if err != nil {

@@ -318,6 +318,16 @@ func (c *Compiler) earlySockets(cfg Object) string {
 }
 func (c *Compiler) equipment(rarity string, cfg Object) string {
 	rules := []*rule{}
+	if !c.legacyEquipmentSelections {
+		for tier := 2; tier <= 5; tier++ {
+			key := fmt.Sprint(tier)
+			settings := Obj(Obj(cfg["tiers"])[key])
+			if Val(settings, "enabled", rarity == "Rare") == true {
+				r := newRule().set("Rarity", "== "+rarity).number("UnidentifiedItemTier", "==", tier)
+				rules = append(rules, c.presentation(r, settings, Obj(c.Styles[strings.ToLower(rarity)+"Tier"+key])))
+			}
+		}
+	}
 	for _, shape := range []struct {
 		key        string
 		w, h, size int

@@ -11,9 +11,7 @@ A desktop item-filter builder for Path of Exile 1, focused on leveling.
   <a href="https://github.com/mositho/filtertool-desktop/releases/latest"><img src="https://img.shields.io/github/v/release/mositho/filtertool-desktop?label=Latest%20version&style=for-the-badge" alt="Latest Filtertool version" height="42" /></a>
 </p>
 
-[Portable Windows](https://github.com/mositho/filtertool-desktop/releases/latest/download/Filtertool.exe) · [Linux AppImage](https://github.com/mositho/filtertool-desktop/releases/latest/download/Filtertool-x86_64.AppImage) · [All downloads](https://github.com/mositho/filtertool-desktop/releases/latest)
-
-[Get started](#get-started) · [Quick guide](#quick-guide) · [Releases](https://github.com/mositho/filtertool-desktop/releases) · [Filter terminology](docs/GLOSSARY.md)
+[Portable Windows](https://github.com/mositho/filtertool-desktop/releases/latest/download/Filtertool.exe) · [Linux AppImage](https://github.com/mositho/filtertool-desktop/releases/latest/download/Filtertool-x86_64.AppImage)
 
 </div>
 
@@ -53,9 +51,9 @@ On Windows, user data is stored in **`%APPDATA%\Filtertool`**.
 | Save / save and export         | `Ctrl+S` / `Ctrl+Shift+S`                                              |
 | Undo / redo                    | `Ctrl+Z` / `Ctrl+Shift+Z`                                              |
 
-Import reads existing web JSON without changing the originals. Folder import also preserves JSON defaults/styles and referenced custom MP3s. Deprecated TypeScript-only configurations are not supported. Large shared filters can exceed Discord's message limit; send the JSON file instead.
+Import reads existing web JSON without changing the originals. Folder import also preserves JSON defaults/styles and referenced custom MP3s. Large shared filters can exceed Discord's message limit; send the JSON file instead.
 
 > [!CAUTION]
 > Keep the exported sound folder alongside the `.filter` file. Moving or deleting it will break the filter's sounds. Check your filters after exporting.
 
-[Contributing](docs/CONTRIBUTING.md) · [Third-party notices](docs/THIRD_PARTY.md)
+[Filter terminology](docs/GLOSSARY.md) · [Contributing](docs/CONTRIBUTING.md) · [Third-party notices](docs/THIRD_PARTY.md)

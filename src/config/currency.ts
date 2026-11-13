@@ -1,12 +1,16 @@
 import definitions from "../../internal/data/currency.json"
 import leagueRules from "../../internal/data/league-mechanic.json"
+import reference from "../../internal/data/reference.json"
 
 export const CURRENCY_TIERS = definitions.tiers
-export { leagueRules as LEAGUE_RULES }
+export const LEAGUE_RULES = leagueRules.map((rule) => ({
+  ...rule,
+  baseTypes: rule.itemClass === "Viscera" ? reference.baseTypesByClass.Viscera : rule.baseTypes,
+}))
 
 /** One owner per base type; other known currencies belong to Leaguestart. */
 export function currencyCatalog(baseTypes: string[]): Record<string, string> {
-  const excluded = new Set(["Scroll of Wisdom", "Portal Scroll", ...leagueRules.flatMap((rule) => rule.baseTypes)])
+  const excluded = new Set(["Scroll of Wisdom", "Portal Scroll", ...LEAGUE_RULES.flatMap((rule) => rule.baseTypes)])
   return Object.fromEntries(
     baseTypes
       .filter((name) => !excluded.has(name))

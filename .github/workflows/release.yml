@@ -177,7 +177,9 @@ jobs:
           if PREVIOUS_TAG=$(git describe --tags --abbrev=0 "$TAG^" 2>/dev/null); then
             CHANGELOG_URL="$REPO_URL/compare/$PREVIOUS_TAG...$TAG"
           fi
-          cat > release-notes.md <<EOF
+          cat .github/release-notes-template.md > release-notes.md
+          cat >> release-notes.md <<EOF
+
           ## Download
 
           - **[Filtertool-Setup.exe]($REPO_URL/releases/download/$TAG/Filtertool-Setup.exe)** — recommended; installs Filtertool and sets up WebView2 if needed.

@@ -57,7 +57,7 @@ func (s *Store) copyCustomSound(path string) (string, error) {
 	}
 	return name, nil
 }
-func (s *Store) importLegacySounds(cfg Object, source string) error {
+func (s *Store) importFolderSounds(cfg Object, source string) error {
 	var walk func(any) error
 	walk = func(value any) error {
 		switch v := value.(type) {

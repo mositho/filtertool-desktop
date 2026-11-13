@@ -35,6 +35,7 @@ import { useCollapsedState } from "../viewState"
 import WeaponPhaseTemplateEditor from "./WeaponPhaseTemplateEditor.vue"
 import { emptyWeaponHighlight } from "@schema/form-schema"
 import RarityPalette from "./RarityPalette.vue"
+import { setEditedValue } from "../edits"
 
 const props = defineProps<{ devMode?: boolean }>()
 
@@ -42,6 +43,11 @@ const isItemDefaultsGroup = (group: FieldGroup) => group.key === "currency" || g
 const defaultGroups = [...DEFAULTS_SCHEMA.map((group) => (isItemDefaultsGroup(group) ? filterEditorGroup(group) : group))].sort(
   (a, b) => editorSectionRank(a.key) - editorSectionRank(b.key),
 )
+// League presentation uses the same controls globally, while named colours stay
+// in Styles. Individual filters retain just the mechanic's item selections.
+const leagueDefaults = defaultGroups.find((group) => group.key === "leagueMechanic")!
+const leagueSchema = DEFAULTS_SCHEMA.find((group) => group.key === "leagueMechanic")!
+leagueDefaults.fields = leagueSchema.fields.filter((field) => field.control !== "style")
 
 const settings = ref<AppSettings>({ filterPath: "", soundsFolder: "", tts: { locale: "en-US", speed: 1.6 } })
 const saving = ref(false)
@@ -54,7 +60,7 @@ const userDefaults = ref<Record<string, unknown>>({})
 const baseDefaults = ref<Record<string, unknown>>({})
 const reference = ref<ReferenceData | null>(null)
 
-const baseStyles = ref<Record<string, unknown>>({})
+const baseStyles = ref<Record<string, Record<string, unknown>>>({})
 const userStyles = ref<Record<string, Record<string, unknown>>>({})
 const mergedStyles = computed(() => mergeStyles(baseStyles.value as StyleMap, userStyles.value))
 const styleOverrides = computed(() => mergeStyles({}, userStyles.value))
@@ -83,7 +89,7 @@ async function load() {
   settings.value = { ...s, filterPath: s.filterPath ?? "", soundsFolder: s.soundsFolder ?? "", tts: s.tts }
   userDefaults.value = (d.userDefaults ?? {}) as Record<string, unknown>
   baseDefaults.value = (d.baseDefaults ?? {}) as Record<string, unknown>
-  baseStyles.value = (st.baseStyles ?? {}) as Record<string, unknown>
+  baseStyles.value = (st.baseStyles ?? {}) as Record<string, Record<string, unknown>>
   userStyles.value = (st.userStyles ?? {}) as Record<string, Record<string, unknown>>
   reference.value = refData as ReferenceData
   savedSnapshot.value = snapshot()
@@ -267,15 +273,16 @@ function defaultsValue(field: SchemaField): unknown {
 }
 
 function setDefaultsValue(field: SchemaField, value: unknown) {
-  const base = fieldDefault(field, userDefaults.value, baseDefaults.value, defaultsReference.value?.styles)
-  const isBase = value === undefined || (!field.defaultFrom && base !== undefined && stableStringify(value) === stableStringify(base))
-  if (isBase) deletePath(userDefaults.value, field.path)
-  else setPath(userDefaults.value, field.path, value)
+  let base = fieldDefault(field, userDefaults.value, baseDefaults.value, defaultsReference.value?.styles)
+  if (field.control === "style") {
+    const style = base as Record<string, unknown> | undefined
+    base = { ...DEFAULT_STYLE_SETTINGS, ...defaultsReference.value?.styles[String(style?.preset)], ...style }
+  }
+  setEditedValue(userDefaults.value, field.path, value, base, field.control === "multiselect" || field.control === "link-colors")
 }
 
 function setDefaultVisibility(field: SchemaField, value: string) {
-  const inherited = fieldDefault(field, userDefaults.value, baseDefaults.value)
-  setDefaultsValue(field, value === inherited ? undefined : value)
+  setDefaultsValue(field, value)
 }
 
 function defaultsOptions(field: SchemaField): string[] {
@@ -359,12 +366,19 @@ function styleColor(style: Record<string, unknown>, prop: string): string {
 }
 
 function setStyleProp(key: string, prop: string, value: unknown) {
-  const entry = { ...styleOverrides.value[key] }
-  for (const old of styleAliasesFor(key)) delete userStyles.value[old]
-  if (value === "" || value === undefined || value === null) delete entry[prop]
-  else entry[prop] = value
-  if (Object.keys(entry).length === 0) delete userStyles.value[key]
-  else userStyles.value[key] = entry
+  if (styleAliasesFor(key).some((old) => Object.hasOwn(userStyles.value, old))) {
+    const entry = { ...styleOverrides.value[key], [prop]: value }
+    for (const old of styleAliasesFor(key)) delete userStyles.value[old]
+    if (value === "" || value === undefined || value === null) delete entry[prop]
+    userStyles.value[key] = entry
+    return
+  }
+  setEditedValue(
+    userStyles.value,
+    `${key}.${prop}`,
+    value === "" || value === null ? undefined : value,
+    baseStyles.value[key]?.[prop] ?? DEFAULT_STYLE_SETTINGS[prop as keyof typeof DEFAULT_STYLE_SETTINGS],
+  )
 }
 
 function resetStyle(key: string) {
@@ -702,8 +716,8 @@ function removeSaved(name: string) {
                 :key="sub.key"
                 :data-editor-subsection="sub.subsection.key"
                 class="editor-card mt-3"
-                :class="sub.depth > 0 ? 'border-l-2 border-l-neutral-700' : ''"
-                :style="{ marginInlineStart: `calc(${sub.depth} * clamp(0.5rem, 2vw, 1rem))` }"
+                :class="{ 'nested-section': sub.depth > 0 }"
+                :style="{ '--section-depth': sub.depth }"
               >
                 <div v-if="sub.visibilityField" class="mb-3 flex items-center justify-between gap-2">
                   <RuleHeader
@@ -824,7 +838,9 @@ function removeSaved(name: string) {
 
               <div v-for="key in section.keys" :key="key" class="py-2" :data-style-key="key">
                 <div class="hidden items-center gap-3 @min-[48rem]:grid" :style="{ gridTemplateColumns: STYLE_GRID_TEMPLATE }">
-                  <span class="min-w-0 truncate text-xs text-neutral-300" :title="styleTextHelp(key)">{{ styleLabel(key) }}</span>
+                  <span class="style-name min-w-0 truncate text-xs text-neutral-300" :title="styleTextHelp(key)">{{
+                    styleLabel(key)
+                  }}</span>
                   <ColorField
                     v-if="!usesRarityText(key)"
                     :label="`${styleLabel(key)} text`"
@@ -945,7 +961,9 @@ function removeSaved(name: string) {
 
                 <div class="rounded border border-neutral-800 p-2 @min-[48rem]:hidden">
                   <div class="mb-2 flex items-center justify-between gap-2">
-                    <span class="truncate text-sm font-medium text-neutral-200" :title="styleTextHelp(key)">{{ styleLabel(key) }}</span>
+                    <span class="style-name min-w-0 truncate text-sm font-medium text-neutral-200" :title="styleTextHelp(key)">{{
+                      styleLabel(key)
+                    }}</span>
                     <div class="flex shrink-0 items-center gap-0.5">
                       <button
                         type="button"

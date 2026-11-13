@@ -53,6 +53,46 @@ func TestNamedHighlightsInheritRarityText(t *testing.T) {
 	}
 }
 
+func TestFatedItemsUseIndependentStyleWithSharedRarityText(t *testing.T) {
+	c := New(nil, Object{
+		"sharedRarityNormal": Object{"text": "#ABCDEF"},
+		"sharedRarityMagic":  Object{"text": "#FEDCBA"},
+		"sharedRarityRare":   Object{"text": "#123456"},
+		"fatedItems":         Object{"background": "#102030", "border": "#405060", "size": float64(38)},
+	}, "")
+	for _, custom := range []Object{{}, {"background": "#203040", "size": float64(40)}} {
+		cfg := Object{
+			"style": Object{"background": "#FF0000", "text": "#FF0000"},
+			"rules": Object{"fated": Object{"style": custom, "icon": Object{"iconColor": "Green", "iconShape": "Circle"}}},
+		}
+		seen := map[string]bool{}
+		for _, block := range strings.Split(c.leagueMechanic(cfg), "\n\n") {
+			if !strings.Contains(block, "Fated True") {
+				continue
+			}
+			rarity := "Normal"
+			for _, value := range []string{"Magic", "Rare"} {
+				if strings.Contains(block, "Rarity == "+value) {
+					rarity = value
+				}
+			}
+			seen[rarity] = true
+			want := c.rarityStyle(Merge(Obj(c.Styles["fatedItems"]), custom), rarity)
+			assertRuleStyle(t, block, want)
+			if !strings.HasPrefix(block, "Show\n") || !strings.Contains(block, "PlayAlertSound 2 240") || !strings.Contains(block, "MinimapIcon 2 Green Circle") {
+				t.Fatal("Fated condition, visibility, sound or icon lost", block)
+			}
+		}
+		if len(seen) != 3 {
+			t.Fatal("missing Fated rarity variants", seen)
+		}
+	}
+	out := c.leagueMechanic(Object{"rules": Object{"fated": Object{"visibility": "Hide"}}})
+	if strings.Count(out, "Fated True") != 1 || !strings.Contains(out, "Hide\nFated True") {
+		t.Fatal("hidden Fated items must retain a single unrestricted Hide rule", out)
+	}
+}
+
 func TestLeagueMechanicUsesIndependentTextColor(t *testing.T) {
 	c := New(nil, Object{
 		"sharedRarityNormal": Object{"text": "#ABCDEF"},
@@ -68,7 +108,7 @@ func TestLeagueMechanicUsesIndependentTextColor(t *testing.T) {
 		output := c.leagueMechanic(cfg)
 		shown := 0
 		for _, block := range strings.Split(output, "\n\n") {
-			if !strings.HasPrefix(block, "Show\n") {
+			if !strings.HasPrefix(block, "Show\n") || strings.Contains(block, "Fated True") {
 				continue
 			}
 			shown++
@@ -76,8 +116,8 @@ func TestLeagueMechanicUsesIndependentTextColor(t *testing.T) {
 				t.Fatal("league text must remain independent of rarity", block)
 			}
 		}
-		if shown != len(leagueRules) {
-			t.Fatalf("got %d shown rules, want %d: %s", shown, len(leagueRules), output)
+		if shown != len(leagueRules)-1 {
+			t.Fatalf("got %d shown rules, want %d: %s", shown, len(leagueRules)-1, output)
 		}
 	}
 }
@@ -131,7 +171,7 @@ func TestSharedPaletteReachesFlasksJewelleryAndEarlyEquipmentWithoutChangingFall
 		}
 		found := false
 		for _, block := range strings.Split(output, "\n\n") {
-			if strings.HasPrefix(block, "Show\n") && !strings.Contains(block, `Class "Belts"`) {
+			if strings.HasPrefix(block, "Show\n") && !strings.Contains(block, `Class "Belts"`) && !strings.Contains(block, "UnidentifiedItemTier") {
 				found = true
 				want := rgb(Text(Obj(c.Styles[strings.ToLower(rarity)])["text"]))
 				if !strings.Contains(block, "SetTextColor "+want) || want == colors[rarity] {

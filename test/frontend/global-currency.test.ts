@@ -34,7 +34,7 @@ beforeEach(() => {
     userDefaults: {},
     baseDefaults: {
       currency: { assignments: { "Chromatic Orb": "leaguestart" }, gold: { minStackSize: 5 } },
-      leagueMechanic: { rules: { charts: { baseTypes: ["Sandy Seabed Chart"] } } },
+      leagueMechanic: { rules: { viscera: { baseTypes: ["Scorched Arm"] } } },
     },
   })
   mock.getStyles.mockResolvedValue({ baseStyles: styles, userStyles: {} })
@@ -97,14 +97,33 @@ it("offers one Generate & Sync action with a short description", async () => {
   expect(root.textContent).toContain("Sounds generated and synced.")
 })
 
+it("restores inherited league sound and global palette colour without leaving Discard enabled", async () => {
+  await mount()
+  const sound = root.querySelector('[data-field-path="leagueMechanic.sound"]')!
+  expect(sound.querySelectorAll("select")[0].value).toBe("alert")
+  const gameSound = sound.querySelectorAll("select")[1]
+  expect(gameSound.value).toBe("2")
+  for (const value of ["8", "2"]) {
+    gameSound.value = value
+    gameSound.dispatchEvent(new Event("change", { bubbles: true }))
+    await nextTick()
+  }
+  expect(exposed.value?.dirty).toBe(false)
+  const colour = root.querySelector<HTMLButtonElement>('[aria-label="Shared rarity text Rare"]')!
+  await editColor(colour, "#123456")
+  expect(exposed.value?.dirty).toBe(true)
+  await editColor(colour, styles.sharedRarityRare.text.toLowerCase())
+  expect(exposed.value?.dirty).toBe(false)
+})
+
 it("uses the current currency/league editors and keeps styles in the Styles panel", async () => {
   await mount()
   const currency = root.querySelector('[data-defaults-group="currency"]')!
   const league = root.querySelector('[data-defaults-group="leagueMechanic"]')!
   expect(currency.querySelectorAll("[data-currency-tier]")).toHaveLength(5)
   expect(currency.querySelector('[aria-label="Currency item settings"]')?.textContent).toContain("Select Currency")
-  expect(league.textContent).toContain("Curse of the Allflame")
-  expect(league.querySelectorAll('[data-field-path$=".baseTypes"]')).toHaveLength(6)
+  expect(league.textContent).toContain("Covens of Umbra")
+  expect(league.querySelectorAll('[data-field-path$=".baseTypes"]')).toHaveLength(2)
   expect(currency.querySelector("summary")).toBeNull()
   expect(league.querySelector("summary")).toBeNull()
   expect(currency.querySelector('[data-field-path$=".style"]')).toBeNull()
@@ -431,9 +450,9 @@ it("saves global tier moves and item settings as defaults, and supports discard"
 
 it("keeps hidden league items restorable and saves an explicit empty selection", async () => {
   await mount()
-  const charts = root.querySelector('[data-defaults-group="leagueMechanic"] [data-field-path="leagueMechanic.rules.charts.baseTypes"]')!
-  const sandy = charts.querySelector<HTMLButtonElement>('[aria-label="Sandy Seabed Chart"]')!
-  const forest = charts.querySelector<HTMLButtonElement>('[aria-label="Coral Forest Chart"]')!
+  const charts = root.querySelector('[data-defaults-group="leagueMechanic"] [data-field-path="leagueMechanic.rules.viscera.baseTypes"]')!
+  const sandy = charts.querySelector<HTMLButtonElement>('[aria-label="Scorched Arm"]')!
+  const forest = charts.querySelector<HTMLButtonElement>('[aria-label="Severed Rhoa Head"]')!
   expect(sandy.getAttribute("aria-pressed")).toBe("true")
   expect(forest.getAttribute("aria-pressed")).toBe("false")
   forest.click()
@@ -441,17 +460,18 @@ it("keeps hidden league items restorable and saves an explicit empty selection",
   expect(forest.getAttribute("aria-pressed")).toBe("true")
   forest.click()
   await nextTick()
+  expect(exposed.value?.dirty).toBe(false)
   sandy.click()
   await nextTick()
-  expect(charts.querySelectorAll('button[aria-pressed="false"]')).toHaveLength(3)
+  expect(charts.querySelectorAll('button[aria-pressed="true"]')).toHaveLength(0)
   await exposed.value!.save()
-  expect(getPath(saved[0], "leagueMechanic.rules.charts.baseTypes")).toEqual([])
+  expect(getPath(saved[0], "leagueMechanic.rules.viscera.baseTypes")).toEqual([])
   charts.querySelector<HTMLButtonElement>('button[title="Use default"]')!.click()
   await nextTick()
   expect(sandy.getAttribute("aria-pressed")).toBe("true")
   expect(forest.getAttribute("aria-pressed")).toBe("false")
   await exposed.value!.save()
-  expect(getPath(saved[1], "leagueMechanic.rules.charts.baseTypes")).toBeUndefined()
+  expect(getPath(saved[1], "leagueMechanic.rules.viscera.baseTypes")).toBeUndefined()
 })
 
 it("omits Gold/scroll visibility controls and preserves matching field widths", async () => {
@@ -459,11 +479,7 @@ it("omits Gold/scroll visibility controls and preserves matching field widths", 
   for (const title of ["Gold", "Scroll of Wisdom", "Portal Scroll"]) {
     expect(root.querySelector(`[data-defaults-group="currency"] select[aria-label="${title} visibility"]`)).toBeNull()
   }
-  for (const path of [
-    "currency.scrolls.wisdom.soundCutoffLevel",
-    "currency.scrolls.portal.soundCutoffLevel",
-    "leagueMechanic.rules.sulphur.minStackSize",
-  ]) {
+  for (const path of ["currency.scrolls.wisdom.soundCutoffLevel", "currency.scrolls.portal.soundCutoffLevel"]) {
     expect(root.querySelector(`[data-field-path="${path}"]`)?.parentElement?.classList.contains("sm:col-span-2")).toBe(true)
   }
   for (const path of ["currency.gold.minStackSize", "currency.gold.stackSize"]) {

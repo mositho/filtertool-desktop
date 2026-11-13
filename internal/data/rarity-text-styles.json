@@ -4,6 +4,7 @@
   "lifeFlask": ["Normal", "Magic"],
   "manaFlask": ["Normal", "Magic"],
   "highlightedEquipment": ["Normal", "Magic", "Rare"],
+  "fatedItems": ["Normal", "Magic", "Rare"],
   "earlyShieldBase": ["Normal", "Magic", "Rare"],
   "utilityFlask": ["Normal", "Magic"],
   "tincture": ["Normal", "Magic"],

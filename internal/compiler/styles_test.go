@@ -31,7 +31,7 @@ func TestOrdinaryRarityStylesReachEquipmentWithExplicitCutoffs(t *testing.T) {
 			out = c.equipment(rarity, cfg)
 		}
 		for _, block := range strings.Split(out, "\n\n") {
-			if !strings.HasPrefix(block, "Show\n") || strings.Contains(block, `Class "Belts"`) {
+			if !strings.HasPrefix(block, "Show\n") || strings.Contains(block, `Class "Belts"`) || strings.Contains(block, "UnidentifiedItemTier") {
 				continue
 			}
 			assertRuleStyle(t, block, Obj(c.Styles[strings.ToLower(rarity)]))
@@ -52,7 +52,7 @@ func TestOrdinaryRarityStyleSizesReachEquipment(t *testing.T) {
 				out = c.normal(Object{})
 			}
 			for _, block := range strings.Split(out, "\n\n") {
-				if strings.HasPrefix(block, "Show\n") && !strings.Contains(block, `Class "Belts"`) && !strings.Contains(block, "SetFontSize "+fmt.Sprint(size)) {
+				if strings.HasPrefix(block, "Show\n") && !strings.Contains(block, `Class "Belts"`) && !strings.Contains(block, "UnidentifiedItemTier") && !strings.Contains(block, "SetFontSize "+fmt.Sprint(size)) {
 					t.Fatalf("%s equipment did not inherit style size %v: %s", rarity, size, block)
 				}
 			}

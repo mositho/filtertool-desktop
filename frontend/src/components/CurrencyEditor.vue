@@ -8,6 +8,7 @@ import FieldInput from "./FieldInput.vue"
 import { layoutFields } from "../formLayout"
 import { useCollapsedState } from "../viewState"
 import StyleShortcut from "./StyleShortcut.vue"
+import { setEditedValue } from "../edits"
 
 const props = defineProps<{
   root: Record<string, unknown>
@@ -108,15 +109,11 @@ watch(
 
 function moveTo(tier: string, names = selected.value) {
   if (!CURRENCY_TIERS.some((definition) => definition.key === tier)) return
-  const overrides = { ...local.value }
   const inherited = effectiveCurrencyAssignments(catalog.value, shared.value)
   for (const name of names) {
     if (!(name in catalog.value)) continue
-    if (tier === inherited[name]) delete overrides[name]
-    else overrides[name] = tier
+    setEditedValue(props.root, `currency.assignments.${name}`, tier, inherited[name])
   }
-  if (Object.keys(overrides).length) setPath(props.root, "currency.assignments", overrides)
-  else deletePath(props.root, "currency.assignments")
   emit("change")
 }
 
@@ -163,16 +160,15 @@ function tierVisibility(tier: string): string {
 
 function setTierVisibility(tier: string, value: string) {
   const path = `currency.tiers.${tier}.visibility`
-  if (value === (getPath(props.defaults ?? {}, path) ?? "Show")) deletePath(props.root, path)
-  else setPath(props.root, path, value)
+  setEditedValue(props.root, path, value, getPath(props.defaults ?? {}, path) ?? "Show")
   emit("change")
 }
 
-function effectiveTierSetting(tier: string, key: string): unknown {
+function effectiveTierSetting(tier: string, key: string, includeLocal = true): unknown {
   let value: unknown = key === "sound" ? CURRENCY_TIERS.find((entry) => entry.key === tier)?.sound : undefined
   for (const source of [
     getPath(props.defaults ?? {}, `currency.tiers.${tier}.${key}`),
-    getPath(props.root, `currency.tiers.${tier}.${key}`),
+    includeLocal ? getPath(props.root, `currency.tiers.${tier}.${key}`) : undefined,
   ]) {
     if (source === undefined || (source !== null && typeof source === "object" && !Object.keys(source).length)) continue
     if (source === null) {
@@ -184,14 +180,14 @@ function effectiveTierSetting(tier: string, key: string): unknown {
   return value
 }
 
-function effectiveSetting(name: string, key: string): unknown {
+function effectiveSetting(name: string, key: string, includeLocal = true): unknown {
   const tier = assignments.value[name]
   const builtInSound = props.reference.currencySounds?.[name]
   const builtIn = key === "sound" ? builtInSound : key === "icon" ? props.reference.currencyIcons?.[name] : undefined
   let value: unknown = builtIn ?? effectiveTierSetting(tier, key)
   for (const source of [
     getPath(props.defaults ?? {}, `currency.items.${name}.${key}`),
-    getPath(props.root, `currency.items.${name}.${key}`),
+    includeLocal ? getPath(props.root, `currency.items.${name}.${key}`) : undefined,
   ]) {
     if (source === undefined) continue
     if (key === "sound") {
@@ -234,7 +230,7 @@ function setVisibility(value: string) {
   if (value !== "Show" && value !== "Hide") return
   for (const name of selected.value) {
     const path = `currency.items.${name}.visibility`
-    setPath(props.root, path, value)
+    setEditedValue(props.root, path, value, effectiveSetting(name, "visibility", false) ?? "Show")
   }
   emit("change")
 }
@@ -293,8 +289,13 @@ function fieldValue(field: SchemaField): unknown {
 }
 
 function updateField(field: SchemaField, value: unknown) {
-  if (value === undefined) deletePath(props.root, field.path)
-  else setPath(props.root, field.path, value)
+  const key = field.control === "icon" ? "icon" : "sound"
+  const inherited =
+    field.control === "number"
+      ? (getPath(props.defaults ?? {}, field.path) ?? field.defaultValue)
+      : ((activeTier.value ? effectiveTierSetting(activeTier.value, key, false) : effectiveSetting(active.value!, key, false)) ??
+        field.defaultValue)
+  setEditedValue(props.root, field.path, value, inherited)
   emit("change")
 }
 

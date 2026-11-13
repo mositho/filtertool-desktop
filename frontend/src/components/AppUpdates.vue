@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from "vue"
 import { Browser } from "@wailsio/runtime"
 import { api, type UpdateStatus } from "../api"
+import { releaseNoteBlocks } from "../releaseNotes"
 
 const props = defineProps<{ unsaved: boolean; busy: boolean; target?: string }>()
 const status = ref<UpdateStatus>({ enabled: true, version: "", ready: false })
@@ -13,6 +14,7 @@ const acceptedMajor = ref(false)
 const error = ref("")
 const message = ref("")
 const working = computed(() => checking.value || downloading.value || restarting.value)
+const notes = computed(() => releaseNoteBlocks(status.value.release?.notes || "No release description provided."))
 
 async function check(manual = false) {
   if (working.value) return
@@ -125,9 +127,21 @@ onMounted(() => void check())
         <button type="button" class="mb-3 text-sm text-blue-300 hover:underline" @click="releaseNotes">
           Read release notes on GitHub ↗
         </button>
-        <pre
-          class="mb-4 max-h-52 overflow-auto whitespace-pre-wrap break-words rounded bg-neutral-950 p-3 font-sans text-sm text-neutral-300"
-          >{{ status.release.notes || "No release description provided." }}</pre>
+        <div class="mb-4 max-h-72 space-y-3 overflow-auto break-words rounded bg-neutral-950 p-3 text-sm text-neutral-300">
+          <template v-for="(block, index) in notes" :key="index">
+            <p v-if="block.kind === 'text'" class="whitespace-pre-wrap">{{ block.text }}</p>
+            <div v-else role="note" class="rounded border border-amber-700 bg-amber-950/50 p-3 text-amber-200">
+              <strong class="mb-2 flex items-center gap-2">
+                <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M12 3 2 21h20L12 3Z" />
+                  <path d="M12 9v5m0 3v1" />
+                </svg>
+                {{ block.kind === "CAUTION" ? "Caution" : "Warning" }}
+              </strong>
+              <p class="whitespace-pre-wrap">{{ block.text }}</p>
+            </div>
+          </template>
+        </div>
         <label v-if="status.release.major && !status.ready" class="mb-4 flex items-start gap-2 text-sm text-amber-200">
           <input v-model="acceptedMajor" type="checkbox" class="mt-1" :disabled="working" />
           I have backed up my data and understand that my filters may need migration or recreation.

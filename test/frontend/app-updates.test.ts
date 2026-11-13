@@ -131,3 +131,20 @@ it.each(["", "- Fixed weapon selection."])("keeps update actions available with 
   expect(button("Download update").disabled).toBe(false)
   expect(button("Read release notes on GitHub")).toBeTruthy()
 })
+
+it("renders GitHub caution and warning blocks while keeping other notes as plain text", async () => {
+  const notes =
+    "> [!CAUTION]\r\n> Re-export your filters.\r\n> Then reload in-game.\r\n\r\n- Fixed filters.\r\n\r\n> [!WARNING]\r\n> <img src=x onerror=alert(1)>\r\n\r\n> [!NOTE]\r\n> Ordinary quoted text."
+  await mount({ ...major, release: { version: "1.1.0", major: false, notes } })
+  button("Version 1.1.0").click()
+  await settle()
+  const alerts = root.querySelectorAll('[role="note"]')
+  expect(alerts).toHaveLength(2)
+  expect(alerts[0].textContent).toContain("Caution")
+  expect(alerts[0].textContent).toContain("Re-export your filters.\nThen reload in-game.")
+  expect(alerts[1].textContent).toContain("Warning")
+  expect(alerts[1].textContent).toContain("<img src=x onerror=alert(1)>")
+  expect(root.querySelector("img")).toBeNull()
+  expect(root.textContent).toContain("- Fixed filters.")
+  expect(root.textContent).toContain("> [!NOTE]")
+})

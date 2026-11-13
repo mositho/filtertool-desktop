@@ -152,7 +152,7 @@ func TestGlobalCurrencyAndLeagueDefaultsReachFilters(t *testing.T) {
 	mustCall(t, s, "createFilter", Object{"name": "Shared Currency"})
 	mustCall(t, s, "saveDefaults", Object{"defaults": Object{
 		"currency":       Object{"assignments": Object{"Chromatic Orb": "leaguestart"}, "items": Object{"Chromatic Orb": Object{"sound": Object{"soundId": float64(8)}}}},
-		"leagueMechanic": Object{"rules": Object{"charts": Object{"baseTypes": []any{}}}},
+		"leagueMechanic": Object{"rules": Object{"viscera": Object{"baseTypes": []any{}}}},
 	}})
 	mustCall(t, s, "saveStyles", Object{"styles": Object{"currencyLeaguestart": Object{"text": "#123456"}}})
 	blockFor := func(output, name string) string {
@@ -168,15 +168,15 @@ func TestGlobalCurrencyAndLeagueDefaultsReachFilters(t *testing.T) {
 	if !strings.Contains(chromatic, "PlayAlertSound 8 240") || !strings.Contains(chromatic, "SetTextColor 18 52 86") {
 		t.Fatal("global currency defaults/styles not applied to filter")
 	}
-	if !strings.HasPrefix(blockFor(output, "Sandy Seabed Chart"), "Hide\n") {
-		t.Fatal("global empty league selection must hide charts")
+	if !strings.HasPrefix(blockFor(output, "Scorched Arm"), "Hide\n") {
+		t.Fatal("global empty league selection must hide viscera")
 	}
 	config := Object{"buildProfile": Object{}, "buildSpecificOptions": Object{
 		"currency":       Object{"items": Object{"Chromatic Orb": Object{"visibility": "Hide"}}},
-		"leagueMechanic": Object{"rules": Object{"charts": Object{"baseTypes": []any{"Sandy Seabed Chart"}}}},
+		"leagueMechanic": Object{"rules": Object{"viscera": Object{"baseTypes": []any{"Scorched Arm"}}}},
 	}}
 	output = c.Text(mustCall(t, s, "preview", Object{"name": "Shared Currency", "config": config}).(Object)["output"])
-	if !strings.HasPrefix(blockFor(output, "Chromatic Orb"), "Hide\n") || !strings.HasPrefix(blockFor(output, "Sandy Seabed Chart"), "Show\n") {
+	if !strings.HasPrefix(blockFor(output, "Chromatic Orb"), "Hide\n") || !strings.HasPrefix(blockFor(output, "Scorched Arm"), "Show\n") {
 		t.Fatal("filter-specific settings must override global item defaults")
 	}
 }
@@ -209,6 +209,7 @@ func TestLifecycleValidationAndPreview(t *testing.T) {
 	}
 	mustCall(t, s, "deleteFilter", Object{"name": "Renamed"})
 }
+
 func TestSharePreservesOutputWithoutChangingRecipientGlobals(t *testing.T) {
 	sender, recipient := testStore(t), testStore(t)
 	mustCall(t, sender, "saveDefaults", Object{"defaults": Object{"preferredColors": []any{"B"}, "links": Object{"fourLinkMaxAreaLevel": float64(40)}}})
