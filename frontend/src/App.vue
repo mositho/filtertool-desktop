@@ -154,7 +154,7 @@ async function refreshFilters(selectName?: string) {
   }
 }
 
-async function loadConfig() {
+async function loadConfig(expectedSnapshot?: string) {
   if (!selected.value) {
     config.value = clone(EMPTY_FILTER_CONFIG)
     savedConfig.value = clone(EMPTY_FILTER_CONFIG)
@@ -163,7 +163,7 @@ async function loadConfig() {
   }
   const name = selected.value
   const [loaded, refData, defaultsData] = await Promise.all([api.getConfig(name), api.reference(name), api.filterDefaults(name)])
-  if (selected.value !== name) return
+  if (selected.value !== name || (expectedSnapshot !== undefined && snapshot() !== expectedSnapshot)) return
   config.value = loaded
   reference.value = refData
   defaults.value = defaultsData.defaults
@@ -214,8 +214,11 @@ async function onGlobalSave() {
 
 async function onGlobalExport() {
   if (devMode.value) return
+  const name = selected.value
+  const before = dirty.value ? undefined : snapshot()
   const result = await globalRef.value?.saveAndExport()
   if (result) flash(result.message, result.kind)
+  if (before !== undefined && selected.value === name) await loadConfig(before)
   await refreshDefaults()
 }
 
@@ -232,13 +235,15 @@ async function refreshDefaults() {
 
 async function onSaveAndExport() {
   if (devMode.value || !selected.value) return
+  const name = selected.value
+  const before = snapshot()
   exporting.value = true
   try {
     const [error] = filterRangeErrors(config.value)
     if (error) throw new Error(error)
-    await api.saveConfig(selected.value, config.value)
-    savedConfig.value = clone(config.value)
-    const result = await api.exportFilter(selected.value, config.value)
+    const result = await api.exportFilter(name, config.value)
+    if (selected.value === name) await loadConfig(before)
+    if (!globalDirty.value) await globalRef.value?.reload?.()
     flash(`Exported ${result.fileName} to ${result.filterPath}`, "export")
   } catch (e) {
     flash((e as Error).message, "error")
@@ -249,6 +254,8 @@ async function onSaveAndExport() {
 
 async function onExportAll() {
   if (devMode.value) return
+  const name = selected.value
+  const before = snapshot()
   exportingAll.value = true
   exportProgress.value = "Preparing export"
   try {
@@ -261,10 +268,16 @@ async function onExportAll() {
     const result = await api.exportAllFilters((done, total, name) => {
       exportProgress.value = `Exporting ${done}/${total}: ${name}`
     })
+    if (selected.value === name) await loadConfig(before)
+    if (!globalDirty.value) await globalRef.value?.reload?.()
     if (result.total === 0) {
       flash("No filters to export")
     } else if (result.errors.length > 0) {
-      flash(`Exported ${result.exported}/${result.total} filters (${result.errors.length} failed)`, "error")
+      const failure = result.errors[0]!
+      flash(
+        `Exported ${result.exported}/${result.total} filters (${result.errors.length} failed). ${failure.name}: ${failure.error}`,
+        "error",
+      )
     } else {
       flash(`Exported ${result.exported} filter${result.exported === 1 ? "" : "s"}`, "export")
     }

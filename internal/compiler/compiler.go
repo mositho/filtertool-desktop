@@ -36,7 +36,7 @@ func New(defaults, styles Object, folder string) *Compiler {
 		_, c.legacyLinkStyles[name] = styles[name]
 	}
 	c.starterGems = append(data.Load[[]string]("starter-skills.json"), data.Load[[]string]("starter-supports.json")...)
-	c.Defaults = CleanRuleDefaults(c.Defaults)
+	c.Defaults = CurrentItemDefaults(CleanRuleDefaults(c.Defaults))
 	c.rarityDefaults = data.Load[Object]("highlight-defaults.json")
 	for _, s := range data.Load[[]Object]("manifest.json") {
 		c.manifest[Text(s["id"])] = Text(s["text"])
@@ -130,7 +130,7 @@ func (c *Compiler) section(options Object, name string) Object {
 }
 func (c *Compiler) Compile(config Object) (string, error) {
 	if !c.legacyEquipmentSelections {
-		config = Clone(config)
+		config = CurrentItemConfig(config)
 		DiscardFilterRuleOverrides(config)
 	}
 	if err := Validate(config); err != nil {
@@ -150,7 +150,11 @@ func (c *Compiler) Compile(config Object) (string, error) {
 			result = append(result, s)
 		}
 	}
-	return strings.Join(result, "\n\n"), nil
+	output := strings.Join(result, "\n\n")
+	if !c.legacyEquipmentSelections {
+		output = currentBaseTypeOutput(output)
+	}
+	return output, nil
 }
 func (c *Compiler) gems(cfg Object) string {
 	cfg = Merge(Obj(c.Defaults["gemCallouts"]), cfg)

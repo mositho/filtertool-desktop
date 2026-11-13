@@ -2,8 +2,10 @@ package app
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"strings"
 
@@ -22,6 +24,7 @@ func (s *Store) export(input Object) (Object, error) {
 	if err != nil {
 		return nil, err
 	}
+	cfg = c.CurrentItemConfig(cfg)
 	settings, err := s.settings()
 	if err != nil {
 		return nil, err
@@ -38,9 +41,6 @@ func (s *Store) export(input Object) (Object, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err = s.writeFilter(name, cfg); err != nil {
-		return nil, err
-	}
 	if err = s.prepareOutputSounds(output, settings, cfg); err != nil {
 		return nil, err
 	}
@@ -53,6 +53,19 @@ func (s *Store) export(input Object) (Object, error) {
 	filename := exportName(name)
 	if err = writeAtomic(filepath.Join(folder, filename), []byte(output)); err != nil {
 		return nil, err
+	}
+	if err = s.writeFilter(name, cfg); err != nil {
+		return nil, fmt.Errorf("exported %s, but could not save updated filter JSON: %w", filename, err)
+	}
+	defaults, err := s.optional("defaults.json")
+	if err != nil {
+		return nil, fmt.Errorf("exported %s and saved filter JSON, but could not read shared defaults: %w", filename, err)
+	}
+	cleaned := c.CurrentItemDefaults(defaults)
+	if !reflect.DeepEqual(defaults, cleaned) {
+		if err = s.write("defaults.json", cleaned); err != nil {
+			return nil, fmt.Errorf("exported %s and saved filter JSON, but could not save updated shared defaults: %w", filename, err)
+		}
 	}
 	return Object{"fileName": filename, "filterPath": folder, "soundFolder": soundFolder(settings)}, nil
 }

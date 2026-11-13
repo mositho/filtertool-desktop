@@ -56,6 +56,7 @@ func MergeDefaults(base, override Object) Object {
 // A sound record represents one choice. Do not retain an inherited TTS/file
 // source when a more specific setting selects a different sound or silence.
 func mergeCurrencySettings(base, override Object) Object {
+	base, override = currentCurrencyNames(base), currentCurrencyNames(override)
 	out := Clone(base)
 	for key, value := range override {
 		if object, ok := value.(map[string]any); ok {

@@ -8,6 +8,9 @@ import styles from "../../internal/data/styles.json"
 import templates from "../../internal/data/templates.json"
 
 const preview = vi.hoisted(() => vi.fn())
+const getConfig = vi.hoisted(() => vi.fn())
+const saveConfig = vi.hoisted(() => vi.fn())
+const exportFilter = vi.hoisted(() => vi.fn())
 vi.mock("../../frontend/src/components/GlobalSettings.vue", () => ({ default: { template: "<div />" } }))
 vi.mock("../../frontend/src/components/AppUpdates.vue", () => ({ default: { template: "<div />" } }))
 vi.mock("../../frontend/src/api", () => ({
@@ -23,7 +26,9 @@ vi.mock("../../frontend/src/api", () => ({
       devMode: false,
       templates: ["Caster Template"],
     }),
-    getConfig: async () => structuredClone(templates["Caster Template"]),
+    getConfig: async () => (await getConfig()) ?? structuredClone(templates["Caster Template"]),
+    saveConfig,
+    exportFilter,
     setDirty: async () => {},
     onCloseRequested: () => () => {},
   },
@@ -38,6 +43,35 @@ afterEach(() => {
   vi.useRealTimers()
   vi.unstubAllGlobals()
   vi.clearAllMocks()
+  getConfig.mockReset()
+})
+
+it("reloads cleaned selections after export without pre-saving historical names", async () => {
+  vi.useFakeTimers()
+  vi.stubGlobal("matchMedia", () => ({ matches: true, addEventListener() {}, removeEventListener() {} }))
+  const historical = { buildProfile: {}, buildSpecificOptions: { gemCallouts: { styleOnly: ["Maven's Chisel of Scarabs"] } } }
+  const cleaned = { buildProfile: {}, buildSpecificOptions: { gemCallouts: { styleOnly: ["Maven's Chisel of Threads"] } } }
+  getConfig.mockResolvedValue(historical)
+  exportFilter.mockImplementation(async () => {
+    getConfig.mockResolvedValue(cleaned)
+    return { fileName: "Caster Template.filter", filterPath: "game" }
+  })
+  root = document.createElement("div")
+  document.body.append(root)
+  app = createApp(App)
+  app.mount(root)
+  await settle()
+  root.querySelector<HTMLButtonElement>("nav > button")!.click()
+  await settle()
+  const loadsBeforeExport = getConfig.mock.calls.length
+  window.dispatchEvent(new KeyboardEvent("keydown", { key: "s", ctrlKey: true, shiftKey: true }))
+  await settle()
+  expect(exportFilter).toHaveBeenCalledWith("Caster Template", historical)
+  expect(saveConfig).not.toHaveBeenCalled()
+  expect(getConfig).toHaveBeenCalledTimes(loadsBeforeExport + 1)
+  window.dispatchEvent(new KeyboardEvent("keydown", { key: "s", ctrlKey: true }))
+  await settle()
+  expect(saveConfig).toHaveBeenCalledWith("Caster Template", cleaned)
 })
 async function settle() {
   for (let i = 0; i < 8; i++) await nextTick()
