@@ -23,7 +23,8 @@
     "format:go": "go run ./cmd/gofmtcheck -w",
     "format:check": "prettier --check . && go run ./cmd/gofmtcheck",
     "update-basetypes": "go run ./cmd/update-basetypes",
-    "generate-data": "go run ./cmd/generate-data"
+    "generate-data": "go run ./cmd/generate-data",
+    "generate-branding": "node scripts/generate-branding.mjs"
   },
   "lint-staged": {
     "*": "prettier --write --ignore-unknown",

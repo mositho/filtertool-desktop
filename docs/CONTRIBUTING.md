@@ -15,6 +15,8 @@ To build the Linux AppImage, run `npm run package:appimage`. It builds the Linux
 
 Dev **Save** edits templates/defaults/styles in `internal/data/`, not personal data. Use `npm run dev:personal` for your personal profile. Windows builds produce `bin/Filtertool.exe`; Linux builds produce `bin/Filtertool`.
 
+Builds use the checked-in branding assets without regenerating them. `npm run generate-branding` explicitly replaces `branding/logo.png`, `build/windows/icon.ico` and the favicon using the artwork in `scripts/generate-branding.mjs`; review those changes before keeping them.
+
 To build the installer locally:
 
 1. Run `npm run build` in WSL/Linux or Windows to produce `bin/Filtertool.exe`.
