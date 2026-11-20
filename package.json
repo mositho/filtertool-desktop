@@ -31,11 +31,11 @@
     "*.go": "gofmt -w"
   },
   "dependencies": {
-    "@wailsio/runtime": "3.0.0",
-    "vue": "^3.5.44"
+    "@wailsio/runtime": "3.1.0",
+    "vue": "^3.5.45"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.3.3",
+    "@tailwindcss/vite": "^4.3.5",
     "@types/node": "^26.6.6",
     "@vitejs/plugin-vue": "^6.0.8",
     "husky": "^9.1.7",
@@ -44,8 +44,8 @@
     "prettier": "^3.6.2",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
-    "vite": "^8.2.4",
-    "vitest": "^5.0.5",
+    "vite": "^8.3.6",
+    "vitest": "^5.1.0",
     "vue-tsc": "^3.3.14",
     "yaml": "^2.9.1"
   }
