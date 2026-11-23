@@ -30,13 +30,15 @@ it("defaults all workflows to read-only and pins every allowlisted external acti
 })
 
 it("keeps installation/builds out of fresh write-enabled jobs", () => {
-  for (const { config } of workflows) {
-    for (const job of Object.values(config.jobs) as any[]) {
+  for (const { name, config } of workflows) {
+    for (const [jobName, job] of Object.entries(config.jobs) as [string, any][]) {
       if (job.permissions?.contents !== "write") continue
       expect(job["runs-on"]).toBe("ubuntu-latest")
       expect(job.permissions).toMatchObject({ contents: "write" })
       for (const [scope, access] of Object.entries(job.permissions)) {
-        if (scope !== "contents") expect(access).toBe("read")
+        if (name === "update-basetypes.yml" && jobName === "propose" && ["pull-requests", "actions"].includes(scope)) {
+          expect(access).toBe("write")
+        } else if (scope !== "contents") expect(access).toBe("read")
       }
       expect(job.needs).toBeDefined()
       expect(job.steps.some((step: any) => step.uses?.startsWith("actions/download-artifact@"))).toBe(true)

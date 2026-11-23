@@ -64,10 +64,13 @@ jobs:
     timeout-minutes: 5
     permissions:
       contents: write
+      pull-requests: write
+      actions: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 0
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: prepared-base-data
@@ -76,7 +79,7 @@ jobs:
         run: |
           mkdir -p prepared/internal/data
           cp downloaded/BaseTypes.csv downloaded/reference.json downloaded/weapons.json prepared/internal/data/
-      - name: Prepare branch for manual review
+      - name: Create or refresh base-data PR
         env:
           GH_TOKEN: ${{ github.token }}
-        run: bash scripts/push-prepared-branch.sh basetypes
+        run: bash scripts/propose-basetypes.sh
