@@ -86,8 +86,7 @@ defineExpose({
           class="flex w-full items-center justify-between px-3 py-2 text-left text-sm font-semibold uppercase tracking-wide text-neutral-400 hover:bg-neutral-900/40"
           @click="collapsed[section.title] = collapsed[section.title] === false"
         >
-          <span>{{ section.title }}</span
-          ><span>{{ collapsed[section.title] === false ? "▾" : "▸" }}</span>
+          <span>{{ section.title }}</span><span>{{ collapsed[section.title] === false ? "▾" : "▸" }}</span>
         </button>
         <div v-if="collapsed[section.title] === false" class="space-y-3 border-t border-neutral-800 px-3 py-2">
           <div
