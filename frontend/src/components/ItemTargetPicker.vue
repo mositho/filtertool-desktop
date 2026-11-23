@@ -233,8 +233,7 @@ function toggleBase(base: string) {
         <div class="grid max-h-40 grid-cols-1 gap-1 overflow-y-auto sm:grid-cols-2">
           <label v-for="base in bases" :key="base" class="flex items-center gap-2 text-xs text-neutral-300">
             <input type="checkbox" :checked="baseSelected(base)" @change="toggleBase(base)" />
-            <span>{{ base }}</span
-            ><span class="whitespace-nowrap text-neutral-500">Lvl {{ dropLevel(base) ?? "—" }}</span>
+            <span>{{ base }}</span><span class="whitespace-nowrap text-neutral-500">Lvl {{ dropLevel(base) ?? "—" }}</span>
           </label>
           <span v-if="!bases.length" class="text-xs text-neutral-500">No matching bases</span>
         </div>
