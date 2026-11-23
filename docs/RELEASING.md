@@ -20,7 +20,7 @@ Release versions use stable `major.minor.patch` numbers, starting with **1.0.0**
 - Rerunning failed CI does not restart a failed Release run. If fixing CI requires a new commit, push the fix first, wait for its push CI to pass, then start a fresh Release run on `main`. Keep the same version if its tag has not been created; old runs retain their original workflow and commit. If the tag already exists, follow the recovery instructions below instead of moving it.
 
 - A fresh, minimal write-enabled runner downloads artifacts from that successful CI run, verifies checksums, creates an annotated tag for the checked commit, and creates a **draft** release. It does not install dependencies or execute built artifacts. Before tagging, it checks that `main` has not advanced; start a fresh run if it has.
-- Releases are serialized and publishing stays manual. Intermediate artifacts expire after seven days. No bot has a branch-protection bypass; bot PR creation/approval remains disabled.
+- Releases are serialized and publishing stays manual. Intermediate artifacts expire after seven days. No bot has a branch-protection bypass; release PR creation stays manual and workflows never approve PRs.
 
 ## In-app update compatibility
 
